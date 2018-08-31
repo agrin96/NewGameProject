@@ -10,16 +10,16 @@
 import SpriteKit
 import CoreGraphics
 
-class WaveGenerator {
+class WaveGenerator:SKShapeNode {
 
-    var waveObject:SKShapeNode?
+    required init?(coder aDecoder:NSCoder){
+        super.init(coder: aDecoder)
+    }
 
-    init(){
-        if self.waveObject == nil{
-            self.waveObject = SKShapeNode()
-            self.waveObject!.path = generateSinusoid(amplitude: 30, frequency: 3, width: 360, numSamples: 200)
-            self.waveObject!.lineWidth = 3
-        }
+    override init(){
+        super.init()
+        self.path = generateSinusoid(amplitude: 30, frequency: 3, width: 360, numSamples: 200)
+        self.lineWidth = 3
     }
 
     func generateSinusoid(amplitude:Double, frequency:Double, width:Double, numSamples:Int) -> CGMutablePath{
