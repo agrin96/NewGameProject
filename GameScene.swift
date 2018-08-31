@@ -17,17 +17,22 @@ class GameScene: SKScene {
 
     override func didMove(to view: SKView) {
 
-        // Test!
-        let label = SKLabelNode(text: "HelloWorld")
-        label.alpha = 1.0
-        label.fontColor = .white
-        label.fontSize = 80
-        label.zPosition = 0
-        label.position = CGPoint(x: 0, y: 0)
         self.anchorPoint = CGPoint(x: 0.5, y: 0.5)
         self.backgroundColor = .gray
-        self.addChild(label)
 
+
+        let waveGen = WaveGenerator()
+        waveGen.waveObject!.position.y += 75
+        self.addChild(waveGen.waveObject!)
+
+        let waveGen2 = WaveGenerator()
+        waveGen2.waveObject!.position.y -= 75
+        self.addChild(waveGen2.waveObject!)
+
+        let playerWave = WaveGenerator()
+        playerWave.waveObject!.strokeColor = .red
+        playerWave.waveObject!.position.x -= 200
+        self.addChild(playerWave.waveObject!)
 
 
     }
