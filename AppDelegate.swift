@@ -15,7 +15,14 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {
-        // Override point for customization after application launch.
+        // Here we are initializing our own window and setting up a root view controller. This allows us to skip over using storyboards
+        // and control our app directly.
+        window = UIWindow(frame: UIScreen.main.bounds)
+        window?.makeKeyAndVisible()
+        window?.rootViewController = UINavigationController(rootViewController: GameViewController())
+
+        //Here we will handle state restoration by opening a shared instance object or closing it.
+
         return true
     }
 
