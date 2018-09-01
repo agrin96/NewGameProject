@@ -26,25 +26,15 @@ class GameScene: SKScene {
         self.anchorPoint = CGPoint(x: 0.5, y: 0.5)
         self.backgroundColor = .gray
 
-
-        let waveGen = WaveGenerator()
-        waveGen.position.y += 75
+        let waveGen = WaveHead(color: .blue, size: CGSize(width: 9, height: 9))
+        waveGen.activateWaveHead()
         self.addChild(waveGen)
-
-        let waveGen2 = WaveGenerator()
-        waveGen2.position.y -= 75
-        self.addChild(waveGen2)
-
-//        let playerWave = WaveGenerator()
-//        playerWave.strokeColor = .red
-//        playerWave.position.x -= 200
-//        self.addChild(playerWave)
-
+        waveGen.deactivateWaveHead()
 
 
         self.player = SKSpriteNode(color: .red, size: CGSize(width: 9, height: 9))
         player!.physicsBody = SKPhysicsBody(rectangleOf: self.player!.size)
-        player!.position = CGPoint(x: 0, y: 0)
+        player!.position = CGPoint(x: -self.view!.bounds.width / 4, y: 0)
         player!.physicsBody!.linearDamping = 0
         player!.physicsBody!.density = 1
         player!.physicsBody!.friction = 0
@@ -53,10 +43,9 @@ class GameScene: SKScene {
         self.physicsWorld.gravity = CGVector(dx: 0, dy: 0)
 
         self.dynamicPath = CGMutablePath()
-//        self.dynamicPath!.move(to: self.player!.position)
 
         self.playerPath = SKShapeNode(path: self.dynamicPath!)
-        self.playerPath!.position = CGPoint(x: 0, y: 0)
+        self.playerPath!.position = self.player!.position
         self.playerPath!.lineWidth = 5
         self.playerPath!.strokeColor = .red
         self.addChild(self.playerPath!)
@@ -67,7 +56,7 @@ class GameScene: SKScene {
             let yVal = 300 * sin((2*Double.pi*1*Double(i)) / Double(numSamples+1))
             self.forcesToApply.append(yVal)
         }
-//        self.forcesToApply = self.forcesToApply.map{ (val: Double) -> Double in if val < 0 { return val*2 }else{return val}}
+
         print(self.forcesToApply)
     }
     
