@@ -27,9 +27,26 @@ class GameScene: SKScene {
         self.backgroundColor = .gray
 
         let waveGen = WaveHead(color: .blue, size: CGSize(width: 9, height: 9))
+        waveGen.position.y += 125
+        waveGen.position.x += 200
         waveGen.activateWaveHead()
         self.addChild(waveGen)
-        waveGen.deactivateWaveHead()
+
+        let samplingWave = WaveDrawer(color: .blue, strokeThickness: 3)
+        samplingWave.position.x = waveGen.position.x
+        self.addChild(samplingWave)
+        samplingWave.sample(waveHead: waveGen, sampleDelay: 1/60, sampleShift: 2)
+
+        let waveGen2 = WaveHead(color: .blue, size: CGSize(width: 9, height: 9))
+        waveGen2.position.y -= 125
+        waveGen2.position.x += 300
+        waveGen2.activateWaveHead()
+        self.addChild(waveGen2)
+
+        let samplingWave2 = WaveDrawer(color: .blue, strokeThickness: 3)
+        samplingWave2.position.x = waveGen2.position.x
+        self.addChild(samplingWave2)
+        samplingWave2.sample(waveHead: waveGen2, sampleDelay: 30/60, sampleShift: 40)
 
 
         self.player = SKSpriteNode(color: .red, size: CGSize(width: 9, height: 9))
@@ -72,6 +89,7 @@ class GameScene: SKScene {
         self.dynamicPath!.move(to: CGPoint(x: CGFloat(self.shift), y: self.player!.position.y))
         self.shift += 0.5
 
+//        print(self.playerPath!.frame.width)
         self.count += 1
         if self.count >= 100{
             self.count = 0
