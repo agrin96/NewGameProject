@@ -21,17 +21,25 @@ class GameScene: SKScene {
         self.anchorPoint = CGPoint(x: 0.5, y: 0.5)
         self.backgroundColor = .gray
 
-        let topWave = WaveGenerator(wave: .simpleSinusoid_1, headLocation: CGPoint(x: 150, y: 75))
+        var playerSettings = WaveGeneratorParameters()
+        playerSettings.waveHead.isPlayer = true
+        playerSettings.waveHead.headColor = .red
+        playerSettings.waveDrawer.waveColor = .red
+        let player = WaveGenerator(paramters: playerSettings)
+        self.addChild(player)
+        player.activateWaveGenerator()
+
+        var bottomWaveSettings = WaveGeneratorParameters()
+        bottomWaveSettings.location = CGPoint(x: self.view!.bounds.width / 2, y: 70)
+        let bottomWave = WaveGenerator(paramters: bottomWaveSettings)
+        self.addChild(bottomWave)
+        bottomWave.activateWaveGenerator()
+
+        var topWaveSettings = WaveGeneratorParameters()
+        topWaveSettings.location = CGPoint(x: self.view!.bounds.width / 2, y: -70)
+        let topWave = WaveGenerator(paramters: topWaveSettings)
         self.addChild(topWave)
         topWave.activateWaveGenerator()
-
-        let bottomWave = WaveGenerator(wave: .simpleSinusoid_1, headLocation: CGPoint(x: 150, y: -75))
-        bottomWave.activateWaveGenerator()
-        self.addChild(bottomWave)
-
-        let player = WaveGenerator(wave: .simpleSinusoid_1, headLocation: CGPoint(x: 0, y: 0))
-        player.activateWaveGenerator()
-        self.addChild(player)
     }
     
     

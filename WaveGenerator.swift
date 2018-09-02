@@ -17,9 +17,18 @@ protocol waveGenerationNotifier:class{
     func resetWaveDrawer(drawerID:Int)
 }
 
-class WaveHead:SKSpriteNode {
+enum Direction{
+    case up, down
+}
 
-    private var osciallationForces:[Int] = []
+//Creates an oscillating up and down point which can be sampled and can act as the player.
+fileprivate class WaveHead:SKSpriteNode {
+
+    private var p_osciallationForces:[Int] = []
+    private var n_osciallationForces:[Int] = []
+
+    //used to track which direction the wave head is currently traveling
+    var currentHeadDirection:Direction = .up
 
     required init?(coder aDecoder:NSCoder){
         super.init(coder: aDecoder)
@@ -55,13 +64,12 @@ class WaveHead:SKSpriteNode {
             if yVal < 0{
                 break
             }
-            self.osciallationForces.append(Int(yVal))
+            self.p_osciallationForces.append(Int(yVal))
         }
         //The loop above will return only the first positive arc of the sin function. Here we copy and
         // negate all the values to make sure our negative arc is a perfect reflection. Otherwise
         // we run into issues of desync between slightly different values
-        let negatedOscillations = self.osciallationForces.map{return -$0}
-        self.osciallationForces.append(contentsOf: negatedOscillations)
+        self.n_osciallationForces = self.p_osciallationForces.map{return -$0}
     }
 
     //Starts the infinite oscillation of the WaveHead on a async queue since animation is taxing and we want it
@@ -69,15 +77,57 @@ class WaveHead:SKSpriteNode {
     func activateWaveHead(){
         DispatchQueue.main.async {
             var count = 0
+            var goingUp = true
 
             let vectorChange = SKAction.run({
-                self.physicsBody!.velocity = CGVector(dx: 0, dy: self.osciallationForces[count])
-                count += 1
-                if count >= self.osciallationForces.count {
-                    count = 0
+                if goingUp == true{
+                    self.physicsBody!.velocity = CGVector(dx: 0, dy: self.p_osciallationForces[count])
+                    count += 1
+                    if count >= self.p_osciallationForces.count{
+                        count = 0
+                        goingUp = false
+                    }
+                }else{
+                    self.physicsBody!.velocity = CGVector(dx: 0, dy: self.n_osciallationForces[count])
+                    count += 1
+                    if count >= self.n_osciallationForces.count{
+                        count = 0
+                        goingUp = true
+                    }
                 }
             })
 
+            //Here we set a wait time of one frame between velocity changes to make sure our framerate is synced.
+            let oscillationAction = SKAction.group([vectorChange, SKAction.wait(forDuration: 1/60)])
+            self.run(SKAction.repeatForever(oscillationAction))
+        }
+    }
+
+    //Separate function which specifies when to activate the player wavehead. It takes an input parameter which
+    // will be used to control whether it is moving up or down.
+    func activatePlayerWavehead(direction:Direction){
+        DispatchQueue.main.async{
+            var count = 0
+            self.currentHeadDirection = direction
+
+            //Reset the previous action, whether it was going up or going down.
+            self.removeAllActions()
+
+            let vectorChange = SKAction.run({
+                if direction == .up{
+                    self.physicsBody!.velocity = CGVector(dx: 0, dy: self.p_osciallationForces[count])
+                    count += 1
+                    if count >= self.p_osciallationForces.count{
+                        count = 0
+                    }
+                }else if direction == .down{
+                    self.physicsBody!.velocity = CGVector(dx: 0, dy: self.n_osciallationForces[count])
+                    count += 1
+                    if count >= self.n_osciallationForces.count{
+                        count = 0
+                    }
+                }
+            })
             //Here we set a wait time of one frame between velocity changes to make sure our framerate is synced.
             let oscillationAction = SKAction.group([vectorChange, SKAction.wait(forDuration: 1/60)])
             self.run(SKAction.repeatForever(oscillationAction))
@@ -92,14 +142,15 @@ class WaveHead:SKSpriteNode {
     }
 }
 
-class WaveDrawer:SKShapeNode {
+//Samples a wavehead to create and display a wave using a combination of wavehead and wavedrawer parameters.
+fileprivate class WaveDrawer:SKShapeNode {
     //This number is used to differentiate between Wave Drawers in the wave generator.
     var waveDrawerNumber:Int = 0
     private var dynamicWavePath:CGMutablePath?
 
     //This is the maximum width of one possible wave in points.
     // chosen based on the width of the iphone X screen.
-    private let maxWaveWidth:CGFloat = 600
+    private let maxWaveWidth:CGFloat = 400
     private var called:Bool = false
 
     var waveNotificationDelegate:waveGenerationNotifier?
@@ -119,7 +170,6 @@ class WaveDrawer:SKShapeNode {
     }
 
     func sample(waveHead:WaveHead, sampleDelay:Double, sampleShift:CGFloat, waveSpeed:CGFloat){
-
         DispatchQueue.main.async{
             //We have to shift our sampling point forward constantly because the shapeNode is moving
             // backwards so to compensate we move the sampling point forwards.
@@ -179,8 +229,8 @@ class WaveDrawer:SKShapeNode {
     }
 }
 
-class WaveGenerator:SKNode, waveGenerationNotifier{
-
+//Generates a wave starting at a location and drawing backwards.
+class WaveGenerator:SKNode, waveGenerationNotifier, UIGestureRecognizerDelegate{
     //This is the wave head which will serve as our drawing point.
     private var waveHead:WaveHead?
 
@@ -188,41 +238,67 @@ class WaveGenerator:SKNode, waveGenerationNotifier{
     private var waveDrawer1:WaveDrawer?
     private var waveDrawer2:WaveDrawer?
 
+    //Store parameters for the waveGenerator
+    private var params:WaveGeneratorParameters?
+
+    //This gesture recognizer will detect the user tapping on screen.
+    private var userTapRecognizer:UIGestureRecognizer?
+
     required init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
     }
 
-    init(wave:WaveType, headLocation:CGPoint){
+    init(paramters:WaveGeneratorParameters){
         super.init()
-        self.position = headLocation
+        self.params = paramters
+        self.position = self.params!.location
 
-        self.waveHead  = WaveHead(color: .blue, size: CGSize(width: 12, height: 12))
-        self.waveHead!.generateOscillationForWaveHeadWith(amplitude: 150, frequency: 1, numSamples: 100)
-        self.waveHead!.position = self.position
+        self.waveHead  = WaveHead(
+                color: self.params!.waveHead.headColor,
+                size: self.params!.waveHead.headSize)
+
+        self.waveHead!.generateOscillationForWaveHeadWith(
+                amplitude: self.params!.waveHead.amplitude,
+                frequency: self.params!.waveHead.frequency,
+                numSamples: self.params!.waveHead.numSamples)
         self.addChild(self.waveHead!)
 
-        self.waveDrawer1 = WaveDrawer(color: .blue, strokeThickness: 9, drawerNumber: 1)
-        self.waveDrawer1!.position = self.position
+        self.waveDrawer1 = WaveDrawer(
+                color: self.params!.waveDrawer.waveColor,
+                strokeThickness: self.params!.waveDrawer.waveStroke,
+                drawerNumber: 1)
         self.waveDrawer1!.waveNotificationDelegate = self
         self.addChild(self.waveDrawer1!)
 
-        self.waveDrawer2 = WaveDrawer(color: .blue, strokeThickness: 9, drawerNumber: 2)
-        self.waveDrawer2!.position = self.position
+        self.waveDrawer2 = WaveDrawer(
+                color: self.params!.waveDrawer.waveColor,
+                strokeThickness: self.params!.waveDrawer.waveStroke,
+                drawerNumber: 2)
         self.waveDrawer2!.waveNotificationDelegate = self
         self.addChild(self.waveDrawer2!)
     }
 
     //When the respective wavedrawer reaches its maximum length it notifies us to start the next wave drawer.
     internal func nextWaveDrawer(drawerID:Int){
-        if drawerID == 1{
-            print("starting 2")
-            self.waveDrawer2!.position = self.position
-            self.waveDrawer2!.sample(waveHead: self.waveHead!, sampleDelay: 1/60, sampleShift: 3, waveSpeed: 3)
-        }
-        if drawerID == 2{
-            print("starting 1")
-            self.waveDrawer1!.position = self.position
-            self.waveDrawer1!.sample(waveHead: self.waveHead!, sampleDelay: 1/60, sampleShift: 3, waveSpeed: 3)
+        if self.params != nil{
+            if drawerID == 1{
+                print("starting 2")
+                self.waveDrawer2!.position = CGPoint.zero
+                self.waveDrawer2!.sample(
+                        waveHead: self.waveHead!,
+                        sampleDelay: self.params!.waveDrawer.sampleDelay,
+                        sampleShift: self.params!.waveDrawer.sampleShift,
+                        waveSpeed: self.params!.waveDrawer.waveSpeed)
+            }
+            if drawerID == 2{
+                print("starting 1")
+                self.waveDrawer1!.position = CGPoint.zero
+                self.waveDrawer1!.sample(
+                        waveHead: self.waveHead!,
+                        sampleDelay: self.params!.waveDrawer.sampleDelay,
+                        sampleShift: self.params!.waveDrawer.sampleShift,
+                        waveSpeed: self.params!.waveDrawer.waveSpeed)
+            }
         }
     }
 
@@ -241,16 +317,109 @@ class WaveGenerator:SKNode, waveGenerationNotifier{
     //Call to activate the wave generator.
     func activateWaveGenerator(){
         if self.waveHead != nil{
-            self.waveHead!.activateWaveHead()
+            if self.params?.waveHead.isPlayer == false{
+                //This is for automatically starting the boundary waves.
+                self.waveHead!.activateWaveHead()
+                if self.waveDrawer1 != nil && self.params != nil{
+                    self.waveDrawer1!.sample(
+                            waveHead: self.waveHead!,
+                            sampleDelay: self.params!.waveDrawer.sampleDelay,
+                            sampleShift: self.params!.waveDrawer.sampleShift,
+                            waveSpeed: self.params!.waveDrawer.waveSpeed)
+                }
+
+            }else{
+                //Initialize the tapGesture here because by now we are sure that the wavegenerator has been added to the scene.
+                if self.params!.waveHead.isPlayer == true{
+                    self.userTapRecognizer = UITapGestureRecognizer(target: self, action: #selector(changeWaveHeadTravelDirection))
+                    self.scene!.view!.addGestureRecognizer(self.userTapRecognizer!)
+                }
+
+                //This causes the player wave to draw as a straight line in the beginning
+                // before taking off upwards. Looks better than immediately jumping into the
+                // wave
+                if self.waveDrawer1 != nil && self.params != nil{
+                    self.waveDrawer1!.sample(
+                            waveHead: self.waveHead!,
+                            sampleDelay: self.params!.waveDrawer.sampleDelay,
+                            sampleShift: self.params!.waveDrawer.sampleShift,
+                            waveSpeed: self.params!.waveDrawer.waveSpeed)
+                }
+                let linearDelay = SKAction.wait(forDuration: 3)
+                let activation = SKAction.run({
+                    self.waveHead!.activatePlayerWavehead(direction: .up)
+                })
+                self.run(SKAction.sequence([linearDelay,activation]))
+            }
         }
-        if self.waveDrawer1 != nil{
-            self.waveDrawer1!.sample(waveHead: self.waveHead!, sampleDelay: 1/60, sampleShift: 3, waveSpeed: 3)
+
+    }
+
+    //Trigger for changing the wave head travel direction on the y axis
+    @objc private func changeWaveHeadTravelDirection(_ sender:UITapGestureRecognizer){
+        if self.params != nil{
+            if self.waveHead!.currentHeadDirection == .up{
+                self.waveHead!.activatePlayerWavehead(direction: .down)
+            }else if self.waveHead!.currentHeadDirection == .down{
+                self.waveHead!.activatePlayerWavehead(direction: .up)
+            }
         }
     }
 }
 
 
-enum WaveType:Int{
-    case simpleSinusoid_1 = 0
-    case simpleSinusoid_2 = 1
+//Note the WaveHeadParams and WaveDrawerParams should only be used inside the WaveGenerator Params and not
+// set indepenedently.
+struct WaveHeadParameters{
+    var headColor:UIColor
+    var headSize:CGSize
+    var amplitude:Double
+    var frequency:Double
+    var numSamples:Int
+    var isPlayer:Bool
+
+    //Default initialization with simple values
+    init(){
+        self.headColor = .blue
+        self.headSize = CGSize(width: 9, height: 9)
+        self.amplitude = 150
+        self.frequency = 1
+        self.numSamples = 100
+        self.isPlayer = false
+    }
+}
+
+struct WaveDrawerParameters{
+    var waveColor:UIColor
+    var waveStroke:CGFloat
+    var sampleDelay:Double
+    var sampleShift:CGFloat
+    var waveSpeed:CGFloat
+
+    //Default initialization with simple values
+    init(){
+        self.waveColor = .blue
+        self.waveStroke = 9
+        self.sampleDelay = 2/60
+        self.sampleShift = 2
+        self.waveSpeed = 1
+    }
+}
+///NOTE the sampe delay and the sample shift are associated
+
+//All relavent options for controlling how a wave is drawn and displayed.
+struct WaveGeneratorParameters{
+    var location:CGPoint
+    var waveHead:WaveHeadParameters
+    var waveDrawer:WaveDrawerParameters
+
+    init(){
+        self.location = CGPoint(x: 0, y: 0)
+        self.waveHead = WaveHeadParameters()
+        self.waveDrawer = WaveDrawerParameters()
+    }
+
+    mutating func setSimpleSinusoid() {
+
+    }
 }
