@@ -12,9 +12,14 @@ import CoreGraphics
 import UIKit
 
 //Used to notify the wave generator when one of the wavedrawers needs to reset or start
-protocol waveGenerationNotifier:class{
+protocol WaveGenerationNotifier:class{
     func nextWaveDrawer(drawerID:Int)
     func resetWaveDrawer(drawerID:Int)
+}
+
+//Used to notify the scene when the player has tapped to update score.
+protocol ScoreChangeNotifier:class{
+    func updateScore(previousDirection:Direction)
 }
 
 enum Direction{
@@ -150,7 +155,7 @@ fileprivate class WaveDrawer:SKShapeNode {
     private let maxWaveWidth:CGFloat = 400
     private var called:Bool = false
 
-    var waveNotificationDelegate:waveGenerationNotifier?
+    var waveNotificationDelegate: WaveGenerationNotifier?
 
     required init?(coder aDecoder:NSCoder){
         super.init(coder: aDecoder)
@@ -226,7 +231,7 @@ fileprivate class WaveDrawer:SKShapeNode {
 }
 
 //Generates a wave starting at a location and drawing backwards.
-class WaveGenerator:SKNode, waveGenerationNotifier, UIGestureRecognizerDelegate{
+class WaveGenerator:SKNode, WaveGenerationNotifier, UIGestureRecognizerDelegate{
     //This is the wave head which will serve as our drawing point.
     private var waveHead:WaveHead?
 
@@ -244,6 +249,9 @@ class WaveGenerator:SKNode, waveGenerationNotifier, UIGestureRecognizerDelegate{
 
     //This gesture recognizer will detect the user tapping on screen.
     private var userTapRecognizer:UIGestureRecognizer?
+
+    //This will allow us to calculate score
+    var scoreUpdateDelegate:ScoreChangeNotifier?
 
     required init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
@@ -266,14 +274,13 @@ class WaveGenerator:SKNode, waveGenerationNotifier, UIGestureRecognizerDelegate{
 
         //Setup the collision wavehead which will help keep score and detect collisions.
         if self.params!.waveHead.isPlayer == false{
-
             self.collisionWaveHead = WaveHead(
                     color: self.params!.waveHead.headColor,
                     size: CGSize(
                             width: self.params!.waveHead.headSize.width / 2,
                             height: self.params!.waveHead.headSize.height / 2))
 
-            //Hide waveheads from view
+            //Hide waveheads from view if this isn't a player.
             self.collisionWaveHead!.isHidden = true
             self.waveHead!.isHidden = true
 
@@ -390,15 +397,34 @@ class WaveGenerator:SKNode, waveGenerationNotifier, UIGestureRecognizerDelegate{
                 self.run(SKAction.sequence([linearDelay,activation]))
             }
         }
+    }
 
+    public func getCollisionWaveHeadPosition() -> CGFloat {
+        if self.collisionWaveHead != nil {
+            return self.collisionWaveHead!.position.y
+        }else{
+            return 0
+        }
+    }
+
+    public func getPrimaryWaveHeadPosition() -> CGFloat {
+        if self.waveHead != nil {
+            return self.waveHead!.position.y
+        }else{
+            return 0
+        }
     }
 
     //Trigger for changing the wave head travel direction on the y axis
     @objc private func changeWaveHeadTravelDirection(_ sender:UITapGestureRecognizer){
         if self.params != nil{
             if self.waveHead!.currentHeadDirection == .up{
+                //Update score and change direction.
+                self.scoreUpdateDelegate!.updateScore(previousDirection: .up)
                 self.waveHead!.activatePlayerWavehead(direction: .down)
             }else if self.waveHead!.currentHeadDirection == .down{
+                //Update score and change direction
+                self.scoreUpdateDelegate!.updateScore(previousDirection: .down)
                 self.waveHead!.activatePlayerWavehead(direction: .up)
             }
         }

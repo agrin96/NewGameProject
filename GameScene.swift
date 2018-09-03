@@ -12,7 +12,14 @@
 import SpriteKit
 import GameplayKit
 
-class GameScene: SKScene, SKPhysicsContactDelegate {
+class GameScene: SKScene, SKPhysicsContactDelegate, ScoreChangeNotifier{
+
+    var bottomWave:WaveGenerator?
+    var topWave:WaveGenerator?
+    var playerWave:WaveGenerator?
+
+    var scoreLabel:SKLabelNode?
+    var score:Int = 0
 
     override func didMove(to view: SKView) {
         //DO NOT TOUCH THE GRAVITY I SPENT 2 HOURS DEBUGGING THIS BEING COMMENTED OUT
@@ -29,26 +36,48 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             playerSettings.waveHead.isPlayer = true
             playerSettings.waveHead.headColor = .red
             playerSettings.waveDrawer.waveColor = .red
-            let player = WaveGenerator(paramters: playerSettings)
-            self.addChild(player)
-            player.activateWaveGenerator()
+            self.playerWave = WaveGenerator(paramters: playerSettings)
+            self.addChild(self.playerWave!)
+            self.playerWave!.scoreUpdateDelegate = self
+            self.playerWave!.activateWaveGenerator()
         })
 
         queue.addOperation({
             var bottomWaveSettings = WaveGeneratorParameters()
             bottomWaveSettings.location = CGPoint(x: self.view!.bounds.width / 2, y: 70)
-            let bottomWave = WaveGenerator(paramters: bottomWaveSettings)
-            self.addChild(bottomWave)
-            bottomWave.activateWaveGenerator()
+            self.bottomWave = WaveGenerator(paramters: bottomWaveSettings)
+            self.addChild(self.bottomWave!)
+            self.bottomWave!.activateWaveGenerator()
         })
 
         queue.addOperation({
             var topWaveSettings = WaveGeneratorParameters()
             topWaveSettings.location = CGPoint(x: self.view!.bounds.width / 2, y: -70)
-            let topWave = WaveGenerator(paramters: topWaveSettings)
-            self.addChild(topWave)
-            topWave.activateWaveGenerator()
+            self.topWave = WaveGenerator(paramters: topWaveSettings)
+            self.addChild(self.topWave!)
+            self.topWave!.activateWaveGenerator()
         })
+
+        self.scoreLabel = SKLabelNode(text: "Score: \(0)")
+        self.scoreLabel?.position = CGPoint(x: 0, y: 250)
+        self.scoreLabel?.fontSize = 30
+        self.addChild(self.scoreLabel!)
+
+    }
+
+    func updateScore(previousDirection: Direction) {
+        if previousDirection == .up {
+            //This means we are closest to the top wave so lets take the score.
+            let distance = abs(self.playerWave!.getPrimaryWaveHeadPosition() - self.topWave!.getCollisionWaveHeadPosition())
+            print(distance)
+            self.score += Int(10000 / (distance*distance))
+            self.scoreLabel!.text = "Score: \(self.score)"
+        }else if previousDirection == .down{
+            //This means we are closest to the bottom wave so lets take the score.
+            let distance = abs(self.playerWave!.getPrimaryWaveHeadPosition() - self.bottomWave!.getCollisionWaveHeadPosition())
+            self.score += Int(10000 / (distance*distance))
+            self.scoreLabel!.text = "Score: \(self.score)"
+        }
     }
 
     func didBegin(_ contact: SKPhysicsContact) {
