@@ -75,70 +75,64 @@ fileprivate class WaveHead:SKSpriteNode {
     //Starts the infinite oscillation of the WaveHead on a async queue since animation is taxing and we want it
     // to not hog the CPU/GPU.
     func activateWaveHead(){
-        DispatchQueue.main.async {
-            var count = 0
-            var goingUp = true
+        var count = 0
+        var goingUp = true
 
-            let vectorChange = SKAction.run({
-                if goingUp == true{
-                    self.physicsBody!.velocity = CGVector(dx: 0, dy: self.p_osciallationForces[count])
-                    count += 1
-                    if count >= self.p_osciallationForces.count{
-                        count = 0
-                        goingUp = false
-                    }
-                }else{
-                    self.physicsBody!.velocity = CGVector(dx: 0, dy: self.n_osciallationForces[count])
-                    count += 1
-                    if count >= self.n_osciallationForces.count{
-                        count = 0
-                        goingUp = true
-                    }
+        let vectorChange = SKAction.run({
+            if goingUp == true{
+                self.physicsBody!.velocity = CGVector(dx: 0, dy: self.p_osciallationForces[count])
+                count += 1
+                if count >= self.p_osciallationForces.count{
+                    count = 0
+                    goingUp = false
                 }
-            })
+            }else{
+                self.physicsBody!.velocity = CGVector(dx: 0, dy: self.n_osciallationForces[count])
+                count += 1
+                if count >= self.n_osciallationForces.count{
+                    count = 0
+                    goingUp = true
+                }
+            }
+        })
 
-            //Here we set a wait time of one frame between velocity changes to make sure our framerate is synced.
-            let oscillationAction = SKAction.group([vectorChange, SKAction.wait(forDuration: 1/60)])
-            self.run(SKAction.repeatForever(oscillationAction))
-        }
+        //Here we set a wait time of one frame between velocity changes to make sure our framerate is synced.
+        let oscillationAction = SKAction.group([vectorChange, SKAction.wait(forDuration: 1/60)])
+        self.run(SKAction.repeatForever(oscillationAction))
     }
 
     //Separate function which specifies when to activate the player wavehead. It takes an input parameter which
     // will be used to control whether it is moving up or down.
     func activatePlayerWavehead(direction:Direction){
-        DispatchQueue.main.async{
-            var count = 0
-            self.currentHeadDirection = direction
+        var count = 0
+        self.currentHeadDirection = direction
 
-            //Reset the previous action, whether it was going up or going down.
-            self.removeAllActions()
+        //Reset the previous action, whether it was going up or going down.
+        self.removeAllActions()
 
-            let vectorChange = SKAction.run({
-                if direction == .up{
-                    self.physicsBody!.velocity = CGVector(dx: 0, dy: self.p_osciallationForces[count])
-                    count += 1
-                    if count >= self.p_osciallationForces.count{
-                        count = 0
-                    }
-                }else if direction == .down{
-                    self.physicsBody!.velocity = CGVector(dx: 0, dy: self.n_osciallationForces[count])
-                    count += 1
-                    if count >= self.n_osciallationForces.count{
-                        count = 0
-                    }
+        let vectorChange = SKAction.run({
+            if direction == .up{
+                self.physicsBody!.velocity = CGVector(dx: 0, dy: self.p_osciallationForces[count])
+                count += 1
+                if count >= self.p_osciallationForces.count{
+                    count = 0
                 }
-            })
-            //Here we set a wait time of one frame between velocity changes to make sure our framerate is synced.
-            let oscillationAction = SKAction.group([vectorChange, SKAction.wait(forDuration: 1/60)])
-            self.run(SKAction.repeatForever(oscillationAction))
-        }
+            }else if direction == .down{
+                self.physicsBody!.velocity = CGVector(dx: 0, dy: self.n_osciallationForces[count])
+                count += 1
+                if count >= self.n_osciallationForces.count{
+                    count = 0
+                }
+            }
+        })
+        //Here we set a wait time of one frame between velocity changes to make sure our framerate is synced.
+        let oscillationAction = SKAction.group([vectorChange, SKAction.wait(forDuration: 1/60)])
+        self.run(SKAction.repeatForever(oscillationAction))
     }
 
     //Stops the infinite oscillation of the WaveHead
     func deactivateWaveHead(){
-        DispatchQueue.main.async {
-            self.removeAllActions()
-        }
+        self.removeAllActions()
     }
 }
 
@@ -170,62 +164,61 @@ fileprivate class WaveDrawer:SKShapeNode {
     }
 
     func sample(waveHead:WaveHead, sampleDelay:Double, sampleShift:CGFloat, waveSpeed:CGFloat){
-        DispatchQueue.main.async{
-            //We have to shift our sampling point forward constantly because the shapeNode is moving
-            // backwards so to compensate we move the sampling point forwards.
-            var shift:CGFloat = 0
+        //We have to shift our sampling point forward constantly because the shapeNode is moving
+        // backwards so to compensate we move the sampling point forwards.
+        var shift:CGFloat = 0
 
-            //Sample wavehead using constantly modifying subpaths. Without the closing of subpath
-            // the shapenode will not draw the path as it deems it incomplete.
-            let waveHeadSample = SKAction.run({
-                self.dynamicWavePath!.addLine(to: CGPoint(x: shift, y: waveHead.position.y))
-                self.dynamicWavePath!.closeSubpath()
-                self.path = self.dynamicWavePath!
-                self.dynamicWavePath!.move(to: CGPoint(x: shift, y: waveHead.position.y))
-                shift += sampleShift
+        //Sample wavehead using constantly modifying subpaths. Without the closing of subpath
+        // the shapenode will not draw the path as it deems it incomplete.
+        self.dynamicWavePath!.move(to: CGPoint(x: shift, y: waveHead.position.y))
+        let waveHeadSample = SKAction.run({
+            self.dynamicWavePath!.addLine(to: CGPoint(x: shift, y: waveHead.position.y))
+            self.dynamicWavePath!.closeSubpath()
+            self.path = self.dynamicWavePath!
+            self.dynamicWavePath!.move(to: CGPoint(x: shift, y: waveHead.position.y))
+            shift += sampleShift
 
-                //When the wave is over its maximum length we notify the WaveGenerator to start the second
-                // wave generator at the same time. This way the transition is smooth. The 25 unit shift
-                // is to make sure that this is always called before the stop notification from the other wave.
-                // Otherwise the wrong notification comes first and the wave fails.
-                // NOTE: Since the waves grow to twice the max size, we prevent this notification from being
-                // called too much by using a flag.
-                if self.frame.width >= (self.maxWaveWidth+25) && self.called == false{
-                    self.called = true
-                    self.waveNotificationDelegate!.nextWaveDrawer(drawerID: self.waveDrawerNumber)
-                }
+            //When the wave is over its maximum length we notify the WaveGenerator to start the second
+            // wave generator at the same time. This way the transition is smooth.
+            // Otherwise the wrong notification comes first and the wave fails.
+            // NOTE: Since the waves grow to twice the max size, we prevent this notification from being
+            // called too much by using a flag.
+            if self.frame.width >= (self.maxWaveWidth) && self.called == false{
+                self.called = true
+                print("\(self.waveDrawerNumber) calling start")
+                self.waveNotificationDelegate!.nextWaveDrawer(drawerID: self.waveDrawerNumber)
+            }
 
-                //When the wave is twice its allowable length we want to clear its path and push it to the front
-                // to continue with our parallax effect. This helps achieve the "infinite wave" without killing
-                // the hardware. Notifies the wavegenerator to call stopSampling.
-                if self.frame.width >= (self.maxWaveWidth*2){
-                    self.waveNotificationDelegate!.resetWaveDrawer(drawerID: self.waveDrawerNumber)
-                }
-            })
+            //When the wave is twice its allowable length we want to clear its path and push it to the front
+            // to continue with our parallax effect. This helps achieve the "infinite wave" without killing
+            // the hardware. Notifies the wavegenerator to call stopSampling.The 25 unit shift
+            // is to make sure that this is always called after the start notification from the other wave.
+            if self.frame.width >= (self.maxWaveWidth*2 - 25) && self.called == true{
+                print("\(self.waveDrawerNumber) stopping")
+                self.waveNotificationDelegate!.resetWaveDrawer(drawerID: self.waveDrawerNumber)
+            }
+        })
 
-            //To make the drawing of the line seem to be a smooth process we shift the shapenode
-            // back. This is done at every frame and thus can be used to speed up or slow down
-            // how fast the curves move.
-            let shiftWaveGen = SKAction.run({
-                self.position.x -= waveSpeed
-            })
+        //To make the drawing of the line seem to be a smooth process we shift the shapenode
+        // back. This is done at every frame and thus can be used to speed up or slow down
+        // how fast the curves move.
+        let shiftWaveGen = SKAction.run({
+            self.position.x -= waveSpeed
+        })
 
-            let smoothShifting = SKAction.group([shiftWaveGen, SKAction.wait(forDuration: 1/60)])
-            let waveSampling = SKAction.group([waveHeadSample, SKAction.wait(forDuration: sampleDelay)])
+        let smoothShifting = SKAction.group([shiftWaveGen, SKAction.wait(forDuration: 1/60)])
+        let waveSampling = SKAction.group([waveHeadSample, SKAction.wait(forDuration: sampleDelay)])
 
-            self.run(SKAction.repeatForever(smoothShifting))
-            self.run(SKAction.repeatForever(waveSampling))
-        }
+        self.run(SKAction.repeatForever(smoothShifting), withKey: "shifting")
+        self.run(SKAction.repeatForever(waveSampling), withKey: "sampling")
     }
 
     //This acts as a complete reset on the wave drawer. Clearing both its path and dynamic path.
     func stopSampling(){
-        DispatchQueue.main.async{
-            self.removeAllActions()
-            self.path = nil
-            self.dynamicWavePath = CGMutablePath()
-            self.called = false
-        }
+        self.removeAllActions()
+        self.path = nil
+        self.dynamicWavePath = CGMutablePath()
+        self.called = false
     }
 }
 

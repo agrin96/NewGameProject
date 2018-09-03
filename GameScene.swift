@@ -21,25 +21,33 @@ class GameScene: SKScene {
         self.anchorPoint = CGPoint(x: 0.5, y: 0.5)
         self.backgroundColor = .gray
 
-        var playerSettings = WaveGeneratorParameters()
-        playerSettings.waveHead.isPlayer = true
-        playerSettings.waveHead.headColor = .red
-        playerSettings.waveDrawer.waveColor = .red
-        let player = WaveGenerator(paramters: playerSettings)
-        self.addChild(player)
-        player.activateWaveGenerator()
+        let queue = OperationQueue()
 
-        var bottomWaveSettings = WaveGeneratorParameters()
-        bottomWaveSettings.location = CGPoint(x: self.view!.bounds.width / 2, y: 70)
-        let bottomWave = WaveGenerator(paramters: bottomWaveSettings)
-        self.addChild(bottomWave)
-        bottomWave.activateWaveGenerator()
+        queue.addOperation({
+            var playerSettings = WaveGeneratorParameters()
+            playerSettings.waveHead.isPlayer = true
+            playerSettings.waveHead.headColor = .red
+            playerSettings.waveDrawer.waveColor = .red
+            let player = WaveGenerator(paramters: playerSettings)
+            self.addChild(player)
+            player.activateWaveGenerator()
+        })
 
-        var topWaveSettings = WaveGeneratorParameters()
-        topWaveSettings.location = CGPoint(x: self.view!.bounds.width / 2, y: -70)
-        let topWave = WaveGenerator(paramters: topWaveSettings)
-        self.addChild(topWave)
-        topWave.activateWaveGenerator()
+        queue.addOperation({
+            var bottomWaveSettings = WaveGeneratorParameters()
+            bottomWaveSettings.location = CGPoint(x: self.view!.bounds.width / 2, y: 70)
+            let bottomWave = WaveGenerator(paramters: bottomWaveSettings)
+            self.addChild(bottomWave)
+            bottomWave.activateWaveGenerator()
+        })
+
+        queue.addOperation({
+            var topWaveSettings = WaveGeneratorParameters()
+            topWaveSettings.location = CGPoint(x: self.view!.bounds.width / 2, y: -70)
+            let topWave = WaveGenerator(paramters: topWaveSettings)
+            self.addChild(topWave)
+            topWave.activateWaveGenerator()
+        })
     }
     
     
