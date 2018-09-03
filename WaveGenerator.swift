@@ -43,14 +43,17 @@ fileprivate class WaveHead:SKSpriteNode {
         //Run an initialization on the wavehead to make sure that all of necessary physics values
         // are set as required.
         self.anchorPoint = CGPoint(x: 0.5, y: 0.5)
-        self.physicsBody = SKPhysicsBody(rectangleOf: self.size)
+        self.physicsBody = SKPhysicsBody(circleOfRadius: (self.size.width / 2 * 0.75))
         self.physicsBody!.linearDamping = 0.0
         self.physicsBody!.friction = 0.0
         self.physicsBody!.density = 1
 
-        //Make sure that the waveheads never interact with eachother.
-        self.physicsBody!.collisionBitMask = 0
-        self.physicsBody!.categoryBitMask = 0
+        //Setup wavehead to detect collision with boundary waves
+        self.physicsBody!.collisionBitMask = 1
+        self.physicsBody!.categoryBitMask = 1
+        self.physicsBody!.contactTestBitMask = 1
+        self.physicsBody!.allowsRotation = false
+        self.physicsBody!.usesPreciseCollisionDetection = true
     }
 
     //Will initialize the physics properties of the wavehead and generate a set of values for its
@@ -227,12 +230,17 @@ class WaveGenerator:SKNode, waveGenerationNotifier, UIGestureRecognizerDelegate{
     //This is the wave head which will serve as our drawing point.
     private var waveHead:WaveHead?
 
+    //Here we define a hidden wavehead which will help us keep score and collision detection.
+    private var collisionWaveHead:WaveHead?
+
     //We use two wavedrawers to acheive an infinite wave parallalax effect
     private var waveDrawer1:WaveDrawer?
     private var waveDrawer2:WaveDrawer?
 
     //Store parameters for the waveGenerator
     private var params:WaveGeneratorParameters?
+    //The approximate time it takes for spawned waves to get to the player
+    private let levelBeginDelay:Double = 3
 
     //This gesture recognizer will detect the user tapping on screen.
     private var userTapRecognizer:UIGestureRecognizer?
@@ -246,16 +254,39 @@ class WaveGenerator:SKNode, waveGenerationNotifier, UIGestureRecognizerDelegate{
         self.params = paramters
         self.position = self.params!.location
 
+        //Setup the wavehead which will actually draw the waves.
         self.waveHead  = WaveHead(
                 color: self.params!.waveHead.headColor,
                 size: self.params!.waveHead.headSize)
-
         self.waveHead!.generateOscillationForWaveHeadWith(
                 amplitude: self.params!.waveHead.amplitude,
                 frequency: self.params!.waveHead.frequency,
                 numSamples: self.params!.waveHead.numSamples)
         self.addChild(self.waveHead!)
 
+        //Setup the collision wavehead which will help keep score and detect collisions.
+        if self.params!.waveHead.isPlayer == false{
+
+            self.collisionWaveHead = WaveHead(
+                    color: self.params!.waveHead.headColor,
+                    size: CGSize(
+                            width: self.params!.waveHead.headSize.width / 2,
+                            height: self.params!.waveHead.headSize.height / 2))
+
+            //Hide waveheads from view
+            self.collisionWaveHead!.isHidden = true
+            self.waveHead!.isHidden = true
+
+            //Center the collision WaveHead on the screen
+            self.collisionWaveHead!.position = CGPoint(x: -self.params!.location.x, y: 0)
+            self.collisionWaveHead!.generateOscillationForWaveHeadWith(
+                    amplitude: self.params!.waveHead.amplitude,
+                    frequency: self.params!.waveHead.frequency,
+                    numSamples: self.params!.waveHead.numSamples)
+            self.addChild(self.collisionWaveHead!)
+        }
+
+        //Setup the two wavedrawers for the infinite parallax effect
         self.waveDrawer1 = WaveDrawer(
                 color: self.params!.waveDrawer.waveColor,
                 strokeThickness: self.params!.waveDrawer.waveStroke,
@@ -326,6 +357,12 @@ class WaveGenerator:SKNode, waveGenerationNotifier, UIGestureRecognizerDelegate{
                             sampleShift: self.params!.waveDrawer.sampleShift,
                             waveSpeed: self.params!.waveDrawer.waveSpeed)
                 }
+                //We start the collision detection wave head only when the player has made it to the wave.
+                let linearDelay = SKAction.wait(forDuration: levelBeginDelay)
+                let activation = SKAction.run({
+                    self.collisionWaveHead!.activateWaveHead()
+                })
+                self.run(SKAction.sequence([linearDelay,activation]))
 
             }else{
                 //Initialize the tapGesture here because by now we are sure that the wavegenerator has been added to the scene.
@@ -344,9 +381,11 @@ class WaveGenerator:SKNode, waveGenerationNotifier, UIGestureRecognizerDelegate{
                             sampleShift: self.params!.waveDrawer.sampleShift,
                             waveSpeed: self.params!.waveDrawer.waveSpeed)
                 }
-                let linearDelay = SKAction.wait(forDuration: 3)
+                let linearDelay = SKAction.wait(forDuration: levelBeginDelay)
                 let activation = SKAction.run({
                     self.waveHead!.activatePlayerWavehead(direction: .up)
+                    //For collision detection purposes we need to know that this is the player node.
+                    self.waveHead!.name = "Player"
                 })
                 self.run(SKAction.sequence([linearDelay,activation]))
             }

@@ -12,11 +12,12 @@
 import SpriteKit
 import GameplayKit
 
-class GameScene: SKScene {
+class GameScene: SKScene, SKPhysicsContactDelegate {
 
     override func didMove(to view: SKView) {
         //DO NOT TOUCH THE GRAVITY I SPENT 2 HOURS DEBUGGING THIS BEING COMMENTED OUT
         self.physicsWorld.gravity = CGVector(dx: 0, dy: 0)
+        self.physicsWorld.contactDelegate = self
 
         self.anchorPoint = CGPoint(x: 0.5, y: 0.5)
         self.backgroundColor = .gray
@@ -49,8 +50,14 @@ class GameScene: SKScene {
             topWave.activateWaveGenerator()
         })
     }
-    
-    
+
+    func didBegin(_ contact: SKPhysicsContact) {
+        if contact.bodyA.node?.name == "Player" || contact.bodyB.node?.name == "Player"{
+            print("contact!!")
+            self.isPaused = true
+        }
+    }
+
     override func update(_ currentTime: TimeInterval) {
         // Called before each frame is rendered
     }
