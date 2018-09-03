@@ -188,15 +188,6 @@ fileprivate class WaveDrawer:SKShapeNode {
                 print("\(self.waveDrawerNumber) calling start")
                 self.waveNotificationDelegate!.nextWaveDrawer(drawerID: self.waveDrawerNumber)
             }
-
-            //When the wave is twice its allowable length we want to clear its path and push it to the front
-            // to continue with our parallax effect. This helps achieve the "infinite wave" without killing
-            // the hardware. Notifies the wavegenerator to call stopSampling.The 25 unit shift
-            // is to make sure that this is always called after the start notification from the other wave.
-            if self.frame.width >= (self.maxWaveWidth*2 - 25) && self.called == true{
-                print("\(self.waveDrawerNumber) stopping")
-                self.waveNotificationDelegate!.resetWaveDrawer(drawerID: self.waveDrawerNumber)
-            }
         })
 
         //To make the drawing of the line seem to be a smooth process we shift the shapenode
@@ -204,6 +195,15 @@ fileprivate class WaveDrawer:SKShapeNode {
         // how fast the curves move.
         let shiftWaveGen = SKAction.run({
             self.position.x -= waveSpeed
+
+            //When the wave is twice its allowable length we want to clear its path and push it to the front
+            // to continue with our parallax effect. This helps achieve the "infinite wave" without killing
+            // the hardware. Notifies the wavegenerator to call stopSampling.The 25 unit shift
+            // is to make sure that this is always called after the start notification from the other wave.
+            if self.position.x <= -(self.maxWaveWidth * 2 - 25) && self.called == true{
+                print("\(self.waveDrawerNumber) stopping")
+                self.waveNotificationDelegate!.resetWaveDrawer(drawerID: self.waveDrawerNumber)
+            }
         })
 
         let smoothShifting = SKAction.group([shiftWaveGen, SKAction.wait(forDuration: 1/60)])
@@ -282,6 +282,9 @@ class WaveGenerator:SKNode, waveGenerationNotifier, UIGestureRecognizerDelegate{
                         sampleDelay: self.params!.waveDrawer.sampleDelay,
                         sampleShift: self.params!.waveDrawer.sampleShift,
                         waveSpeed: self.params!.waveDrawer.waveSpeed)
+                //Here we will stop sampling because the other wave drawer has started and they would simply
+                // overlap and waste system resources.
+                self.waveDrawer1!.removeAction(forKey: "sampling")
             }
             if drawerID == 2{
                 print("starting 1")
@@ -291,6 +294,9 @@ class WaveGenerator:SKNode, waveGenerationNotifier, UIGestureRecognizerDelegate{
                         sampleDelay: self.params!.waveDrawer.sampleDelay,
                         sampleShift: self.params!.waveDrawer.sampleShift,
                         waveSpeed: self.params!.waveDrawer.waveSpeed)
+                //Here we will stop sampling because the other wave drawer has started and they would simply
+                // overlap and waste system resources.
+                self.waveDrawer2!.removeAction(forKey: "sampling")
             }
         }
     }
