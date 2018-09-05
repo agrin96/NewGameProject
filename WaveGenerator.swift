@@ -22,6 +22,7 @@ protocol ScoreChangeNotifier:class{
     func updateScore(previousDirection:Direction)
 }
 
+//Used to denote the direction in which a wavehead is traveling
 enum Direction{
     case up, down
 }

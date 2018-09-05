@@ -27,6 +27,8 @@ class GameScene: SKScene, GameStatusNotifier{
         self.gamestatus = SKLabelNode(text: "")
         self.gamestatus!.fontSize = 60
         self.gamestatus!.fontColor = .green
+        self.gamestatus!.isHidden = false
+        self.addChild(self.gamestatus!)
 
         //Create a level and set it as the contact delegate
         self.levelToPlay = LevelGenerator(in: self.view!)
@@ -50,6 +52,7 @@ class GameScene: SKScene, GameStatusNotifier{
     }
 
     private func resetLevel(){
+        self.removeAllActions()
         self.levelToPlay!.removeFromParent()
         self.levelToPlay = nil
 
@@ -72,10 +75,24 @@ class GameScene: SKScene, GameStatusNotifier{
 
     func gameStateChanged(status: GameStatus) {
         if status == .won{
-            print("Game won!")
+            self.run(SKAction.sequence([SKAction.wait(forDuration: 0.5), SKAction.run({
+                self.gamestatus!.text = "YOU WON!"
+                self.gamestatus!.run(SKAction.sequence([
+                    SKAction.fadeIn(withDuration: 0.5),
+                    SKAction.wait(forDuration: 2),
+                    SKAction.fadeOut(withDuration: 0.5)]))
+            })]))
         }else if status == .lost{
-            print("Game Lost!")
-            self.resetLevel()
+            self.run(SKAction.sequence([SKAction.wait(forDuration: 0.5), SKAction.run({
+                self.gamestatus!.text = "YOU LOST!"
+                self.gamestatus!.run(SKAction.sequence([
+                    SKAction.fadeIn(withDuration: 0.5),
+                    SKAction.wait(forDuration: 2),
+                    SKAction.fadeOut(withDuration: 0.5),
+                        SKAction.run({
+                    self.resetLevel()
+                })]))
+            })]))
         }
     }
 

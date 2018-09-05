@@ -41,9 +41,9 @@ class LevelGenerator:SKNode, SKPhysicsContactDelegate, ScoreChangeNotifier{
     var levelTimer:Timer?
     let maximumLevelTime:CGFloat = 180//seconds (3 minutes)
 
-    var didPlayerLose:Bool = true
     //Notifier of win/lose
     var gameStatusDelegate:GameStatusNotifier?
+    var didPlayerLose:Bool = true
 
     required init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
