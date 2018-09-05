@@ -265,6 +265,8 @@ class WaveGenerator:SKNode, WaveGenerationNotifier, UIGestureRecognizerDelegate{
         super.init()
         self.params = paramters
         self.position = self.params!.location
+        //We want the level to start with the user being unable to tap.
+        self.isUserInteractionEnabled = false
 
         //Setup the wavehead which will actually draw the waves.
         self.waveHead  = WaveHead(
@@ -393,6 +395,7 @@ class WaveGenerator:SKNode, WaveGenerationNotifier, UIGestureRecognizerDelegate{
                     self.waveHead!.activatePlayerWavehead(direction: .up)
                     //For collision detection purposes we need to know that this is the player node.
                     self.waveHead!.name = "Player"
+                    self.isUserInteractionEnabled = true
                 })
                 self.run(SKAction.sequence([linearDelay,activation]))
             }
@@ -402,11 +405,22 @@ class WaveGenerator:SKNode, WaveGenerationNotifier, UIGestureRecognizerDelegate{
     //Used to stop all relevant wave generating operations.
     func deactivateWaveGenerator(){
         if self.waveHead != nil{
+            self.position = self.params!.location
             self.waveHead!.deactivateWaveHead()
+            self.waveHead!.position = CGPoint.zero
+
             self.waveDrawer1!.stopSampling()
+            self.waveDrawer1!.position = CGPoint.zero
+
             self.waveDrawer2!.stopSampling()
-            self.collisionWaveHead?.deactivateWaveHead()
-            self.removeAllActions()
+            self.waveDrawer2!.position = CGPoint.zero
+
+            //Reset the collision only if this isnt a player.
+            if self.params!.waveHead.isPlayer == false{
+                self.collisionWaveHead!.deactivateWaveHead()
+                self.collisionWaveHead!.position = CGPoint(x: -self.params!.location.x, y: 0)
+                self.removeAllActions()
+            }
         }
     }
 
@@ -445,15 +459,17 @@ class WaveGenerator:SKNode, WaveGenerationNotifier, UIGestureRecognizerDelegate{
 
     //Trigger for changing the wave head travel direction on the y axis
     @objc private func changeWaveHeadTravelDirection(_ sender:UITapGestureRecognizer){
-        if self.params != nil{
-            if self.waveHead!.currentHeadDirection == .up{
-                //Update score and change direction.
-                self.scoreUpdateDelegate!.updateScore(previousDirection: .up)
-                self.waveHead!.activatePlayerWavehead(direction: .down)
-            }else if self.waveHead!.currentHeadDirection == .down{
-                //Update score and change direction
-                self.scoreUpdateDelegate!.updateScore(previousDirection: .down)
-                self.waveHead!.activatePlayerWavehead(direction: .up)
+        if self.isUserInteractionEnabled == true{
+            if self.params != nil{
+                if self.waveHead!.currentHeadDirection == .up{
+                    //Update score and change direction.
+                    self.scoreUpdateDelegate!.updateScore(previousDirection: .up)
+                    self.waveHead!.activatePlayerWavehead(direction: .down)
+                }else if self.waveHead!.currentHeadDirection == .down{
+                    //Update score and change direction
+                    self.scoreUpdateDelegate!.updateScore(previousDirection: .down)
+                    self.waveHead!.activatePlayerWavehead(direction: .up)
+                }
             }
         }
     }
