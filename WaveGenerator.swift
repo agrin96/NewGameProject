@@ -48,7 +48,7 @@ fileprivate class WaveHead:SKSpriteNode {
         //Run an initialization on the wavehead to make sure that all of necessary physics values
         // are set as required.
         self.anchorPoint = CGPoint(x: 0.5, y: 0.5)
-        self.physicsBody = SKPhysicsBody(circleOfRadius: (self.size.width / 2 * 0.75))
+        self.physicsBody = SKPhysicsBody(circleOfRadius: (self.size.width / 2 * 0.9))
         self.physicsBody!.linearDamping = 0.0
         self.physicsBody!.friction = 0.0
         self.physicsBody!.density = 1
@@ -88,14 +88,14 @@ fileprivate class WaveHead:SKSpriteNode {
 
         let vectorChange = SKAction.run({
             if goingUp == true{
-                self.physicsBody!.velocity = CGVector(dx: 0, dy: self.p_osciallationForces[count])
+                self.position = CGPoint(x: self.position.x, y: (self.position.y + CGFloat(self.p_osciallationForces[count])))
                 count += 1
                 if count >= self.p_osciallationForces.count{
                     count = 0
                     goingUp = false
                 }
             }else{
-                self.physicsBody!.velocity = CGVector(dx: 0, dy: self.n_osciallationForces[count])
+                self.position = CGPoint(x: self.position.x, y: (self.position.y + CGFloat(self.n_osciallationForces[count])))
                 count += 1
                 if count >= self.n_osciallationForces.count{
                     count = 0
@@ -120,13 +120,13 @@ fileprivate class WaveHead:SKSpriteNode {
 
         let vectorChange = SKAction.run({
             if direction == .up{
-                self.physicsBody!.velocity = CGVector(dx: 0, dy: self.p_osciallationForces[count])
+                self.position = CGPoint(x: self.position.x, y: (self.position.y + CGFloat(self.p_osciallationForces[count])))
                 count += 1
                 if count >= self.p_osciallationForces.count{
                     count = 0
                 }
             }else if direction == .down{
-                self.physicsBody!.velocity = CGVector(dx: 0, dy: self.n_osciallationForces[count])
+                self.position = CGPoint(x: self.position.x, y: (self.position.y + CGFloat(self.n_osciallationForces[count])))
                 count += 1
                 if count >= self.n_osciallationForces.count{
                     count = 0
@@ -141,6 +141,12 @@ fileprivate class WaveHead:SKSpriteNode {
     //Stops the infinite oscillation of the WaveHead
     func deactivateWaveHead(){
         self.removeAllActions()
+    }
+
+    //This funciton is used to inject different oscillation styles into the wavehead.
+    func changeOscillation(to forces:[Int]){
+        self.p_osciallationForces = forces
+        self.n_osciallationForces = forces.map({return -$0})
     }
 }
 
@@ -193,7 +199,6 @@ fileprivate class WaveDrawer:SKShapeNode {
             // called too much by using a flag.
             if self.frame.width >= (self.maxWaveWidth) && self.called == false{
                 self.called = true
-                print("\(self.waveDrawerNumber) calling start")
                 self.waveNotificationDelegate!.nextWaveDrawer(drawerID: self.waveDrawerNumber)
             }
         })
@@ -209,7 +214,6 @@ fileprivate class WaveDrawer:SKShapeNode {
             // the hardware. Notifies the wavegenerator to call stopSampling.The 25 unit shift
             // is to make sure that this is always called after the start notification from the other wave.
             if self.position.x <= -(self.maxWaveWidth * 2 - 25) && self.called == true{
-                print("\(self.waveDrawerNumber) stopping")
                 self.waveNotificationDelegate!.resetWaveDrawer(drawerID: self.waveDrawerNumber)
             }
         })
@@ -245,7 +249,7 @@ class WaveGenerator:SKNode, WaveGenerationNotifier, UIGestureRecognizerDelegate{
     //Store parameters for the waveGenerator
     private var params:WaveGeneratorParameters?
     //The approximate time it takes for spawned waves to get to the player
-    private let levelBeginDelay:Double = 3
+    private let levelBeginDelay:Double = 3.125
 
     //This gesture recognizer will detect the user tapping on screen.
     private var userTapRecognizer:UIGestureRecognizer?
@@ -277,8 +281,8 @@ class WaveGenerator:SKNode, WaveGenerationNotifier, UIGestureRecognizerDelegate{
             self.collisionWaveHead = WaveHead(
                     color: self.params!.waveHead.headColor,
                     size: CGSize(
-                            width: self.params!.waveHead.headSize.width / 2,
-                            height: self.params!.waveHead.headSize.height / 2))
+                            width: self.params!.waveHead.headSize.width,
+                            height: self.params!.waveHead.headSize.height))
 
             //Hide waveheads from view if this isn't a player.
             self.collisionWaveHead!.isHidden = true
@@ -313,7 +317,6 @@ class WaveGenerator:SKNode, WaveGenerationNotifier, UIGestureRecognizerDelegate{
     internal func nextWaveDrawer(drawerID:Int){
         if self.params != nil{
             if drawerID == 1{
-                print("starting 2")
                 self.waveDrawer2!.position = CGPoint.zero
                 self.waveDrawer2!.sample(
                         waveHead: self.waveHead!,
@@ -325,7 +328,6 @@ class WaveGenerator:SKNode, WaveGenerationNotifier, UIGestureRecognizerDelegate{
                 self.waveDrawer1!.removeAction(forKey: "sampling")
             }
             if drawerID == 2{
-                print("starting 1")
                 self.waveDrawer1!.position = CGPoint.zero
                 self.waveDrawer1!.sample(
                         waveHead: self.waveHead!,
@@ -342,11 +344,9 @@ class WaveGenerator:SKNode, WaveGenerationNotifier, UIGestureRecognizerDelegate{
     //When the respective wavedrawer reaches twice its maximum length it notifies us to reset the previous wavedrawer.
     internal func resetWaveDrawer(drawerID:Int){
         if drawerID == 1{
-            print("stopping 1")
             self.waveDrawer1!.stopSampling()
         }
         if drawerID == 2{
-            print("stopping 2")
             self.waveDrawer2!.stopSampling()
         }
     }
@@ -399,19 +399,47 @@ class WaveGenerator:SKNode, WaveGenerationNotifier, UIGestureRecognizerDelegate{
         }
     }
 
+    //Used to stop all relevant wave generating operations.
+    func deactivateWaveGenerator(){
+        if self.waveHead != nil{
+            self.waveHead!.deactivateWaveHead()
+            self.waveDrawer1!.stopSampling()
+            self.waveDrawer2!.stopSampling()
+            self.collisionWaveHead?.deactivateWaveHead()
+            self.removeAllActions()
+        }
+    }
+
+    //Utility for getting position used in score calculation.
+    //Note, for this to work we need to convert position to scene coordinates so everything matches
     public func getCollisionWaveHeadPosition() -> CGFloat {
         if self.collisionWaveHead != nil {
-            return self.collisionWaveHead!.position.y
+            return self.scene!.convert(self.collisionWaveHead!.position, from: self).y
         }else{
             return 0
         }
     }
 
+    //Utility for getting position used in score calculation
+    //Note, for this to work we need to convert position to scene coordinates so everything matches
     public func getPrimaryWaveHeadPosition() -> CGFloat {
         if self.waveHead != nil {
-            return self.waveHead!.position.y
+            return self.scene!.convert(self.waveHead!.position, from: self).y
         }else{
             return 0
+        }
+    }
+
+    //Used to update oscillation style at any point by providing an array of new points
+    public func updateWaveOscillationWith(forces:[Int]){
+        if self.waveHead != nil{
+            self.waveHead!.changeOscillation(to: forces)
+            //If this isn't a player wave we have to also change the collision wavehead oscillation
+            if self.collisionWaveHead != nil{
+                self.run(SKAction.sequence([SKAction.wait(forDuration: self.levelBeginDelay), SKAction.run({
+                    self.collisionWaveHead!.changeOscillation(to: forces)
+                })]))
+            }
         }
     }
 
@@ -446,7 +474,7 @@ struct WaveHeadParameters{
     init(){
         self.headColor = .blue
         self.headSize = CGSize(width: 9, height: 9)
-        self.amplitude = 150
+        self.amplitude = 3
         self.frequency = 1
         self.numSamples = 100
         self.isPlayer = false
@@ -469,7 +497,7 @@ struct WaveDrawerParameters{
         self.waveSpeed = 1
     }
 }
-///NOTE the sampe delay and the sample shift are associated
+///NOTE the sample delay and the sample shift are associated
 
 //All relavent options for controlling how a wave is drawn and displayed.
 struct WaveGeneratorParameters{

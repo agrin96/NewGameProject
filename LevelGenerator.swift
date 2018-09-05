@@ -33,34 +33,28 @@ class LevelGenerator:SKNode, SKPhysicsContactDelegate, ScoreChangeNotifier{
         super.init(coder: aDecoder)
     }
 
+    //A level consists of 2 boundary waves and 1 player wave.
     init(in view:SKView) {
         super.init()
 
-        let queue = OperationQueue()
+        var playerSettings = WaveGeneratorParameters()
+        playerSettings.waveHead.isPlayer = true
+        playerSettings.waveHead.headColor = .red
+        playerSettings.waveDrawer.waveColor = .red
+        self.playerWave = WaveGenerator(paramters: playerSettings)
+        self.addChild(self.playerWave!)
+        self.playerWave!.scoreUpdateDelegate = self
 
-        queue.addOperation({
-            var playerSettings = WaveGeneratorParameters()
-            playerSettings.waveHead.isPlayer = true
-            playerSettings.waveHead.headColor = .red
-            playerSettings.waveDrawer.waveColor = .red
-            self.playerWave = WaveGenerator(paramters: playerSettings)
-            self.addChild(self.playerWave!)
-            self.playerWave!.scoreUpdateDelegate = self
-        })
+        var topWaveSettings = WaveGeneratorParameters()
+        topWaveSettings.location = CGPoint(x: view.bounds.width / 2, y: 70)
+        self.topWave = WaveGenerator(paramters: topWaveSettings)
+        self.addChild(self.topWave!)
 
-        queue.addOperation({
-            var bottomWaveSettings = WaveGeneratorParameters()
-            bottomWaveSettings.location = CGPoint(x: view.bounds.width / 2, y: 70)
-            self.bottomWave = WaveGenerator(paramters: bottomWaveSettings)
-            self.addChild(self.bottomWave!)
-        })
+        var bottomWaveSettings = WaveGeneratorParameters()
+        bottomWaveSettings.location = CGPoint(x: view.bounds.width / 2, y: -70)
+        self.bottomWave = WaveGenerator(paramters: bottomWaveSettings)
+        self.addChild(self.bottomWave!)
 
-        queue.addOperation({
-            var topWaveSettings = WaveGeneratorParameters()
-            topWaveSettings.location = CGPoint(x: view.bounds.width / 2, y: -70)
-            self.topWave = WaveGenerator(paramters: topWaveSettings)
-            self.addChild(self.topWave!)
-        })
 
         self.scoreLabel = SKLabelNode(text: "Score: \(0)")
         self.scoreLabel?.position = CGPoint(x: 0, y: 250)
@@ -72,25 +66,26 @@ class LevelGenerator:SKNode, SKPhysicsContactDelegate, ScoreChangeNotifier{
     //Called to actually start the level
     func beginLevel(){
         if self.playerWave != nil{
+            self.currentScore = 0
+            self.currentLevelTime = 0
             //Start all the wave generators
             self.bottomWave!.activateWaveGenerator()
             self.topWave!.activateWaveGenerator()
-
             self.playerWave!.activateWaveGenerator()
         }
     }
 
+    //Is called each time a player taps to update score
     internal func updateScore(previousDirection: Direction) {
         if previousDirection == .up {
             //This means we are closest to the top wave so lets take the score.
             let distance = abs(self.playerWave!.getPrimaryWaveHeadPosition() - self.topWave!.getCollisionWaveHeadPosition())
-            print(distance)
-            self.currentScore += Int(10000 / (distance*distance))
+            self.currentScore += (1+Int(10000 / (distance*distance)))
             self.scoreLabel!.text = "Score: \(self.currentScore)"
         }else if previousDirection == .down{
             //This means we are closest to the bottom wave so lets take the score.
             let distance = abs(self.playerWave!.getPrimaryWaveHeadPosition() - self.bottomWave!.getCollisionWaveHeadPosition())
-            self.currentScore += Int(10000 / (distance*distance))
+            self.currentScore += (1+Int(10000 / (distance*distance)))
             self.scoreLabel!.text = "Score: \(self.currentScore)"
         }
     }
