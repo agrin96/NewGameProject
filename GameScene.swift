@@ -12,10 +12,17 @@
 import SpriteKit
 import GameplayKit
 
-class GameScene: SKScene, GameStatusNotifier{
+///NOTE: make custom enums + struct of level editing scripting style so like:
+// enum Action: case wait,change
+// struct Level: Action,Data
+// so it would look like [Wait(3), change([]), wait(10), change([])]
+// can mask it under regular SKAction subclass
 
+
+class GameScene: SKScene, GameStatusNotifier{
     var levelToPlay:LevelGenerator?
 
+    //Win/lose
     var gamestatus:SKLabelNode?
     var score:Int = 0
 
@@ -51,6 +58,9 @@ class GameScene: SKScene, GameStatusNotifier{
         self.run(SKAction.sequence([SKAction.wait(forDuration: 10),updateOscillation]))
     }
 
+    //Resets the current level by nulling out the level values and actions and then reinitializing them.
+    // This is easier and cleaner than writing some kind of crazy reset function to zero out all the values
+    // inside the Wavegenerator class.
     private func resetLevel(){
         self.removeAllActions()
         self.levelToPlay!.removeFromParent()
@@ -73,6 +83,7 @@ class GameScene: SKScene, GameStatusNotifier{
         self.run(SKAction.sequence([SKAction.wait(forDuration: 10),updateOscillation]))
     }
 
+    //Function which handles win/lose condition and reseting the level.
     func gameStateChanged(status: GameStatus) {
         if status == .won{
             self.run(SKAction.sequence([SKAction.wait(forDuration: 0.5), SKAction.run({
