@@ -105,6 +105,7 @@ class LevelGenerator:SKNode, SKPhysicsContactDelegate, ScoreChangeNotifier{
     //Update the level timer.
     @objc private func updateTime(){
         self.currentTime += 0.1
+        self.currentTime = CGFloat(round(Double(self.currentTime * 10)) / 10)
         self.currentTimeDisplay?.text = "\(self.currentTime)"
 
         //If the current level time reaches the max then we have won!

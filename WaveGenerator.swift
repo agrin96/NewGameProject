@@ -30,8 +30,9 @@ enum Direction{
 //Creates an oscillating up and down point which can be sampled and can act as the player.
 fileprivate class WaveHead:SKSpriteNode {
 
-    private var p_osciallationForces:[Int] = []
-    private var n_osciallationForces:[Int] = []
+    private var p_osciallationForces:[CGFloat] = []
+    private var n_osciallationForces:[CGFloat] = []
+    private var oscillationCount:Int = 0
 
     //used to track which direction the wave head is currently traveling
     var currentHeadDirection:Direction = .up
@@ -60,60 +61,43 @@ fileprivate class WaveHead:SKSpriteNode {
         self.physicsBody!.contactTestBitMask = 1
         self.physicsBody!.allowsRotation = false
         self.physicsBody!.usesPreciseCollisionDetection = true
+
+        self.p_osciallationForces = WaveType.simpleSin()
+        self.n_osciallationForces = WaveType.simpleSin().map({return -$0})
     }
 
-    //Will initialize the physics properties of the wavehead and generate a set of values for its
-    // y-axis oscillation which will be used to draw the sine waves.
-    func generateOscillationForWaveHeadWith(amplitude:Double, frequency:Double, numSamples:Int){
-        //Generate a set of values by which the waveHead will oscillation on the y-axis of the screen.
-        // Note we multiply the amplitude by the frequency because otherwise increasing the frequency
-        // decreases the amplitude due to how we generate the sine waves.
-        for i in 0..<numSamples{
-            let yVal = amplitude * frequency * sin((2*Double.pi*frequency*Double(i)) / Double(numSamples+1))
-            if yVal < 0{
-                break
-            }
-            self.p_osciallationForces.append(Int(yVal))
-        }
-        //The loop above will return only the first positive arc of the sin function. Here we copy and
-        // negate all the values to make sure our negative arc is a perfect reflection. Otherwise
-        // we run into issues of desync between slightly different values
-        self.n_osciallationForces = self.p_osciallationForces.map{return -$0}
-    }
-
-    //Starts the infinite oscillation of the WaveHead on a async queue since animation is taxing and we want it
-    // to not hog the CPU/GPU.
+    //Starts the infinite oscillation of the WaveHead
     func activateWaveHead(){
-        var count = 0
+        self.oscillationCount = 0
         var goingUp = true
 
         let vectorChange = SKAction.run({
             if goingUp == true{
-                self.position = CGPoint(x: self.position.x, y: (self.position.y + CGFloat(self.p_osciallationForces[count])))
-                count += 1
-                if count >= self.p_osciallationForces.count{
-                    count = 0
+                self.position = CGPoint(x: self.position.x, y: (self.position.y + CGFloat(self.p_osciallationForces[self.oscillationCount])))
+                self.oscillationCount += 1
+                if self.oscillationCount >= self.p_osciallationForces.count{
+                    self.oscillationCount = 0
                     goingUp = false
                 }
             }else{
-                self.position = CGPoint(x: self.position.x, y: (self.position.y + CGFloat(self.n_osciallationForces[count])))
-                count += 1
-                if count >= self.n_osciallationForces.count{
-                    count = 0
+                self.position = CGPoint(x: self.position.x, y: (self.position.y + CGFloat(self.n_osciallationForces[self.oscillationCount])))
+                self.oscillationCount += 1
+                if self.oscillationCount >= self.n_osciallationForces.count{
+                    self.oscillationCount = 0
                     goingUp = true
                 }
             }
         })
 
         //Here we set a wait time of one frame between velocity changes to make sure our framerate is synced.
-        let oscillationAction = SKAction.group([vectorChange, SKAction.wait(forDuration: 1/60)])
+        let oscillationAction = SKAction.group([vectorChange, SKAction.wait(forDuration: 1/120)])
         self.run(SKAction.repeatForever(oscillationAction))
     }
 
     //Separate function which specifies when to activate the player wavehead. It takes an input parameter which
     // will be used to control whether it is moving up or down.
     func activatePlayerWavehead(direction:Direction){
-        var count = 0
+        self.oscillationCount = 0
         self.currentHeadDirection = direction
 
         //Reset the previous action, whether it was going up or going down.
@@ -121,21 +105,21 @@ fileprivate class WaveHead:SKSpriteNode {
 
         let vectorChange = SKAction.run({
             if direction == .up{
-                self.position = CGPoint(x: self.position.x, y: (self.position.y + CGFloat(self.p_osciallationForces[count])))
-                count += 1
-                if count >= self.p_osciallationForces.count{
-                    count = 0
+                self.position = CGPoint(x: self.position.x, y: (self.position.y + CGFloat(self.p_osciallationForces[self.oscillationCount])))
+                self.oscillationCount += 1
+                if self.oscillationCount >= self.p_osciallationForces.count{
+                    self.oscillationCount = 0
                 }
             }else if direction == .down{
-                self.position = CGPoint(x: self.position.x, y: (self.position.y + CGFloat(self.n_osciallationForces[count])))
-                count += 1
-                if count >= self.n_osciallationForces.count{
-                    count = 0
+                self.position = CGPoint(x: self.position.x, y: (self.position.y + CGFloat(self.n_osciallationForces[self.oscillationCount])))
+                self.oscillationCount += 1
+                if self.oscillationCount >= self.n_osciallationForces.count{
+                    self.oscillationCount = 0
                 }
             }
         })
         //Here we set a wait time of one frame between velocity changes to make sure our framerate is synced.
-        let oscillationAction = SKAction.group([vectorChange, SKAction.wait(forDuration: 1/60)])
+        let oscillationAction = SKAction.group([vectorChange, SKAction.wait(forDuration: 1/120)])
         self.run(SKAction.repeatForever(oscillationAction))
     }
 
@@ -146,6 +130,7 @@ fileprivate class WaveHead:SKSpriteNode {
 
     //This funciton is used to inject different oscillation styles into the wavehead.
     func changeOscillation(to forces:[CGFloat]){
+        self.oscillationCount = 0
         self.p_osciallationForces = forces
         self.n_osciallationForces = forces.map({return -$0})
     }
@@ -273,19 +258,16 @@ class WaveGenerator:SKNode, WaveGenerationNotifier, UIGestureRecognizerDelegate{
         self.waveHead  = WaveHead(
                 color: self.params!.waveHead.headColor,
                 size: self.params!.waveHead.headSize)
-        self.waveHead!.generateOscillationForWaveHeadWith(
-                amplitude: self.params!.waveHead.amplitude,
-                frequency: self.params!.waveHead.frequency,
-                numSamples: self.params!.waveHead.numSamples)
         self.addChild(self.waveHead!)
 
         //Setup the collision wavehead which will help keep score and detect collisions.
         if self.params!.waveHead.isPlayer == false{
             self.collisionWaveHead = WaveHead(
-                    color: self.params!.waveHead.headColor,
+                    color: .green,
                     size: CGSize(
                             width: self.params!.waveHead.headSize.width,
                             height: self.params!.waveHead.headSize.height))
+            self.addChild(self.collisionWaveHead!)
 
             //Hide waveheads from view if this isn't a player.
             self.collisionWaveHead!.isHidden = true
@@ -293,11 +275,6 @@ class WaveGenerator:SKNode, WaveGenerationNotifier, UIGestureRecognizerDelegate{
 
             //Center the collision WaveHead on the screen
             self.collisionWaveHead!.position = CGPoint(x: -self.params!.location.x, y: 0)
-            self.collisionWaveHead!.generateOscillationForWaveHeadWith(
-                    amplitude: self.params!.waveHead.amplitude,
-                    frequency: self.params!.waveHead.frequency,
-                    numSamples: self.params!.waveHead.numSamples)
-            self.addChild(self.collisionWaveHead!)
         }
 
         //Setup the two wavedrawers for the infinite parallax effect
@@ -482,18 +459,12 @@ class WaveGenerator:SKNode, WaveGenerationNotifier, UIGestureRecognizerDelegate{
 struct WaveHeadParameters{
     var headColor:UIColor
     var headSize:CGSize
-    var amplitude:Double
-    var frequency:Double
-    var numSamples:Int
     var isPlayer:Bool
 
     //Default initialization with simple values
     init(){
         self.headColor = .blue
         self.headSize = CGSize(width: 9, height: 9)
-        self.amplitude = 3
-        self.frequency = 1
-        self.numSamples = 100
         self.isPlayer = false
     }
 }

@@ -45,14 +45,14 @@ class GameScene: SKScene, GameStatusNotifier{
         self.anchorPoint = CGPoint(x: 0.5, y: 0.5)
         self.backgroundColor = .gray
 
-//        let playerOscillation:[Int] = [1,1,1,1,2,2,2,2,3,3,3,3,4,4,4,4]
-        let playerOscillation:[Int] = [1,2,3,4]
+        let playerOscillation:[CGFloat] = [1,1,1,1]
         self.levelToPlay!.playerWave!.updateWaveOscillationWith(forces: playerOscillation)
-        self.levelToPlay!.topWave!.updateWaveOscillationWith(forces: WaveType.simpleSquare())
+        let modWave = LevelBuilder.scale(wave: WaveType.simpleSin(), dx: 8, dy: 1)
+        self.levelToPlay!.topWave!.updateWaveOscillationWith(forces: modWave)
         self.levelToPlay!.gameStatusDelegate = self
         self.levelToPlay!.beginLevel()
 
-        let newOscillation:[Int] = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
+        let newOscillation:[CGFloat] = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
         let updateOscillation = SKAction.run({
             self.levelToPlay!.topWave!.updateWaveOscillationWith(forces: newOscillation)
         })
@@ -72,13 +72,13 @@ class GameScene: SKScene, GameStatusNotifier{
         self.addChild(self.levelToPlay!)
         self.physicsWorld.contactDelegate = self.levelToPlay!
 
-        let playerOscillation:[Int] = [1,2,3,4]
+        let playerOscillation:[CGFloat] = [1,1,1,1]
         self.levelToPlay!.playerWave!.updateWaveOscillationWith(forces: playerOscillation)
         self.levelToPlay!.topWave!.updateWaveOscillationWith(forces: WaveType.simpleSquare())
         self.levelToPlay!.gameStatusDelegate = self
         self.levelToPlay!.beginLevel()
 
-        let newOscillation:[Int] = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
+        let newOscillation:[CGFloat] = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
         let updateOscillation = SKAction.run({
             self.levelToPlay!.topWave!.updateWaveOscillationWith(forces: newOscillation)
         })
