@@ -48,6 +48,7 @@ class GameScene: SKScene, GameStatusNotifier{
 //        let playerOscillation:[Int] = [1,1,1,1,2,2,2,2,3,3,3,3,4,4,4,4]
         let playerOscillation:[Int] = [1,2,3,4]
         self.levelToPlay!.playerWave!.updateWaveOscillationWith(forces: playerOscillation)
+        self.levelToPlay!.topWave!.updateWaveOscillationWith(forces: WaveType.simpleSquare())
         self.levelToPlay!.gameStatusDelegate = self
         self.levelToPlay!.beginLevel()
 
@@ -73,6 +74,7 @@ class GameScene: SKScene, GameStatusNotifier{
 
         let playerOscillation:[Int] = [1,2,3,4]
         self.levelToPlay!.playerWave!.updateWaveOscillationWith(forces: playerOscillation)
+        self.levelToPlay!.topWave!.updateWaveOscillationWith(forces: WaveType.simpleSquare())
         self.levelToPlay!.gameStatusDelegate = self
         self.levelToPlay!.beginLevel()
 

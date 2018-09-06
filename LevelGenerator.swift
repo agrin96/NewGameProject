@@ -98,6 +98,7 @@ class LevelGenerator:SKNode, SKPhysicsContactDelegate, ScoreChangeNotifier{
             //Start the level timer
             self.currentTimeDisplay!.text = "\(0)"
             self.levelTimer = Timer.scheduledTimer(timeInterval: 0.1, target: self, selector: #selector(updateTime), userInfo: nil, repeats: true)
+
         }
     }
 

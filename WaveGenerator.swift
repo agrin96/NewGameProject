@@ -145,7 +145,7 @@ fileprivate class WaveHead:SKSpriteNode {
     }
 
     //This funciton is used to inject different oscillation styles into the wavehead.
-    func changeOscillation(to forces:[Int]){
+    func changeOscillation(to forces:[CGFloat]){
         self.p_osciallationForces = forces
         self.n_osciallationForces = forces.map({return -$0})
     }
@@ -446,7 +446,7 @@ class WaveGenerator:SKNode, WaveGenerationNotifier, UIGestureRecognizerDelegate{
     }
 
     //Used to update oscillation style at any point by providing an array of new points
-    public func updateWaveOscillationWith(forces:[Int]){
+    public func updateWaveOscillationWith(forces:[CGFloat]){
         if self.waveHead != nil{
             self.waveHead!.changeOscillation(to: forces)
             //If this isn't a player wave we have to also change the collision wavehead oscillation
