@@ -8,6 +8,9 @@
 import SpriteKit
 import GameplayKit
 
+//Note that every single wave type MUST have at least 2 array sub elements.
+// This is to facilitate the scaling function in the wave builder. Otherwise
+// we this will crash out
 class WaveType{
     public class func simpleSin()->[[CGFloat]]{
         return Array([
@@ -29,14 +32,14 @@ class WaveType{
     }
     public class func simpleTriangle()->[[CGFloat]]{
         return Array([
-            [CGFloat](repeatElement(1, count: 60)),
-
+            [CGFloat](repeatElement(1, count: 40)),
+            [CGFloat](repeatElement(1, count: 40))
         ])
     }
     public class func simpleTrapezoid()->[[CGFloat]]{
         return Array([
-            [CGFloat](repeatElement(0, count: 30)),
-            [CGFloat](repeatElement(1, count: 30))
+            [CGFloat](repeatElement(0, count: 60)),
+            [CGFloat](repeatElement(1, count: 60))
         ])
     }
 
@@ -74,7 +77,7 @@ class LevelBuilder{
         return SKAction.run({of.updateWaveOscillationWith(forces: to)})
     }
 
-    //Scales passed wavearray in the x and y direction. X makes the array longer by
+    //Scales passed wave array in the x and y direction. X makes the array longer by
     // duplicating elements and Y makes the individual elements larger.
     public class func scale(wave:[[CGFloat]], dx:CGFloat, dy:CGFloat)->[[CGFloat]]{
         if dx < 0 || dy < 0{ return [] }
@@ -88,26 +91,45 @@ class LevelBuilder{
             return newWave
         }()
 
+        print({
+            var count:[Int] = []
+           for subset in yScaledWave{
+               count.append(subset.count)
+           }
+            return count
+        }())
+
         var finalWave:[[CGFloat]] = []
         if dx > 1 {
-            for i in 0..<(yScaledWave.count - 1){
+            for i in 0..<(yScaledWave.count){
                 //Add the original wave parts to the new wave.
                 finalWave.append(yScaledWave[i])
 
+                //If we have reached the second to last wave then we need to break out.
+                if i == (yScaledWave.count-1) {
+                    break
+                }
                 //If the next wave is an impulse we do not interpolate.
                 //We simply add the scale number of wave parts.
                 if (yScaledWave[i+1].count == 1){
                     for _ in 1..<Int(dx){
                         finalWave.append(yScaledWave[i])
                     }
-                //If the next wave is not an impulse we interpolate and make steps
+                //If the next wave is not an impulse and this current one is not an impulse we interpolate and make steps
                 // based on the scale value, then add that number of wave parts.
                 }else if (yScaledWave[i].count != 1){
                     for j in 1..<Int(dx){
                         let interpolation:CGFloat = {
                             return yScaledWave[i][0] + (((yScaledWave[i+1][0] - yScaledWave[i][0]) / dx) * CGFloat(j))
                         }()
-                        finalWave.append([CGFloat](repeatElement(interpolation, count: yScaledWave[i].count)))
+                        let midCount = Int((yScaledWave[i].count + yScaledWave[i+1].count) / 2)
+                        finalWave.append([CGFloat](repeatElement(interpolation, count: midCount)))
+                    }
+                //If the current wave is an impulse, to keep the wave even we add a copy of the next
+                // element based on the scaling amount.
+                }else if (yScaledWave[i].count == 1){
+                    for _ in 1..<Int(dx){
+                        finalWave.append(yScaledWave[i+1])
                     }
                 }
             }
@@ -133,7 +155,8 @@ class LevelBuilder{
             }
             return downScaled
         }()
-        //Return a flat array of the expanded and scaled values
+
+        //Return expanded and scaled values
         return finalWave
     }
 }
