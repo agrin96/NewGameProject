@@ -47,16 +47,16 @@ class GameScene: SKScene, GameStatusNotifier{
 
         let playerOscillation:[CGFloat] = [1,1,1,1]
         self.levelToPlay!.playerWave!.updateWaveOscillationWith(forces: playerOscillation)
-        let modWave = LevelBuilder.scale(wave: WaveType.simpleSin(), dx: 8, dy: 1)
-        self.levelToPlay!.topWave!.updateWaveOscillationWith(forces: modWave)
+        let modWave = LevelBuilder.scale(wave: WaveType.simpleSquare(), dx: 8, dy: 1)
+        self.levelToPlay!.topWave!.updateWaveOscillationWith(forces: modWave.flatMap({$0}))
         self.levelToPlay!.gameStatusDelegate = self
         self.levelToPlay!.beginLevel()
 
-        let newOscillation:[CGFloat] = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
-        let updateOscillation = SKAction.run({
-            self.levelToPlay!.topWave!.updateWaveOscillationWith(forces: newOscillation)
-        })
-        self.run(SKAction.sequence([SKAction.wait(forDuration: 10),updateOscillation]))
+//        let newOscillation:[CGFloat] = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
+//        let updateOscillation = SKAction.run({
+//            self.levelToPlay!.topWave!.updateWaveOscillationWith(forces: newOscillation)
+//        })
+//        self.run(SKAction.sequence([SKAction.wait(forDuration: 10),updateOscillation]))
     }
 
     //Resets the current level by nulling out the level values and actions and then reinitializing them.
@@ -74,15 +74,9 @@ class GameScene: SKScene, GameStatusNotifier{
 
         let playerOscillation:[CGFloat] = [1,1,1,1]
         self.levelToPlay!.playerWave!.updateWaveOscillationWith(forces: playerOscillation)
-        self.levelToPlay!.topWave!.updateWaveOscillationWith(forces: WaveType.simpleSquare())
+        self.levelToPlay!.topWave!.updateWaveOscillationWith(forces: WaveType.simpleSquare().flatMap({$0}))
         self.levelToPlay!.gameStatusDelegate = self
         self.levelToPlay!.beginLevel()
-
-        let newOscillation:[CGFloat] = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
-        let updateOscillation = SKAction.run({
-            self.levelToPlay!.topWave!.updateWaveOscillationWith(forces: newOscillation)
-        })
-        self.run(SKAction.sequence([SKAction.wait(forDuration: 10),updateOscillation]))
     }
 
     //Function which handles win/lose condition and reseting the level.

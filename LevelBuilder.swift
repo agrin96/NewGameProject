@@ -9,50 +9,50 @@ import SpriteKit
 import GameplayKit
 
 class WaveType{
-    public class func simpleSin()->[CGFloat]{
+    public class func simpleSin()->[[CGFloat]]{
         return Array([
-            [CGFloat](repeatElement(0, count: 6)),
-            [CGFloat](repeatElement(1, count: 6)),
-            [CGFloat](repeatElement(2, count: 6)),
+            [CGFloat](repeatElement(0, count: 10)),
+            [CGFloat](repeatElement(1, count: 10)),
+            [CGFloat](repeatElement(2, count: 8)),
             [CGFloat](repeatElement(3, count: 6)),
-            [CGFloat](repeatElement(2, count: 6)),
-            [CGFloat](repeatElement(1, count: 6)),
-            [CGFloat](repeatElement(0, count: 6))
-        ].joined(separator: []))
+            [CGFloat](repeatElement(2, count: 8)),
+            [CGFloat](repeatElement(1, count: 10)),
+            [CGFloat](repeatElement(0, count: 10))
+        ])
     }
-    public class func simpleSquare()->[CGFloat]{
+    public class func simpleSquare()->[[CGFloat]]{
         return Array([
-            [CGFloat](repeatElement(0, count: 30)),
+            [CGFloat](repeatElement(0, count: 60)),
             [CGFloat](repeatElement(50, count: 1)),
-            [CGFloat](repeatElement(0, count: 30))
-        ].joined(separator: []))
+            [CGFloat](repeatElement(0, count: 60))
+        ])
     }
-    public class func simpleTriangle()->[CGFloat]{
+    public class func simpleTriangle()->[[CGFloat]]{
         return Array([
             [CGFloat](repeatElement(1, count: 60)),
 
-        ].joined(separator: []))
+        ])
     }
-    public class func simpleTrapezoid()->[CGFloat]{
+    public class func simpleTrapezoid()->[[CGFloat]]{
         return Array([
             [CGFloat](repeatElement(0, count: 30)),
             [CGFloat](repeatElement(1, count: 30))
-        ].joined(separator: []))
+        ])
     }
 
     //When doing shifting operations the associated wait should be short
     // so as not to allow the wavehead to move into the negative values.
-    public class func shiftUpwards()->[CGFloat]{
+    public class func shiftUpwards()->[[CGFloat]]{
         return Array([
             [CGFloat](repeatElement(0, count: 30)),
             [CGFloat](repeatElement(1, count: 30))
-        ].joined(separator: []))
+        ])
     }
-    public class func shiftDownwards()->[CGFloat]{
+    public class func shiftDownwards()->[[CGFloat]]{
         return Array([
             [CGFloat](repeatElement(0, count: 30)),
             [CGFloat](repeatElement(1, count: 30))
-        ].joined(separator: []))
+        ])
     }
 }
 
@@ -76,25 +76,64 @@ class LevelBuilder{
 
     //Scales passed wavearray in the x and y direction. X makes the array longer by
     // duplicating elements and Y makes the individual elements larger.
-    public class func scale(wave:[CGFloat], dx:Int, dy:CGFloat)->[CGFloat]{
+    public class func scale(wave:[[CGFloat]], dx:CGFloat, dy:CGFloat)->[[CGFloat]]{
         if dx < 0 || dy < 0{ return [] }
 
-        var yScaledWave:[CGFloat] = wave.map({return $0 * dy})
-        var finalWave:[[CGFloat]] = []
+        //Compute the values scaled in the y direction.
+        var yScaledWave:[[CGFloat]] = {
+            var newWave:[[CGFloat]] = []
+            for subset in wave{
+                newWave.append(subset.map({$0 * dy}))
+            }
+            return newWave
+        }()
 
-        for i in 1..<(yScaledWave.count-1) {
-            //If this element is surrounded by zeros it is an instant change
-            // so we shouldn't expand it, otherwise expand.
-            if (yScaledWave[i-1] == 0 && yScaledWave[i+1] == 0 && yScaledWave[i] != 0) == false{
-                var expandedWave:[CGFloat] = []
-                for _ in 0..<dx{
-                    expandedWave.append(yScaledWave[i] / CGFloat(dx))
+        var finalWave:[[CGFloat]] = []
+        if dx > 1 {
+            for i in 0..<(yScaledWave.count - 1){
+                //Add the original wave parts to the new wave.
+                finalWave.append(yScaledWave[i])
+
+                //If the next wave is an impulse we do not interpolate.
+                //We simply add the scale number of wave parts.
+                if (yScaledWave[i+1].count == 1){
+                    for _ in 1..<Int(dx){
+                        finalWave.append(yScaledWave[i])
+                    }
+                //If the next wave is not an impulse we interpolate and make steps
+                // based on the scale value, then add that number of wave parts.
+                }else if (yScaledWave[i].count != 1){
+                    for j in 1..<Int(dx){
+                        let interpolation:CGFloat = {
+                            return yScaledWave[i][0] + (((yScaledWave[i+1][0] - yScaledWave[i][0]) / dx) * CGFloat(j))
+                        }()
+                        finalWave.append([CGFloat](repeatElement(interpolation, count: yScaledWave[i].count)))
+                    }
                 }
-                finalWave.append(expandedWave)
+            }
+        //When the scale factor is less than 1 then that means we simply filter out each dx element
+        // of the wave, thereby scaling it down.
+        }else{
+            let step:Int = Int(1 / dx)
+            for i in stride(from: 0, to: yScaledWave.count, by: step){
+                finalWave.append(yScaledWave[i])
             }
         }
 
+        //When scaling in x, the y changes as well so we adjust to make it seem as though y didnt change.
+        finalWave = {
+            var downScaled:[[CGFloat]] = []
+            for subset in finalWave{
+                if subset.count != 1{
+                    downScaled.append(subset.map({$0 / dx}))
+                }else{
+                    //Prevent downscaling of impulses.
+                    downScaled.append(subset)
+                }
+            }
+            return downScaled
+        }()
         //Return a flat array of the expanded and scaled values
-        return finalWave.flatMap({$0})
+        return finalWave
     }
 }

@@ -62,8 +62,9 @@ fileprivate class WaveHead:SKSpriteNode {
         self.physicsBody!.allowsRotation = false
         self.physicsBody!.usesPreciseCollisionDetection = true
 
-        self.p_osciallationForces = WaveType.simpleSin()
-        self.n_osciallationForces = WaveType.simpleSin().map({return -$0})
+        //Todo change back
+        self.p_osciallationForces = WaveType.simpleSin().flatMap({$0})
+        self.n_osciallationForces = WaveType.simpleSin().flatMap({$0}).map({return -$0})
     }
 
     //Starts the infinite oscillation of the WaveHead
