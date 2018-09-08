@@ -119,12 +119,12 @@ class LevelGenerator:SKNode, SKPhysicsContactDelegate, ScoreChangeNotifier{
         if didPlayerLose == false{
             if previousDirection == .up {
                 //This means we are closest to the top wave so lets take the score.
-                let distance = abs(self.playerWave!.getPrimaryWaveHeadPosition() - self.topWave!.getCollisionWaveHeadPosition())
+                let distance = abs(self.playerWave!.getPrimaryWaveHeadPosition() - self.topWave!.getPrimaryWaveHeadPosition())
                 self.currentScore += (1+Int(10000 / (distance*distance)))
                 self.scoreLabel!.text = "Score: \(self.currentScore)"
             }else if previousDirection == .down{
                 //This means we are closest to the bottom wave so lets take the score.
-                let distance = abs(self.playerWave!.getPrimaryWaveHeadPosition() - self.bottomWave!.getCollisionWaveHeadPosition())
+                let distance = abs(self.playerWave!.getPrimaryWaveHeadPosition() - self.bottomWave!.getPrimaryWaveHeadPosition())
                 self.currentScore += (1+Int(10000 / (distance*distance)))
                 self.scoreLabel!.text = "Score: \(self.currentScore)"
             }
