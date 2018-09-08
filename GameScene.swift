@@ -45,10 +45,20 @@ class GameScene: SKScene, GameStatusNotifier{
         self.anchorPoint = CGPoint(x: 0.5, y: 0.5)
         self.backgroundColor = .black
 
-        let playerOscillation:[CGFloat] = [1,1,1,1]
+
+        let playerOscillation:[[CGFloat]] = [[1,1,1,1]]
         self.levelToPlay!.playerWave!.updateWaveOscillationWith(forces: playerOscillation)
-        let modWave = LevelBuilder.scale(wave: WaveType.simpleSquare(), dx: 2, dy: 1.5).flatMap({$0})
-        self.levelToPlay!.topWave!.updateWaveOscillationWith(forces: modWave)
+        LevelBuilder.changeHeight(wave: self.levelToPlay!.topWave!, dy: 25)
+        LevelBuilder.changeHeight(wave: self.levelToPlay!.bottomWave!, dy: -25)
+        LevelBuilder.wait(time: 1)
+        LevelBuilder.changeWave(
+                of: self.levelToPlay!.topWave! ,
+                to: LevelBuilder.scale(wave: WaveType.simpleSquare(), dx: 2, dy: 1.5))
+        LevelBuilder.wait(time: 1)
+        LevelBuilder.changeWave(
+                of: self.levelToPlay!.bottomWave! ,
+                to: LevelBuilder.scale(wave: WaveType.simpleSquare(), dx: 2, dy: 1.5))
+        LevelBuilder.runBuffer(level: self.levelToPlay!)
         self.levelToPlay!.gameStatusDelegate = self
         self.levelToPlay!.beginLevel()
     }
@@ -66,10 +76,20 @@ class GameScene: SKScene, GameStatusNotifier{
         self.addChild(self.levelToPlay!)
         self.physicsWorld.contactDelegate = self.levelToPlay!
 
-        let playerOscillation:[CGFloat] = [1,1,1,1]
+        let playerOscillation:[[CGFloat]] = [[1,1,1,1]]
         self.levelToPlay!.playerWave!.updateWaveOscillationWith(forces: playerOscillation)
-        let modWave = LevelBuilder.scale(wave: WaveType.simpleSquare(), dx: 2, dy: 1.5).flatMap({$0})
-        self.levelToPlay!.topWave!.updateWaveOscillationWith(forces: modWave)
+        LevelBuilder.clearBuffer()
+        LevelBuilder.changeHeight(wave: self.levelToPlay!.topWave!, dy: 25)
+        LevelBuilder.changeHeight(wave: self.levelToPlay!.bottomWave!, dy: -25)
+        LevelBuilder.wait(time: 1)
+        LevelBuilder.changeWave(
+                of: self.levelToPlay!.topWave! ,
+                to: LevelBuilder.scale(wave: WaveType.simpleSquare(), dx: 2, dy: 1.5))
+        LevelBuilder.wait(time: 1)
+        LevelBuilder.changeWave(
+                of: self.levelToPlay!.bottomWave! ,
+                to: LevelBuilder.scale(wave: WaveType.simpleSquare(), dx: 2, dy: 1.5))
+        LevelBuilder.runBuffer(level: self.levelToPlay!)
         self.levelToPlay!.gameStatusDelegate = self
         self.levelToPlay!.beginLevel()
     }

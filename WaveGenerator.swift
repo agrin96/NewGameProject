@@ -65,8 +65,8 @@ fileprivate class WaveHead:SKSpriteNode {
             self.physicsBody!.usesPreciseCollisionDetection = true
         }
 
-        self.p_osciallationForces = WaveType.simpleSin().flatMap({$0})
-        self.n_osciallationForces = WaveType.simpleSin().flatMap({$0}).map({return -$0})
+        self.p_osciallationForces = WaveType.steady().flatMap({$0})
+        self.n_osciallationForces = WaveType.steady().flatMap({$0}).map({return -$0})
     }
 
     //Starts the infinite oscillation of the WaveHead
@@ -132,10 +132,10 @@ fileprivate class WaveHead:SKSpriteNode {
     }
 
     //This funciton is used to inject different oscillation styles into the wavehead.
-    func changeOscillation(to forces:[CGFloat]){
+    func changeOscillation(to forces:[[CGFloat]]){
         self.oscillationCount = 0
-        self.p_osciallationForces = forces
-        self.n_osciallationForces = forces.map({return -$0})
+        self.p_osciallationForces = forces.flatMap({$0})
+        self.n_osciallationForces = forces.flatMap({$0}).map({return -$0})
     }
 }
 
@@ -266,8 +266,10 @@ class WaveGenerator:SKNode, WaveGenerationNotifier, UIGestureRecognizerDelegate{
 
     //Store parameters for the waveGenerator
     private var params:WaveGeneratorParameters?
+
     //The approximate time it takes for spawned waves to get to the player
     private let levelBeginDelay:Double = 3.125
+    private var startingLine:SKSpriteNode?
 
     //This gesture recognizer will detect the user tapping on screen.
     private var userTapRecognizer:UIGestureRecognizer?
@@ -288,6 +290,7 @@ class WaveGenerator:SKNode, WaveGenerationNotifier, UIGestureRecognizerDelegate{
 
         //Setup the wavehead which will actually draw the waves.
         self.waveHead  = WaveHead(params: self.params!.waveHead)
+        self.waveHead!.zPosition = 3
         self.addChild(self.waveHead!)
 
         //Setup the collision wavehead which will help keep score and detect collisions.
@@ -302,6 +305,7 @@ class WaveGenerator:SKNode, WaveGenerationNotifier, UIGestureRecognizerDelegate{
                 drawerNumber: 1,
                 isPlayer: self.params!.waveHead.isPlayer)
         self.waveDrawer1!.waveNotificationDelegate = self
+        self.waveDrawer1!.zPosition = 1
         self.addChild(self.waveDrawer1!)
 
         self.waveDrawer2 = WaveDrawer(
@@ -310,7 +314,15 @@ class WaveGenerator:SKNode, WaveGenerationNotifier, UIGestureRecognizerDelegate{
                 drawerNumber: 2,
                 isPlayer: self.params!.waveHead.isPlayer)
         self.waveDrawer2!.waveNotificationDelegate = self
+        self.waveDrawer2!.zPosition = 1
         self.addChild(self.waveDrawer2!)
+
+        self.startingLine = SKSpriteNode(color: .white, size: CGSize(width: 4, height: 900))
+        self.startingLine!.anchorPoint = CGPoint(x: 0.5, y: 0.5)
+        self.startingLine!.position.x = 187.5
+        self.startingLine!.alpha = 0.3
+        self.startingLine!.zPosition = 2
+        self.addChild(self.startingLine!)
     }
 
     //When the respective wavedrawer reaches its maximum length it notifies us to start the next wave drawer.
@@ -381,14 +393,21 @@ class WaveGenerator:SKNode, WaveGenerationNotifier, UIGestureRecognizerDelegate{
                             sampleShift: self.params!.waveDrawer.sampleShift,
                             waveSpeed: self.params!.waveDrawer.waveSpeed)
                 }
-                let linearDelay = SKAction.wait(forDuration: levelBeginDelay)
+                let linearDelay = SKAction.wait(forDuration: 1/60)
                 let activation = SKAction.run({
-                    self.waveHead!.activatePlayerWavehead(direction: .up)
-                    //For collision detection purposes we need to know that this is the player node.
-                    self.waveHead!.name = "Player"
-                    self.isUserInteractionEnabled = true
+                    self.startingLine!.position.x -= self.params!.waveDrawer.waveSpeed
+                    if self.startingLine!.position.x <= 0 && self.isUserInteractionEnabled == false{
+                        self.waveHead!.currentHeadDirection = .down
+                        //For collision detection purposes we need to know that this is the player node.
+                        self.waveHead!.name = "Player"
+                        self.isUserInteractionEnabled = true
+                    }
+                    if self.startingLine!.position.x <= -300{
+                        self.removeAction(forKey: "StartingLine")
+                        self.startingLine!.removeFromParent()
+                    }
                 })
-                self.run(SKAction.sequence([linearDelay,activation]))
+                self.run(SKAction.repeatForever(SKAction.sequence([activation, linearDelay])), withKey: "StartingLine")
             }
         }
     }
@@ -404,7 +423,7 @@ class WaveGenerator:SKNode, WaveGenerationNotifier, UIGestureRecognizerDelegate{
     }
 
     //Used to update oscillation style at any point by providing an array of new points
-    public func updateWaveOscillationWith(forces:[CGFloat]){
+    public func updateWaveOscillationWith(forces:[[CGFloat]]){
         if self.waveHead != nil{
             self.waveHead!.changeOscillation(to: forces)
         }

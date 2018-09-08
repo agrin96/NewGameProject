@@ -57,24 +57,45 @@ class WaveType{
             [CGFloat](repeatElement(1, count: 30))
         ])
     }
+
+    public class func steady()->[[CGFloat]]{
+        return Array([
+            [CGFloat](repeatElement(0, count: 30)),
+            [CGFloat](repeatElement(0, count: 30))
+        ])
+    }
 }
 
 
 class LevelBuilder{
+    private static var lvl:[SKAction] = []
+
     //Provides an SKAction which waits a certain amount of time.
-    public class func wait(time:Double)->SKAction{
-        return SKAction.wait(forDuration: time)
+    public class func wait(time:Double){
+        self.lvl.append(SKAction.wait(forDuration: time))
     }
 
     //Generates a random wait time between the two specified bounds. Used for endless
     // level generation to provide variety.
-    public class func randWait(upper:Double,lower:Double)->SKAction{
-        return SKAction.wait(forDuration: Double(arc4random_uniform(UInt32(upper - lower + 1))) + lower)
+    public class func randWait(upper:Double,lower:Double){
+        self.lvl.append(SKAction.wait(forDuration: Double(arc4random_uniform(UInt32(upper - lower + 1))) + lower))
     }
 
     //Generates an SKAction which will cause the wavegenerator passed in to change oscillation.
-    public class func changeWave(of:WaveGenerator, to:[CGFloat])->SKAction{
-        return SKAction.run({of.updateWaveOscillationWith(forces: to)})
+    public class func changeWave(of:WaveGenerator, to:[[CGFloat]]){
+        self.lvl.append(SKAction.run({of.updateWaveOscillationWith(forces: to)}))
+    }
+
+    public class func changeHeight(wave:WaveGenerator, dy:CGFloat){
+        self.lvl.append(SKAction.run({wave.position.y += dy}))
+    }
+
+    public class func runBuffer(level:LevelGenerator){
+        level.run(SKAction.sequence(self.lvl))
+    }
+
+    public class func clearBuffer(){
+        self.lvl = []
     }
 
     //Scales passed wave array in the x and y direction. X makes the array longer by
