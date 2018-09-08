@@ -129,6 +129,7 @@ class LevelGenerator:SKNode, SKPhysicsContactDelegate, ScoreChangeNotifier{
             self.gameStatusDelegate!.gameStateChanged(status: .won)
             self.playerWave!.deactivateWaveGenerator()
             self.levelTimer!.invalidate()
+            self.currentTime = 0
         }
     }
 
