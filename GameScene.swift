@@ -43,7 +43,7 @@ class GameScene: SKScene, GameStatusNotifier{
         self.physicsWorld.contactDelegate = self.levelToPlay!
 
         self.anchorPoint = CGPoint(x: 0.5, y: 0.5)
-        self.backgroundColor = .gray
+        self.backgroundColor = .black
 
         let playerOscillation:[CGFloat] = [1,1,1,1]
         self.levelToPlay!.playerWave!.updateWaveOscillationWith(forces: playerOscillation)

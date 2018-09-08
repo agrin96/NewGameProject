@@ -45,6 +45,7 @@ class GameViewController: UIViewController {
             //Debug information for development
             view.showsFPS = true
             view.showsNodeCount = true
+            view.showsPhysics = true
         }
     }
 

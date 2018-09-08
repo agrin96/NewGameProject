@@ -45,24 +45,26 @@ fileprivate class WaveHead:SKSpriteNode {
         super.init(texture: texture, color:color, size:size)
     }
 
-    convenience init(color:UIColor, size:CGSize){
-        self.init(texture: nil, color:color, size:size)
+    convenience init(params:WaveHeadParameters){
+        self.init(texture: nil, color:params.headColor, size:params.headSize)
         //Run an initialization on the wavehead to make sure that all of necessary physics values
         // are set as required.
         self.anchorPoint = CGPoint(x: 0.5, y: 0.5)
-        self.physicsBody = SKPhysicsBody(circleOfRadius: (self.size.width / 2 * 0.9))
-        self.physicsBody!.linearDamping = 0.0
-        self.physicsBody!.friction = 0.0
-        self.physicsBody!.density = 1
 
-        //Setup wavehead to detect collision with boundary waves
-        self.physicsBody!.collisionBitMask = 1
-        self.physicsBody!.categoryBitMask = 1
-        self.physicsBody!.contactTestBitMask = 1
-        self.physicsBody!.allowsRotation = false
-        self.physicsBody!.usesPreciseCollisionDetection = true
+        //Setup wavehead to detect collision with boundary waves if it is the player
+        if params.isPlayer == true{
+            self.physicsBody = SKPhysicsBody(circleOfRadius: (self.size.width / 1.5))
+            self.physicsBody!.linearDamping = 0.0
+            self.physicsBody!.friction = 0.0
+            self.physicsBody!.density = 1
 
-        //Todo change back
+            self.physicsBody!.collisionBitMask = 1
+            self.physicsBody!.categoryBitMask = 1
+            self.physicsBody!.contactTestBitMask = 1
+            self.physicsBody!.allowsRotation = false
+            self.physicsBody!.usesPreciseCollisionDetection = true
+        }
+
         self.p_osciallationForces = WaveType.simpleSin().flatMap({$0})
         self.n_osciallationForces = WaveType.simpleSin().flatMap({$0}).map({return -$0})
     }
@@ -142,6 +144,7 @@ fileprivate class WaveDrawer:SKShapeNode {
     //This number is used to differentiate between Wave Drawers in the wave generator.
     var waveDrawerNumber:Int = 0
     private var dynamicWavePath:CGMutablePath?
+    private var physicsPath:CGMutablePath?
 
     //This is the maximum width of one possible wave in points.
     // chosen based on the width of the iphone X screen.
@@ -154,14 +157,18 @@ fileprivate class WaveDrawer:SKShapeNode {
         super.init(coder: aDecoder)
     }
 
-    init(color:UIColor, strokeThickness:CGFloat, drawerNumber:Int){
+    init(color:UIColor, strokeThickness:CGFloat, drawerNumber:Int, isPlayer:Bool){
         super.init()
         self.strokeColor = color
         self.lineWidth = strokeThickness
         self.lineCap = .round
 
+        self.name = "drawer\(drawerNumber)"
         self.waveDrawerNumber = drawerNumber
         self.dynamicWavePath = CGMutablePath()
+        if isPlayer == false{
+            self.physicsPath = CGMutablePath()
+        }
     }
 
     func sample(waveHead:WaveHead, sampleDelay:Double, sampleShift:CGFloat, waveSpeed:CGFloat){
@@ -172,9 +179,19 @@ fileprivate class WaveDrawer:SKShapeNode {
         //Sample wavehead using constantly modifying subpaths. Without the closing of subpath
         // the shapenode will not draw the path as it deems it incomplete.
         self.dynamicWavePath!.move(to: CGPoint(x: shift, y: waveHead.position.y))
+
+        //Secondary path which is continuous and will draw the physics body. We test if it is nil
+        // because that means that this is the player wave and we do not use it here.
+        if self.physicsPath != nil{
+            self.physicsPath!.move(to: CGPoint(x: shift, y: waveHead.position.y))
+        }
         let waveHeadSample = SKAction.run({
             self.dynamicWavePath!.addLine(to: CGPoint(x: shift, y: waveHead.position.y))
+            if self.physicsPath != nil{
+                self.physicsPath!.addLine(to: CGPoint(x: shift, y: waveHead.position.y))
+            }
             self.dynamicWavePath!.closeSubpath()
+
             self.path = self.dynamicWavePath!
             self.dynamicWavePath!.move(to: CGPoint(x: shift, y: waveHead.position.y))
             shift += sampleShift
@@ -210,6 +227,20 @@ fileprivate class WaveDrawer:SKShapeNode {
 
         self.run(SKAction.repeatForever(smoothShifting), withKey: "shifting")
         self.run(SKAction.repeatForever(waveSampling), withKey: "sampling")
+
+        if self.physicsPath != nil{
+            updatePhysicsPath()
+        }
+    }
+
+    //Updates the physics body of the object every X seconds to make sure that it is current.
+    func updatePhysicsPath(){
+        let updatePath = SKAction.run({
+            self.physicsBody = SKPhysicsBody(edgeChainFrom: self.physicsPath!)
+            self.physicsBody!.contactTestBitMask = 1
+            self.physicsBody!.collisionBitMask = 1
+        })
+        self.run(SKAction.repeatForever(SKAction.sequence([SKAction.wait(forDuration: 2), updatePath])))
     }
 
     //This acts as a complete reset on the wave drawer. Clearing both its path and dynamic path.
@@ -217,6 +248,9 @@ fileprivate class WaveDrawer:SKShapeNode {
         self.removeAllActions()
         self.path = nil
         self.dynamicWavePath = CGMutablePath()
+        if self.physicsPath != nil{
+            self.physicsPath = CGMutablePath()
+        }
         self.called = false
     }
 }
@@ -256,23 +290,17 @@ class WaveGenerator:SKNode, WaveGenerationNotifier, UIGestureRecognizerDelegate{
         self.isUserInteractionEnabled = false
 
         //Setup the wavehead which will actually draw the waves.
-        self.waveHead  = WaveHead(
-                color: self.params!.waveHead.headColor,
-                size: self.params!.waveHead.headSize)
+        self.waveHead  = WaveHead(params: self.params!.waveHead)
         self.addChild(self.waveHead!)
 
         //Setup the collision wavehead which will help keep score and detect collisions.
         if self.params!.waveHead.isPlayer == false{
-            self.collisionWaveHead = WaveHead(
-                    color: .green,
-                    size: CGSize(
-                            width: self.params!.waveHead.headSize.width,
-                            height: self.params!.waveHead.headSize.height))
+            self.collisionWaveHead = WaveHead(params: self.params!.waveHead)
             self.collisionWaveHead!.zPosition = 10
             self.addChild(self.collisionWaveHead!)
 
             //Hide waveheads from view if this isn't a player.
-//            self.collisionWaveHead!.isHidden = true
+            self.collisionWaveHead!.isHidden = true
             self.waveHead!.isHidden = true
 
             //Center the collision WaveHead on the screen
@@ -283,14 +311,16 @@ class WaveGenerator:SKNode, WaveGenerationNotifier, UIGestureRecognizerDelegate{
         self.waveDrawer1 = WaveDrawer(
                 color: self.params!.waveDrawer.waveColor,
                 strokeThickness: self.params!.waveDrawer.waveStroke,
-                drawerNumber: 1)
+                drawerNumber: 1,
+                isPlayer: self.params!.waveHead.isPlayer)
         self.waveDrawer1!.waveNotificationDelegate = self
         self.addChild(self.waveDrawer1!)
 
         self.waveDrawer2 = WaveDrawer(
                 color: self.params!.waveDrawer.waveColor,
                 strokeThickness: self.params!.waveDrawer.waveStroke,
-                drawerNumber: 2)
+                drawerNumber: 2,
+                isPlayer: self.params!.waveHead.isPlayer)
         self.waveDrawer2!.waveNotificationDelegate = self
         self.addChild(self.waveDrawer2!)
     }
@@ -378,28 +408,6 @@ class WaveGenerator:SKNode, WaveGenerationNotifier, UIGestureRecognizerDelegate{
                     self.isUserInteractionEnabled = true
                 })
                 self.run(SKAction.sequence([linearDelay,activation]))
-            }
-        }
-    }
-
-    //Used to stop all relevant wave generating operations.
-    func deactivateWaveGenerator(){
-        if self.waveHead != nil{
-            self.position = self.params!.location
-            self.waveHead!.deactivateWaveHead()
-            self.waveHead!.position = CGPoint.zero
-
-            self.waveDrawer1!.stopSampling()
-            self.waveDrawer1!.position = CGPoint.zero
-
-            self.waveDrawer2!.stopSampling()
-            self.waveDrawer2!.position = CGPoint.zero
-
-            //Reset the collision only if this isnt a player.
-            if self.params!.waveHead.isPlayer == false{
-                self.collisionWaveHead!.deactivateWaveHead()
-                self.collisionWaveHead!.position = CGPoint(x: -self.params!.location.x, y: 0)
-                self.removeAllActions()
             }
         }
     }
