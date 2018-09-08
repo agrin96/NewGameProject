@@ -268,10 +268,11 @@ class WaveGenerator:SKNode, WaveGenerationNotifier, UIGestureRecognizerDelegate{
                     size: CGSize(
                             width: self.params!.waveHead.headSize.width,
                             height: self.params!.waveHead.headSize.height))
+            self.collisionWaveHead!.zPosition = 10
             self.addChild(self.collisionWaveHead!)
 
             //Hide waveheads from view if this isn't a player.
-            self.collisionWaveHead!.isHidden = true
+//            self.collisionWaveHead!.isHidden = true
             self.waveHead!.isHidden = true
 
             //Center the collision WaveHead on the screen

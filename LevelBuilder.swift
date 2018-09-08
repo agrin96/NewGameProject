@@ -91,14 +91,6 @@ class LevelBuilder{
             return newWave
         }()
 
-        print({
-            var count:[Int] = []
-           for subset in yScaledWave{
-               count.append(subset.count)
-           }
-            return count
-        }())
-
         var finalWave:[[CGFloat]] = []
         if dx > 1 {
             for i in 0..<(yScaledWave.count){
