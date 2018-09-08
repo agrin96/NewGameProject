@@ -32,9 +32,9 @@ class GameScene: SKScene, GameStatusNotifier{
 
         //Make the notification bar of game win/lose
         self.gamestatus = SKLabelNode(text: "")
-        self.gamestatus!.fontSize = 60
-        self.gamestatus!.fontColor = .green
+        self.gamestatus!.fontName = "AvenirNext-Bold"
         self.gamestatus!.isHidden = false
+        self.gamestatus!.zPosition = 10
         self.addChild(self.gamestatus!)
 
         //Create a level and set it as the contact delegate
@@ -98,7 +98,9 @@ class GameScene: SKScene, GameStatusNotifier{
     func gameStateChanged(status: GameStatus) {
         if status == .won{
             self.run(SKAction.sequence([SKAction.wait(forDuration: 0.5), SKAction.run({
-                self.gamestatus!.text = "YOU WON!"
+                self.gamestatus!.text = "SIGNAL RECEIVED!"
+                self.gamestatus!.fontSize = 36
+                self.gamestatus!.fontColor = .green
                 self.gamestatus!.run(SKAction.sequence([
                     SKAction.fadeIn(withDuration: 0.5),
                     SKAction.wait(forDuration: 2),
@@ -106,7 +108,9 @@ class GameScene: SKScene, GameStatusNotifier{
             })]))
         }else if status == .lost{
             self.run(SKAction.sequence([SKAction.wait(forDuration: 0.5), SKAction.run({
-                self.gamestatus!.text = "YOU LOST!"
+                self.gamestatus!.text = "SIGNAL LOST!"
+                self.gamestatus!.fontSize = 48
+                self.gamestatus!.fontColor = .red
                 self.gamestatus!.run(SKAction.sequence([
                     SKAction.fadeIn(withDuration: 0.5),
                     SKAction.wait(forDuration: 2),

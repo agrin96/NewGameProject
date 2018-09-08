@@ -39,7 +39,7 @@ class LevelGenerator:SKNode, SKPhysicsContactDelegate, ScoreChangeNotifier{
     var currentTimeDisplay:SKLabelNode?
     var currentTime:CGFloat = 0
     var levelTimer:Timer?
-    let maximumLevelTime:CGFloat = 180//seconds (3 minutes)
+    let maximumLevelTime:CGFloat = 90//seconds (1.5 minutes)
 
     //Notifier of win/lose
     var gameStatusDelegate:GameStatusNotifier?
@@ -52,6 +52,7 @@ class LevelGenerator:SKNode, SKPhysicsContactDelegate, ScoreChangeNotifier{
     //A level consists of 2 boundary waves and 1 player wave.
     init(in view:SKView) {
         super.init()
+
 
         var playerSettings = WaveGeneratorParameters()
         playerSettings.waveHead.isPlayer = true
@@ -72,7 +73,7 @@ class LevelGenerator:SKNode, SKPhysicsContactDelegate, ScoreChangeNotifier{
         self.addChild(self.bottomWave!)
 
 
-        self.scoreLabel = SKLabelNode(text: "Score: \(0)")
+        self.scoreLabel = SKLabelNode(text: "Signal Strength: \(0)")
         self.scoreLabel?.position = CGPoint(x: 0, y: 250)
         self.scoreLabel?.fontSize = 30
         self.addChild(self.scoreLabel!)
@@ -90,10 +91,19 @@ class LevelGenerator:SKNode, SKPhysicsContactDelegate, ScoreChangeNotifier{
             self.currentScore = 0
             self.didPlayerLose = false
 
+            let queue = OperationQueue()
+            queue.qualityOfService = .userInitiated
+
             //Start all the wave generators
-            self.bottomWave!.activateWaveGenerator()
-            self.topWave!.activateWaveGenerator()
-            self.playerWave!.activateWaveGenerator()
+            queue.addOperation({
+                self.bottomWave!.activateWaveGenerator()
+            })
+            queue.addOperation({
+                self.topWave!.activateWaveGenerator()
+            })
+            queue.addOperation({
+                self.playerWave!.activateWaveGenerator()
+            })
 
             //Start the level timer
             self.currentTimeDisplay!.text = "\(0)"
@@ -115,19 +125,10 @@ class LevelGenerator:SKNode, SKPhysicsContactDelegate, ScoreChangeNotifier{
     }
 
     //Is called each time a player taps to update score
-    internal func updateScore(previousDirection: Direction) {
+    internal func updateScore(scoreKeeper:SKLabelNode) {
         if didPlayerLose == false{
-            if previousDirection == .up {
-                //This means we are closest to the top wave so lets take the score.
-                let distance = abs(self.playerWave!.getPrimaryWaveHeadPosition() - self.topWave!.getPrimaryWaveHeadPosition())
-                self.currentScore += (1+Int(10000 / (distance*distance)))
-                self.scoreLabel!.text = "Score: \(self.currentScore)"
-            }else if previousDirection == .down{
-                //This means we are closest to the bottom wave so lets take the score.
-                let distance = abs(self.playerWave!.getPrimaryWaveHeadPosition() - self.bottomWave!.getPrimaryWaveHeadPosition())
-                self.currentScore += (1+Int(10000 / (distance*distance)))
-                self.scoreLabel!.text = "Score: \(self.currentScore)"
-            }
+            self.currentScore += Int(scoreKeeper.text!)!
+            self.scoreLabel!.text = "Signal Strength: \(self.currentScore)"
         }
     }
 
@@ -138,6 +139,7 @@ class LevelGenerator:SKNode, SKPhysicsContactDelegate, ScoreChangeNotifier{
             self.levelTimer!.invalidate()
 
             //If we hit into a wave then we have lost.
+            self.currentTime = 0
             self.gameStatusDelegate!.gameStateChanged(status: .lost)
         }
     }

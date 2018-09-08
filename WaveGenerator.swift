@@ -19,7 +19,7 @@ protocol WaveGenerationNotifier:class{
 
 //Used to notify the scene when the player has tapped to update score.
 protocol ScoreChangeNotifier:class{
-    func updateScore(previousDirection:Direction)
+    func updateScore(scoreKeeper:SKLabelNode)
 }
 
 //Used to denote the direction in which a wavehead is traveling
@@ -277,6 +277,9 @@ class WaveGenerator:SKNode, WaveGenerationNotifier, UIGestureRecognizerDelegate{
     //This will allow us to calculate score
     var scoreUpdateDelegate:ScoreChangeNotifier?
 
+    //Score notifier
+    private var waveScoreKeeper:SKLabelNode?
+
     required init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
     }
@@ -317,12 +320,24 @@ class WaveGenerator:SKNode, WaveGenerationNotifier, UIGestureRecognizerDelegate{
         self.waveDrawer2!.zPosition = 1
         self.addChild(self.waveDrawer2!)
 
-        self.startingLine = SKSpriteNode(color: .white, size: CGSize(width: 4, height: 900))
+        //Adds a starting line that shows when the player can start to tap.
+        self.startingLine = SKSpriteNode(color: .white, size: CGSize(width: 5, height: 900))
         self.startingLine!.anchorPoint = CGPoint(x: 0.5, y: 0.5)
         self.startingLine!.position.x = 187.5
-        self.startingLine!.alpha = 0.3
+        self.startingLine!.alpha = 0.25
         self.startingLine!.zPosition = 2
         self.addChild(self.startingLine!)
+
+        //Adds a small score label to the player head.
+        if self.params!.waveHead.isPlayer == true{
+            self.waveScoreKeeper = SKLabelNode(text: "0")
+            self.waveScoreKeeper!.fontName = "AvenirNext-Bold"
+            self.waveScoreKeeper!.position = CGPoint(x: -self.waveHead!.size.width * 3, y: -self.waveHead!.size.height)
+            self.waveScoreKeeper!.zPosition = 4
+            self.waveScoreKeeper!.fontSize = 20
+            self.waveScoreKeeper!.fontColor = .green
+            self.waveHead!.addChild(self.waveScoreKeeper!)
+        }
     }
 
     //When the respective wavedrawer reaches its maximum length it notifies us to start the next wave drawer.
@@ -429,17 +444,29 @@ class WaveGenerator:SKNode, WaveGenerationNotifier, UIGestureRecognizerDelegate{
         }
     }
 
+    //Used to update the score.
+    internal func resetAndRunScore(){
+        self.removeAction(forKey: "scorer")
+        var counter:Int = 1
+        let scorer = SKAction.run({
+            self.waveScoreKeeper!.text = String(counter*counter)
+            counter += 1
+        })
+        self.run(SKAction.repeatForever(SKAction.sequence([SKAction.wait(forDuration: 0.2), scorer])), withKey: "scorer")
+    }
+
     //Trigger for changing the wave head travel direction on the y axis
     @objc private func changeWaveHeadTravelDirection(_ sender:UITapGestureRecognizer){
         if self.isUserInteractionEnabled == true{
             if self.params != nil{
+                //Update the player score and reset the score keeper
+                self.scoreUpdateDelegate!.updateScore(scoreKeeper: self.waveScoreKeeper!)
+                self.resetAndRunScore()
+
+                //Change the travel direction of the wave.
                 if self.waveHead!.currentHeadDirection == .up{
-                    //Update score and change direction.
-                    self.scoreUpdateDelegate!.updateScore(previousDirection: .up)
                     self.waveHead!.activatePlayerWavehead(direction: .down)
                 }else if self.waveHead!.currentHeadDirection == .down{
-                    //Update score and change direction
-                    self.scoreUpdateDelegate!.updateScore(previousDirection: .down)
                     self.waveHead!.activatePlayerWavehead(direction: .up)
                 }
             }
@@ -491,9 +518,5 @@ struct WaveGeneratorParameters{
         self.location = CGPoint(x: 0, y: 0)
         self.waveHead = WaveHeadParameters()
         self.waveDrawer = WaveDrawerParameters()
-    }
-
-    mutating func setSimpleSinusoid() {
-
     }
 }
