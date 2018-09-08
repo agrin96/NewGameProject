@@ -171,7 +171,7 @@ fileprivate class WaveDrawer:SKShapeNode {
         }
     }
 
-    func sample(waveHead:WaveHead, sampleDelay:Double, sampleShift:CGFloat, waveSpeed:CGFloat){
+    func sample(waveHead:WaveHead, sampleDelay:Double, waveSpeed:CGFloat){
         //We have to shift our sampling point forward constantly because the shapeNode is moving
         // backwards so to compensate we move the sampling point forwards.
         var shift:CGFloat = 0
@@ -191,10 +191,10 @@ fileprivate class WaveDrawer:SKShapeNode {
                 self.physicsPath!.addLine(to: CGPoint(x: shift, y: waveHead.position.y))
             }
             self.dynamicWavePath!.closeSubpath()
-
             self.path = self.dynamicWavePath!
+
+            shift += waveSpeed
             self.dynamicWavePath!.move(to: CGPoint(x: shift, y: waveHead.position.y))
-            shift += sampleShift
 
             //When the wave is over its maximum length we notify the WaveGenerator to start the second
             // wave generator at the same time. This way the transition is smooth.
@@ -222,25 +222,25 @@ fileprivate class WaveDrawer:SKShapeNode {
             }
         })
 
-        let smoothShifting = SKAction.group([shiftWaveGen, SKAction.wait(forDuration: 1/60)])
+        let smoothShifting = SKAction.group([shiftWaveGen, SKAction.wait(forDuration: sampleDelay)])
         let waveSampling = SKAction.group([waveHeadSample, SKAction.wait(forDuration: sampleDelay)])
 
         self.run(SKAction.repeatForever(smoothShifting), withKey: "shifting")
         self.run(SKAction.repeatForever(waveSampling), withKey: "sampling")
 
         if self.physicsPath != nil{
-            updatePhysicsPath()
+            updatePhysicsPath(waveSpeed: waveSpeed)
         }
     }
 
     //Updates the physics body of the object every X seconds to make sure that it is current.
-    func updatePhysicsPath(){
+    func updatePhysicsPath(waveSpeed:CGFloat){
         let updatePath = SKAction.run({
             self.physicsBody = SKPhysicsBody(edgeChainFrom: self.physicsPath!)
             self.physicsBody!.contactTestBitMask = 1
             self.physicsBody!.collisionBitMask = 1
         })
-        self.run(SKAction.repeatForever(SKAction.sequence([SKAction.wait(forDuration: 2), updatePath])))
+        self.run(SKAction.repeatForever(SKAction.sequence([SKAction.wait(forDuration: Double(2 / waveSpeed)), updatePath])))
     }
 
     //This acts as a complete reset on the wave drawer. Clearing both its path and dynamic path.
@@ -348,7 +348,6 @@ class WaveGenerator:SKNode, WaveGenerationNotifier, UIGestureRecognizerDelegate{
                 self.waveDrawer2!.sample(
                         waveHead: self.waveHead!,
                         sampleDelay: self.params!.waveDrawer.sampleDelay,
-                        sampleShift: self.params!.waveDrawer.sampleShift,
                         waveSpeed: self.params!.waveDrawer.waveSpeed)
                 //Here we will stop sampling because the other wave drawer has started and they would simply
                 // overlap and waste system resources.
@@ -359,7 +358,6 @@ class WaveGenerator:SKNode, WaveGenerationNotifier, UIGestureRecognizerDelegate{
                 self.waveDrawer1!.sample(
                         waveHead: self.waveHead!,
                         sampleDelay: self.params!.waveDrawer.sampleDelay,
-                        sampleShift: self.params!.waveDrawer.sampleShift,
                         waveSpeed: self.params!.waveDrawer.waveSpeed)
                 //Here we will stop sampling because the other wave drawer has started and they would simply
                 // overlap and waste system resources.
@@ -388,7 +386,6 @@ class WaveGenerator:SKNode, WaveGenerationNotifier, UIGestureRecognizerDelegate{
                     self.waveDrawer1!.sample(
                             waveHead: self.waveHead!,
                             sampleDelay: self.params!.waveDrawer.sampleDelay,
-                            sampleShift: self.params!.waveDrawer.sampleShift,
                             waveSpeed: self.params!.waveDrawer.waveSpeed)
                 }
             }else{
@@ -405,7 +402,6 @@ class WaveGenerator:SKNode, WaveGenerationNotifier, UIGestureRecognizerDelegate{
                     self.waveDrawer1!.sample(
                             waveHead: self.waveHead!,
                             sampleDelay: self.params!.waveDrawer.sampleDelay,
-                            sampleShift: self.params!.waveDrawer.sampleShift,
                             waveSpeed: self.params!.waveDrawer.waveSpeed)
                 }
                 let linearDelay = SKAction.wait(forDuration: 1/60)
@@ -494,15 +490,13 @@ struct WaveDrawerParameters{
     var waveColor:UIColor
     var waveStroke:CGFloat
     var sampleDelay:Double
-    var sampleShift:CGFloat
     var waveSpeed:CGFloat
 
     //Default initialization with simple values
     init(){
         self.waveColor = .blue
         self.waveStroke = 9
-        self.sampleDelay = 2/60
-        self.sampleShift = 2
+        self.sampleDelay = 1/60
         self.waveSpeed = 1
     }
 }
