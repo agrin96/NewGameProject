@@ -235,12 +235,16 @@ fileprivate class WaveDrawer:SKShapeNode {
 
     //Updates the physics body of the object every X seconds to make sure that it is current.
     func updatePhysicsPath(waveSpeed:CGFloat){
-        let updatePath = SKAction.run({
-            self.physicsBody = SKPhysicsBody(edgeChainFrom: self.physicsPath!)
-            self.physicsBody!.contactTestBitMask = 1
-            self.physicsBody!.collisionBitMask = 1
+        let queue = OperationQueue()
+        queue.qualityOfService = .userInteractive
+        queue.addOperation({
+            let updatePath = SKAction.run({
+                self.physicsBody = SKPhysicsBody(edgeChainFrom: self.physicsPath!)
+                self.physicsBody!.contactTestBitMask = 1
+                self.physicsBody!.collisionBitMask = 1
+            })
+            self.run(SKAction.repeatForever(SKAction.sequence([SKAction.wait(forDuration: Double(2 / waveSpeed)), updatePath])))
         })
-        self.run(SKAction.repeatForever(SKAction.sequence([SKAction.wait(forDuration: Double(2 / waveSpeed)), updatePath])))
     }
 
     //This acts as a complete reset on the wave drawer. Clearing both its path and dynamic path.
@@ -423,13 +427,18 @@ class WaveGenerator:SKNode, WaveGenerationNotifier, UIGestureRecognizerDelegate{
         }
     }
 
-    //Utility for getting position used in score calculation
-    //Note, for this to work we need to convert position to scene coordinates so everything matches
-    public func getPrimaryWaveHeadPosition() -> CGFloat {
-        if self.waveHead != nil {
-            return self.scene!.convert(self.waveHead!.position, from: self).y
+    //At the end of the level we stop the wave drawing.
+    public func deactivateWaveGenerator(){
+        if self.params!.waveHead.isPlayer == false{
+            self.waveDrawer1!.removeAction(forKey: "sampling")
+            self.waveDrawer2!.removeAction(forKey: "sampling")
         }else{
-            return 0
+            self.isUserInteractionEnabled = false
+            //Recenter the wavehead at the end to prevent it from running away.
+            self.waveHead!.removeAllActions()
+            self.waveHead!.run(SKAction.move(to: CGPoint(x: self.waveHead!.position.x, y: 0), duration: 0.25))
+            self.waveScoreKeeper!.isHidden = true
+            self.removeAllActions()
         }
     }
 

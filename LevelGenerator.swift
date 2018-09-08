@@ -39,7 +39,7 @@ class LevelGenerator:SKNode, SKPhysicsContactDelegate, ScoreChangeNotifier{
     var currentTimeDisplay:SKLabelNode?
     var currentTime:CGFloat = 0
     var levelTimer:Timer?
-    let maximumLevelTime:CGFloat = 90//seconds (1.5 minutes)
+    let maximumLevelTime:CGFloat = 30//seconds (1.5 minutes)
 
     //Notifier of win/lose
     var gameStatusDelegate:GameStatusNotifier?
@@ -118,9 +118,18 @@ class LevelGenerator:SKNode, SKPhysicsContactDelegate, ScoreChangeNotifier{
         self.currentTime = CGFloat(round(Double(self.currentTime * 10)) / 10)
         self.currentTimeDisplay?.text = "\(self.currentTime)"
 
+        //We stop the wave generation of the bounds so that they end right at the
+        // middle of the screen when the time is at the max.
+        if self.currentTime >= (self.maximumLevelTime - 3.125) {
+            self.bottomWave!.deactivateWaveGenerator()
+            self.topWave!.deactivateWaveGenerator()
+        }
+
         //If the current level time reaches the max then we have won!
         if self.currentTime >= self.maximumLevelTime {
             self.gameStatusDelegate!.gameStateChanged(status: .won)
+            self.playerWave!.deactivateWaveGenerator()
+            self.levelTimer!.invalidate()
         }
     }
 
