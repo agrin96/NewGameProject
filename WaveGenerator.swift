@@ -53,7 +53,7 @@ fileprivate class WaveHead:SKSpriteNode {
 
         //Setup wavehead to detect collision with boundary waves if it is the player
         if params.isPlayer == true{
-            self.physicsBody = SKPhysicsBody(circleOfRadius: (self.size.width / 1.5))
+            self.physicsBody = SKPhysicsBody(circleOfRadius: (self.size.width / 1.1))
             self.physicsBody!.linearDamping = 0.0
             self.physicsBody!.friction = 0.0
             self.physicsBody!.density = 1
@@ -273,7 +273,10 @@ class WaveGenerator:SKNode, WaveGenerationNotifier, UIGestureRecognizerDelegate{
 
     //The approximate time it takes for spawned waves to get to the player
     private let levelBeginDelay:Double = 3.125
-    private var startingLine:SKSpriteNode?
+
+    //These will be visual aids for your wave start and end.
+    private var startingReciever:SKSpriteNode?
+    private var endingReciever:SKSpriteNode?
 
     //This gesture recognizer will detect the user tapping on screen.
     private var userTapRecognizer:UIGestureRecognizer?
@@ -324,14 +327,6 @@ class WaveGenerator:SKNode, WaveGenerationNotifier, UIGestureRecognizerDelegate{
         self.waveDrawer2!.zPosition = 1
         self.addChild(self.waveDrawer2!)
 
-        //Adds a starting line that shows when the player can start to tap.
-        self.startingLine = SKSpriteNode(color: .white, size: CGSize(width: 5, height: 900))
-        self.startingLine!.anchorPoint = CGPoint(x: 0.5, y: 0.5)
-        self.startingLine!.position.x = 187.5
-        self.startingLine!.alpha = 0.25
-        self.startingLine!.zPosition = 2
-        self.addChild(self.startingLine!)
-
         //Adds a small score label to the player head.
         if self.params!.waveHead.isPlayer == true{
             self.waveScoreKeeper = SKLabelNode(text: "0")
@@ -342,6 +337,24 @@ class WaveGenerator:SKNode, WaveGenerationNotifier, UIGestureRecognizerDelegate{
             self.waveScoreKeeper!.fontColor = .green
             self.waveHead!.addChild(self.waveScoreKeeper!)
         }
+
+        //Add the starting reciever and hide it.
+        self.startingReciever = SKSpriteNode(color: .red, size: CGSize(width: 22, height: 400))
+        self.startingReciever!.anchorPoint = CGPoint(x: 0.5, y: 1)
+        self.startingReciever!.position.x = 0
+        self.startingReciever!.alpha = 0.25
+        self.startingReciever!.zPosition = 2
+        self.startingReciever!.isHidden = true
+        self.addChild(self.startingReciever!)
+
+        //Add the ending reciever and hide it.
+        self.endingReciever = SKSpriteNode(color: .red, size: CGSize(width: 22, height: 400))
+        self.endingReciever!.anchorPoint = CGPoint(x: 0.5, y: 1)
+        self.endingReciever!.position.x = 187.5
+        self.endingReciever!.alpha = 0.25
+        self.endingReciever!.zPosition = 2
+        self.endingReciever!.isHidden = true
+        self.addChild(self.endingReciever!)
     }
 
     //When the respective wavedrawer reaches its maximum length it notifies us to start the next wave drawer.
@@ -410,16 +423,18 @@ class WaveGenerator:SKNode, WaveGenerationNotifier, UIGestureRecognizerDelegate{
                 }
                 let linearDelay = SKAction.wait(forDuration: 1/60)
                 let activation = SKAction.run({
-                    self.startingLine!.position.x -= self.params!.waveDrawer.waveSpeed
-                    if self.startingLine!.position.x <= 0 && self.isUserInteractionEnabled == false{
+                    self.startingReciever!.isHidden = false
+                    self.startingReciever!.position.x -= self.params!.waveDrawer.waveSpeed
+
+                    if self.startingReciever!.position.x <= -187.5 && self.isUserInteractionEnabled == false{
                         self.waveHead!.currentHeadDirection = .down
                         //For collision detection purposes we need to know that this is the player node.
                         self.waveHead!.name = "Player"
                         self.isUserInteractionEnabled = true
                     }
-                    if self.startingLine!.position.x <= -300{
+                    if self.startingReciever!.position.x <= -200{
                         self.removeAction(forKey: "StartingLine")
-                        self.startingLine!.removeFromParent()
+                        self.startingReciever!.removeFromParent()
                     }
                 })
                 self.run(SKAction.repeatForever(SKAction.sequence([activation, linearDelay])), withKey: "StartingLine")
@@ -439,6 +454,17 @@ class WaveGenerator:SKNode, WaveGenerationNotifier, UIGestureRecognizerDelegate{
             self.waveHead!.run(SKAction.move(to: CGPoint(x: self.waveHead!.position.x, y: 0), duration: 0.25))
             self.waveScoreKeeper!.isHidden = true
             self.removeAllActions()
+
+            let linearDelay = SKAction.wait(forDuration: 1/60)
+            let activation = SKAction.run({
+                self.endingReciever!.isHidden = false
+                self.endingReciever!.position.x -= self.params!.waveDrawer.waveSpeed
+                if self.endingReciever!.position.x <= 0{
+                    self.removeAction(forKey: "EndingLine")
+                    self.endingReciever!.color = .green
+                }
+            })
+            self.run(SKAction.repeatForever(SKAction.sequence([activation, linearDelay])), withKey: "EndingLine")
         }
     }
 

@@ -104,7 +104,10 @@ class GameScene: SKScene, GameStatusNotifier{
                 self.gamestatus!.run(SKAction.sequence([
                     SKAction.fadeIn(withDuration: 0.5),
                     SKAction.wait(forDuration: 2),
-                    SKAction.fadeOut(withDuration: 0.5)]))
+                    SKAction.fadeOut(withDuration: 0.5),
+                    SKAction.run({
+                        self.resetLevel()
+                })]))
             })]))
         }else if status == .lost{
             self.run(SKAction.sequence([SKAction.wait(forDuration: 0.5), SKAction.run({
@@ -115,8 +118,8 @@ class GameScene: SKScene, GameStatusNotifier{
                     SKAction.fadeIn(withDuration: 0.5),
                     SKAction.wait(forDuration: 2),
                     SKAction.fadeOut(withDuration: 0.5),
-                        SKAction.run({
-                    self.resetLevel()
+                    SKAction.run({
+                        self.resetLevel()
                 })]))
             })]))
         }

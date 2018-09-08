@@ -39,7 +39,7 @@ class LevelGenerator:SKNode, SKPhysicsContactDelegate, ScoreChangeNotifier{
     var currentTimeDisplay:SKLabelNode?
     var currentTime:CGFloat = 0
     var levelTimer:Timer?
-    let maximumLevelTime:CGFloat = 30//seconds (1.5 minutes)
+    let maximumLevelTime:CGFloat = 60//seconds (1.5 minutes)
 
     //Notifier of win/lose
     var gameStatusDelegate:GameStatusNotifier?
@@ -74,8 +74,9 @@ class LevelGenerator:SKNode, SKPhysicsContactDelegate, ScoreChangeNotifier{
 
 
         self.scoreLabel = SKLabelNode(text: "Signal Strength: \(0)")
-        self.scoreLabel?.position = CGPoint(x: 0, y: 250)
-        self.scoreLabel?.fontSize = 30
+        self.scoreLabel!.fontName = "AvenirNext-Bold"
+        self.scoreLabel!.position = CGPoint(x: 0, y: 250)
+        self.scoreLabel!.fontSize = 30
         self.addChild(self.scoreLabel!)
 
         self.currentTimeDisplay = SKLabelNode(text: "\(0)")
@@ -101,9 +102,7 @@ class LevelGenerator:SKNode, SKPhysicsContactDelegate, ScoreChangeNotifier{
             queue.addOperation({
                 self.topWave!.activateWaveGenerator()
             })
-            queue.addOperation({
-                self.playerWave!.activateWaveGenerator()
-            })
+            self.playerWave!.activateWaveGenerator()
 
             //Start the level timer
             self.currentTimeDisplay!.text = "\(0)"
