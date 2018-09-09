@@ -67,35 +67,51 @@ class WaveType{
 }
 
 
-class LevelBuilder{
-    private static var lvl:[SKAction] = []
+fileprivate class Level {
+    private var lvl:[SKAction] = []
+    private var lvlGen:LevelGenerator?
+
+    init(generator:LevelGenerator){
+        self.lvlGen = generator
+    }
 
     //Provides an SKAction which waits a certain amount of time.
-    public class func wait(time:Double){
+    public func wait(time:Double){
         self.lvl.append(SKAction.wait(forDuration: time))
     }
 
     //Generates a random wait time between the two specified bounds. Used for endless
     // level generation to provide variety.
-    public class func randWait(upper:Double,lower:Double){
+    public func randWait(upper:Double,lower:Double){
         self.lvl.append(SKAction.wait(forDuration: Double(arc4random_uniform(UInt32(upper - lower + 1))) + lower))
     }
 
     //Generates an SKAction which will cause the wavegenerator passed in to change oscillation.
-    public class func changeWave(of:WaveGenerator, to:[[CGFloat]]){
-        self.lvl.append(SKAction.run({of.updateWaveOscillationWith(forces: to)}))
+    public func changeTopWave(to:[[CGFloat]]){
+        self.lvl.append(SKAction.run({self.lvlGen!.topWave!.updateWaveOscillationWith(forces: to)}))
+    }
+    public func changeBottomWave(to:[[CGFloat]]){
+        self.lvl.append(SKAction.run({self.lvlGen!.bottomWave!.updateWaveOscillationWith(forces: to)}))
+    }
+    public func changePlayerWave(to:[[CGFloat]]){
+        self.lvl.append(SKAction.run({self.lvlGen!.playerWave!.updateWaveOscillationWith(forces: to)}))
     }
 
-    public class func changeHeight(wave:WaveGenerator, dy:CGFloat){
-        self.lvl.append(SKAction.run({wave.position.y += dy}))
+    public func shiftTop(dy:CGFloat){
+        self.lvl.append(SKAction.run({self.lvlGen!.topWave!.position.y += dy}))
+    }
+    public func shiftBottom(dy:CGFloat){
+        self.lvl.append(SKAction.run({self.lvlGen!.bottomWave!.position.y += dy}))
     }
 
-    public class func runBuffer(level:LevelGenerator){
+    public func runBuffer(level:LevelGenerator){
         level.run(SKAction.sequence(self.lvl))
     }
 
-    public class func clearBuffer(){
+    //Clears the level object.
+    public func clearBuffer(){
         self.lvl = []
+        self.lvlGen = nil
     }
 
     //Scales passed wave array in the x and y direction. X makes the array longer by
@@ -171,5 +187,64 @@ class LevelBuilder{
 
         //Return expanded and scaled values
         return finalWave
+    }
+
+    //Flips all the wave values.
+    public class func flip(wave:[[CGFloat]])->[[CGFloat]]{
+        var newWave:[[CGFloat]] = []
+        for subset in wave{
+            newWave.append(subset.map({if ($0 == 0){ return 0 }else{ return -$0}}))
+        }
+        return newWave
+    }
+}
+
+class LevelList {
+    class func level(num:Int, gen:LevelGenerator){
+        //Clear all actions just in case.
+        gen.removeAllActions()
+
+        switch num{
+        case 1:
+            LevelList.level1(gen: gen)
+            break
+        case 2:
+            LevelList.level2(gen: gen)
+            break
+        default:
+            LevelList.level3(gen: gen)
+            break
+        }
+    }
+
+    private class func level1(gen:LevelGenerator){
+        let lvl = Level(generator: gen)
+        lvl.shiftTop(dy: 35)
+        lvl.shiftBottom(dy: -35)
+        lvl.wait(time: 1)
+        lvl.changeTopWave(to: Level.flip(wave: Level.scale(wave: WaveType.simpleTriangle(), dx: 4, dy: 2)))
+        lvl.changeBottomWave(to: Level.scale(wave: WaveType.simpleTriangle(), dx: 4, dy: 2))
+        lvl.runBuffer(level: gen)
+    }
+
+    private class func level2(gen:LevelGenerator){
+        let lvl = Level(generator: gen)
+        lvl.shiftTop(dy: 35)
+        lvl.shiftBottom(dy: -35)
+        lvl.wait(time: 1)
+        lvl.changeTopWave(to: Level.flip(wave: Level.scale(wave: WaveType.simpleSin(), dx: 4, dy: 2)))
+        lvl.changeBottomWave(to: Level.scale(wave: WaveType.simpleSin(), dx: 4, dy: 2))
+        lvl.runBuffer(level: gen)
+    }
+
+    private class func level3(gen:LevelGenerator){
+        let lvl = Level(generator: gen)
+        lvl.shiftTop(dy: 35)
+        lvl.shiftBottom(dy: -35)
+        lvl.wait(time: 1)
+        lvl.changeTopWave(to: Level.flip(wave: Level.scale(wave: WaveType.simpleSquare(), dx: 3, dy: 2)))
+        lvl.wait(time: 3)
+        lvl.changeBottomWave(to: Level.scale(wave: WaveType.simpleSquare(), dx: 3, dy: 2))
+        lvl.runBuffer(level: gen)
     }
 }

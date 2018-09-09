@@ -21,12 +21,14 @@ import GameplayKit
 
 class GameScene: SKScene, GameStatusNotifier{
     var levelToPlay:LevelGenerator?
+    var currentLevel:Int = 1
 
     //Win/lose
     var gamestatus:SKLabelNode?
     var score:Int = 0
 
     override func didMove(to view: SKView) {
+        super.didMove(to: view)
         //DO NOT TOUCH THE GRAVITY I SPENT 2 HOURS DEBUGGING THIS BEING COMMENTED OUT
         self.physicsWorld.gravity = CGVector(dx: 0, dy: 0)
 
@@ -37,30 +39,23 @@ class GameScene: SKScene, GameStatusNotifier{
         self.gamestatus!.zPosition = 10
         self.addChild(self.gamestatus!)
 
+        self.anchorPoint = CGPoint(x: 0.5, y: 0.5)
+        self.backgroundColor = .black
+
         //Create a level and set it as the contact delegate
         self.levelToPlay = LevelGenerator(in: self.view!)
         self.addChild(self.levelToPlay!)
         self.physicsWorld.contactDelegate = self.levelToPlay!
 
-        self.anchorPoint = CGPoint(x: 0.5, y: 0.5)
-        self.backgroundColor = .black
-
-
         let playerOscillation:[[CGFloat]] = [[1,1,1,1]]
         self.levelToPlay!.playerWave!.updateWaveOscillationWith(forces: playerOscillation)
-        LevelBuilder.changeHeight(wave: self.levelToPlay!.topWave!, dy: 25)
-        LevelBuilder.changeHeight(wave: self.levelToPlay!.bottomWave!, dy: -25)
-        LevelBuilder.wait(time: 1)
-        LevelBuilder.changeWave(
-                of: self.levelToPlay!.topWave! ,
-                to: LevelBuilder.scale(wave: WaveType.simpleSquare(), dx: 2, dy: 1.5))
-        LevelBuilder.wait(time: 1)
-        LevelBuilder.changeWave(
-                of: self.levelToPlay!.bottomWave! ,
-                to: LevelBuilder.scale(wave: WaveType.simpleSquare(), dx: 2, dy: 1.5))
-        LevelBuilder.runBuffer(level: self.levelToPlay!)
+        LevelList.level(num: self.currentLevel, gen: self.levelToPlay!)
         self.levelToPlay!.gameStatusDelegate = self
         self.levelToPlay!.beginLevel()
+    }
+
+    override func sceneDidLoad() {
+        super.sceneDidLoad()
     }
 
     //Resets the current level by nulling out the level values and actions and then reinitializing them.
@@ -78,18 +73,7 @@ class GameScene: SKScene, GameStatusNotifier{
 
         let playerOscillation:[[CGFloat]] = [[1,1,1,1]]
         self.levelToPlay!.playerWave!.updateWaveOscillationWith(forces: playerOscillation)
-        LevelBuilder.clearBuffer()
-        LevelBuilder.changeHeight(wave: self.levelToPlay!.topWave!, dy: 25)
-        LevelBuilder.changeHeight(wave: self.levelToPlay!.bottomWave!, dy: -25)
-        LevelBuilder.wait(time: 1)
-        LevelBuilder.changeWave(
-                of: self.levelToPlay!.topWave! ,
-                to: LevelBuilder.scale(wave: WaveType.simpleSquare(), dx: 2, dy: 1.5))
-        LevelBuilder.wait(time: 1)
-        LevelBuilder.changeWave(
-                of: self.levelToPlay!.bottomWave! ,
-                to: LevelBuilder.scale(wave: WaveType.simpleSquare(), dx: 2, dy: 1.5))
-        LevelBuilder.runBuffer(level: self.levelToPlay!)
+        LevelList.level(num: self.currentLevel, gen: self.levelToPlay!)
         self.levelToPlay!.gameStatusDelegate = self
         self.levelToPlay!.beginLevel()
     }
@@ -106,6 +90,10 @@ class GameScene: SKScene, GameStatusNotifier{
                     SKAction.wait(forDuration: 2),
                     SKAction.fadeOut(withDuration: 0.5),
                     SKAction.run({
+                        self.currentLevel += 1
+                        if self.currentLevel == 3 {
+                            self.currentLevel = 0
+                        }
                         self.resetLevel()
                 })]))
             })]))

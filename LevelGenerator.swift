@@ -126,10 +126,10 @@ class LevelGenerator:SKNode, SKPhysicsContactDelegate, ScoreChangeNotifier{
 
         //If the current level time reaches the max then we have won!
         if self.currentTime >= self.maximumLevelTime {
-            self.gameStatusDelegate!.gameStateChanged(status: .won)
-            self.playerWave!.deactivateWaveGenerator()
             self.levelTimer!.invalidate()
             self.currentTime = 0
+            self.gameStatusDelegate!.gameStateChanged(status: .won)
+            self.playerWave!.deactivateWaveGenerator()
         }
     }
 
