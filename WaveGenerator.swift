@@ -257,19 +257,25 @@ class WaveGenerator:SKNode, WaveGenerationNotifier, UIGestureRecognizerDelegate{
 
     //Trigger for changing the wave head travel direction on the y axis
     @objc private func changeWaveHeadTravelDirection(_ sender:UITapGestureRecognizer){
-        if self.isUserInteractionEnabled == true{
-            if self.params != nil{
-                //Update the player score and reset the score keeper
-                self.scoreUpdateDelegate!.updateScore(scoreKeeper: self.waveScoreKeeper!)
-                self.resetAndRunScore()
+        switch sender.state{
+        case .began,.changed,.ended:
+            if self.isUserInteractionEnabled == true{
+                if self.params != nil{
+                    //Update the player score and reset the score keeper
+                    self.scoreUpdateDelegate!.updateScore(scoreKeeper: self.waveScoreKeeper!)
+                    self.resetAndRunScore()
 
-                //Change the travel direction of the wave.
-                if self.waveHead!.currentHeadDirection == .up{
-                    self.waveHead!.activatePlayerWavehead(direction: .down)
-                }else if self.waveHead!.currentHeadDirection == .down{
-                    self.waveHead!.activatePlayerWavehead(direction: .up)
+                    //Change the travel direction of the wave.
+                    if self.waveHead!.currentHeadDirection == .up{
+                        self.waveHead!.activatePlayerWavehead(direction: .down)
+                    }else if self.waveHead!.currentHeadDirection == .down{
+                        self.waveHead!.activatePlayerWavehead(direction: .up)
+                    }
                 }
             }
+            break
+        default:
+            break
         }
     }
 }

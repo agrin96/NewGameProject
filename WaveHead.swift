@@ -41,7 +41,7 @@ class WaveHead:SKSpriteNode {
             self.physicsBody!.friction = 0.0
             self.physicsBody!.density = 1
 
-            self.physicsBody!.collisionBitMask = 1
+            self.physicsBody!.collisionBitMask = 0
             self.physicsBody!.categoryBitMask = 1
             self.physicsBody!.contactTestBitMask = 1
             self.physicsBody!.allowsRotation = false
