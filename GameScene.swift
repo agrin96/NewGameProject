@@ -42,6 +42,7 @@ class GameScene: SKScene, GameStatusNotifier{
         self.anchorPoint = CGPoint(x: 0.5, y: 0.5)
         self.backgroundColor = .black
 
+
         //Create a level and set it as the contact delegate
         self.levelToPlay = LevelGenerator(in: self.view!)
         self.addChild(self.levelToPlay!)

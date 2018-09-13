@@ -108,6 +108,7 @@ class WaveDrawer:SKShapeNode {
                 self.physicsBody = SKPhysicsBody(edgeChainFrom: self.physicsPath!)
                 self.physicsBody!.contactTestBitMask = 1
                 self.physicsBody!.collisionBitMask = 1
+                self.physicsBody!.categoryBitMask = 0
             })
             self.run(SKAction.repeatForever(SKAction.sequence([SKAction.wait(forDuration: Double(2 / waveSpeed)), updatePath])))
         })

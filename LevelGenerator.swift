@@ -56,7 +56,6 @@ class LevelGenerator:SKNode, SKPhysicsContactDelegate, ScoreChangeNotifier{
     init(in view:SKView) {
         super.init()
 
-
         var playerSettings = WaveGeneratorParameters()
         playerSettings.waveHead.isPlayer = true
         playerSettings.waveHead.headColor = .red
@@ -74,15 +73,6 @@ class LevelGenerator:SKNode, SKPhysicsContactDelegate, ScoreChangeNotifier{
         bottomWaveSettings.location = CGPoint(x: view.bounds.width / 2, y: -70)
         self.bottomWave = WaveGenerator(paramters: bottomWaveSettings)
         self.addChild(self.bottomWave!)
-
-        //Add obstacles
-        self.obstacleGenerators.append(ObstacleGenerator(travelTime: 5,
-                count: 5,
-                obstacleSize: CGSize(width: 28, height: 6)))
-        for obs in self.obstacleGenerators{
-            obs.position = CGPoint(x: view.bounds.width, y: 0)
-            self.addChild(obs)
-        }
 
         self.scoreLabel = SKLabelNode(text: "Signal Strength: \(0)")
         self.scoreLabel!.fontName = "AvenirNext-Bold"

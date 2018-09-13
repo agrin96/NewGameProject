@@ -5,22 +5,35 @@
 
 import SpriteKit
 
+//Holds all the parameters for the obstacle generator
+struct ObstacleParameters {
+    var timeBetweenObstacles:Double
+    var obstacleTravelTime:Double
+    var obstacleSize:CGSize
+}
+
 //Generates an endless flow of obstacles across the screen.
 class ObstacleGenerator:SKNode{
     private var obstacles:[SKSpriteNode] = []
     private var obstacleSize:CGSize = CGSize.zero
     private var obstacleTime:Double = 0
+    private var obstacleSpace:Double = 0
+
+    //Point at which the obstacles get shifted back.
+    private let obstacleResetPoint:CGFloat = -600
 
     required init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
     }
 
-    init(travelTime:Double, count:Int, obstacleSize:CGSize){
+    init(params:ObstacleParameters){
         super.init()
 
         //Helper information
-        self.obstacleTime = travelTime
-        self.obstacleSize = obstacleSize
+        self.obstacleTime = params.obstacleTravelTime
+        self.obstacleSize = params.obstacleSize
+        self.obstacleSpace = params.timeBetweenObstacles
+        let count:Int = 5
 
         //Create the objects.
         for _ in 0..<count{
@@ -45,7 +58,7 @@ class ObstacleGenerator:SKNode{
         let moveAction = SKAction.sequence([SKAction.moveTo(x: -600, duration: self.obstacleTime), SKAction.moveTo(x: 0, duration: 0)])
 
         var obsCounter:Int = 0
-        let delayedActivation = SKAction.sequence([SKAction.wait(forDuration: 1), SKAction.run({
+        let delayedActivation = SKAction.sequence([SKAction.wait(forDuration: self.obstacleSpace), SKAction.run({
             self.obstacles[obsCounter].run(SKAction.repeatForever(moveAction))
             obsCounter += 1
         })])
