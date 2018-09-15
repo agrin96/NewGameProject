@@ -53,8 +53,8 @@ class WaveType{
     }
     public class func shiftDownwards()->[[CGFloat]]{
         return Array([
-            [CGFloat](repeatElement(0, count: 30)),
-            [CGFloat](repeatElement(1, count: 30))
+            [CGFloat](repeatElement(-1, count: 240)),
+            [CGFloat](repeatElement(-1, count: 240))
         ])
     }
 
@@ -120,7 +120,7 @@ fileprivate class Level {
     //Scales passed wave array in the x and y direction. X makes the array longer by
     // duplicating elements and Y makes the individual elements larger.
     public class func scale(wave:[[CGFloat]], dx:CGFloat, dy:CGFloat)->[[CGFloat]]{
-        if dx < 0 || dy < 0{ return [] }
+        if dx <= 0 || dy <= 0{ return wave }
 
         //Compute the values scaled in the y direction.
         var yScaledWave:[[CGFloat]] = {
@@ -228,27 +228,64 @@ class LevelList {
         lvl.addObstacleGenerator(position: CGPoint(x: 400, y: 0), obsParams: ObstacleParameters(
                 timeBetweenObstacles: 0.5,
                 obstacleTravelTime: 5,
-                obstacleSize: CGSize(width: 24, height: 6)))
+                obstacleSize: CGSize(width: 24, height: 6),
+                randomPositions: true))
         lvl.addObstacleGenerator(position: CGPoint(x: 400, y: 100), obsParams: ObstacleParameters(
                 timeBetweenObstacles: 1.5,
                 obstacleTravelTime: 5,
-                obstacleSize: CGSize(width: 18, height: 6)))
+                obstacleSize: CGSize(width: 18, height: 6),
+                randomPositions: true))
         lvl.addObstacleGenerator(position: CGPoint(x: 400, y: -100), obsParams: ObstacleParameters(
                 timeBetweenObstacles: 1.5,
                 obstacleTravelTime: 5,
-                obstacleSize: CGSize(width: 18, height: 6)))
+                obstacleSize: CGSize(width: 18, height: 6),
+                randomPositions: true))
         lvl.changeTopWave(to: Level.flip(wave: Level.scale(wave: WaveType.simpleTriangle(), dx: 4, dy: 2)))
         lvl.changeBottomWave(to: Level.scale(wave: WaveType.simpleTriangle(), dx: 4, dy: 2))
+        lvl.wait(time: 5)
+        lvl.changeTopWave(to: WaveType.shiftDownwards())
+        lvl.wait(time: 1)
+        lvl.changeTopWave(to: Level.flip(wave: Level.scale(wave: WaveType.simpleTriangle(), dx: 4, dy: 2)))
         lvl.runBuffer(level: gen)
     }
 
     private class func level2(gen:LevelGenerator){
         let lvl = Level(generator: gen)
-        lvl.shiftTop(dy: 35)
-        lvl.shiftBottom(dy: -35)
-        lvl.wait(time: 1)
-        lvl.changeTopWave(to: Level.flip(wave: Level.scale(wave: WaveType.simpleSin(), dx: 4, dy: 2)))
-        lvl.changeBottomWave(to: Level.scale(wave: WaveType.simpleSin(), dx: 4, dy: 2))
+        lvl.shiftTop(dy: 75)
+        lvl.shiftBottom(dy: -75)
+        lvl.changeTopWave(to: Level.scale(
+                wave: WaveType.simpleSin(),
+                dx: CGFloat(arc4random_uniform(6)),
+                dy: CGFloat(arc4random_uniform(5))))
+        lvl.changeBottomWave(to: Level.scale(
+                wave: WaveType.simpleSin(),
+                dx: CGFloat(arc4random_uniform(6)),
+                dy: CGFloat(arc4random_uniform(5))))
+        lvl.wait(time: 1.5)
+        lvl.addObstacleGenerator(position: CGPoint(x: 400, y: 0), obsParams: ObstacleParameters(
+                timeBetweenObstacles: 0.5,
+                obstacleTravelTime: 5,
+                obstacleSize: CGSize(width: 24, height: 6),
+                randomPositions: true))
+        lvl.addObstacleGenerator(position: CGPoint(x: 400, y: 0), obsParams: ObstacleParameters(
+                timeBetweenObstacles: 1.5,
+                obstacleTravelTime: 5,
+                obstacleSize: CGSize(width: 100, height: 6),
+                randomPositions: true))
+        lvl.addObstacleGenerator(position: CGPoint(x: 400, y: 0), obsParams: ObstacleParameters(
+                timeBetweenObstacles: 2,
+                obstacleTravelTime: 8,
+                obstacleSize: CGSize(width: 100, height: 6),
+                randomPositions: true))
+        lvl.wait(time: 13)
+        lvl.changeTopWave(to: Level.flip(wave: Level.scale(
+                wave: WaveType.simpleSin(),
+                dx: CGFloat(arc4random_uniform(6)),
+                dy: CGFloat(arc4random_uniform(5)))))
+        lvl.changeBottomWave(to: Level.scale(
+                wave: WaveType.simpleSin(),
+                dx: CGFloat(arc4random_uniform(6)),
+                dy: CGFloat(arc4random_uniform(5))))
         lvl.runBuffer(level: gen)
     }
 

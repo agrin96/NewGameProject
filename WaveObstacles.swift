@@ -10,6 +10,7 @@ struct ObstacleParameters {
     var timeBetweenObstacles:Double
     var obstacleTravelTime:Double
     var obstacleSize:CGSize
+    var randomPositions:Bool
 }
 
 //Generates an endless flow of obstacles across the screen.
@@ -18,6 +19,7 @@ class ObstacleGenerator:SKNode{
     private var obstacleSize:CGSize = CGSize.zero
     private var obstacleTime:Double = 0
     private var obstacleSpace:Double = 0
+    private var randomPositions:Bool = false
 
     //Point at which the obstacles get shifted back.
     private let obstacleResetPoint:CGFloat = -600
@@ -33,6 +35,7 @@ class ObstacleGenerator:SKNode{
         self.obstacleTime = params.obstacleTravelTime
         self.obstacleSize = params.obstacleSize
         self.obstacleSpace = params.timeBetweenObstacles
+        self.randomPositions = params.randomPositions
         let count:Int = 5
 
         //Create the objects.
@@ -55,6 +58,12 @@ class ObstacleGenerator:SKNode{
     //Adds the SKActions that end up actually running the obstacles across the screen.
     // The actions are added to the obstacles not the generator.
     func startObstacles(){
+        if self.randomPositions == true{
+            for obs in obstacles{
+                obs.position.y = CGFloat(arc4random_uniform(600)) - 300
+            }
+        }
+
         let moveAction = SKAction.sequence([SKAction.moveTo(x: -600, duration: self.obstacleTime), SKAction.moveTo(x: 0, duration: 0)])
 
         var obsCounter:Int = 0

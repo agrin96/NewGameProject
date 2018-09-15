@@ -195,7 +195,7 @@ class WaveGenerator:SKNode, WaveGenerationNotifier, UIGestureRecognizerDelegate{
                     self.startingReciever!.isHidden = false
                     self.startingReciever!.position.x -= self.params!.waveDrawer.waveSpeed
 
-                    if self.startingReciever!.position.x <= -187.5 && self.isUserInteractionEnabled == false{
+                    if self.startingReciever!.position.x <= -170 && self.isUserInteractionEnabled == false{
                         self.waveHead!.currentHeadDirection = .down
                         //For collision detection purposes we need to know that this is the player node.
                         self.waveHead!.name = "Player"
