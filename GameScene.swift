@@ -21,7 +21,7 @@ import GameplayKit
 
 class GameScene: SKScene, GameStatusNotifier{
     var levelToPlay:LevelGenerator?
-    var currentLevel:Int = 2
+    var currentLevel:Int = 3
     //Win/lose
     var gamestatus:SKLabelNode?
     var score:Int = 0

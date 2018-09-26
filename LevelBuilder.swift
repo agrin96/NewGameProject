@@ -47,8 +47,8 @@ class WaveType{
     // so as not to allow the wavehead to move into the negative values.
     public class func shiftUpwards()->[[CGFloat]]{
         return Array([
-            [CGFloat](repeatElement(0, count: 30)),
-            [CGFloat](repeatElement(1, count: 30))
+            [CGFloat](repeatElement(1, count: 240)),
+            [CGFloat](repeatElement(1, count: 240))
         ])
     }
     public class func shiftDownwards()->[[CGFloat]]{
@@ -67,7 +67,7 @@ class WaveType{
 }
 
 
-fileprivate class Level {
+class Level {
     private var lvl:[SKAction] = []
     private var lvlGen:LevelGenerator?
 
@@ -294,9 +294,11 @@ class LevelList {
         lvl.shiftTop(dy: 35)
         lvl.shiftBottom(dy: -35)
         lvl.wait(time: 1)
-        lvl.changeTopWave(to: Level.flip(wave: Level.scale(wave: WaveType.simpleSquare(), dx: 3, dy: 2)))
-        lvl.wait(time: 3)
-        lvl.changeBottomWave(to: Level.scale(wave: WaveType.simpleSquare(), dx: 3, dy: 2))
+        lvl.changeTopWave(to: WaveType.shiftDownwards())
+        lvl.changeBottomWave(to: WaveType.shiftDownwards())
+        lvl.wait(time: 2)
+        lvl.changeTopWave(to: WaveType.steady())
+        lvl.changeBottomWave(to: WaveType.steady())
         lvl.runBuffer(level: gen)
     }
 }
