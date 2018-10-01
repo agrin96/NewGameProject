@@ -16,32 +16,72 @@ enum WaveChangeGroupings {
     case both
 }
 
+
 enum DisplacementTemplate:Int {
     case displace30 = 0
     case displace45
     case displace55
     case displace75
 
-    func run(lvl: Level, direction: ShiftingDirection) -> DisplacementTemplate {
+    func run(lvl: Level, direction: ShiftingDirection, grouping:WaveChangeGroupings = .both) -> DisplacementTemplate {
         switch self {
         case .displace30:
-            lvl.shiftTop(dy: 30 * direction.rawValue)
-            lvl.shiftBottom(dy: 30 * direction.rawValue)
-            break
+            switch grouping{
+            case .both:
+                lvl.shiftTop(dy: CGFloat(30 * direction.rawValue))
+                lvl.shiftBottom(dy: CGFloat(30 * direction.rawValue))
+                break
+            case .bottom:
+                lvl.shiftBottom(dy: CGFloat(30 * direction.rawValue))
+                break
+            case .top:
+                lvl.shiftTop(dy: CGFloat(30 * direction.rawValue))
+                break
+            }
+            return .displace30
         case .displace45:
-            lvl.shiftTop(dy: 45 * direction.rawValue)
-            lvl.shiftBottom(dy: 45 * direction.rawValue)
-            break
+            switch grouping{
+            case .both:
+                lvl.shiftTop(dy: CGFloat(45 * direction.rawValue))
+                lvl.shiftBottom(dy: CGFloat(45 * direction.rawValue))
+                break
+            case .bottom:
+                lvl.shiftBottom(dy: CGFloat(45 * direction.rawValue))
+                break
+            case .top:
+                lvl.shiftTop(dy: CGFloat(45 * direction.rawValue))
+                break
+            }
+            return .displace45
         case .displace55:
-            lvl.shiftTop(dy: 55 * direction.rawValue)
-            lvl.shiftBottom(dy: 55 * direction.rawValue)
-            break
+            switch grouping{
+            case .both:
+                lvl.shiftTop(dy: CGFloat(55 * direction.rawValue))
+                lvl.shiftBottom(dy: CGFloat(55 * direction.rawValue))
+                break
+            case .bottom:
+                lvl.shiftBottom(dy: CGFloat(55 * direction.rawValue))
+                break
+            case .top:
+                lvl.shiftTop(dy: CGFloat(55 * direction.rawValue))
+                break
+            }
+            return .displace55
         case .displace75:
-            lvl.shiftTop(dy: 75 * direction.rawValue)
-            lvl.shiftBottom(dy: 75 * direction.rawValue)
-            break
+            switch grouping{
+            case .both:
+                lvl.shiftTop(dy: CGFloat(75 * direction.rawValue))
+                lvl.shiftBottom(dy: CGFloat(75 * direction.rawValue))
+                break
+            case .bottom:
+                lvl.shiftBottom(dy: CGFloat(75 * direction.rawValue))
+                break
+            case .top:
+                lvl.shiftTop(dy: CGFloat(75 * direction.rawValue))
+                break
+            }
+            return .displace75
         }
-        return self
     }
 }
 
@@ -65,10 +105,10 @@ enum ShiftingTemplates:Int {
     case P7
     case P8 = 8     //Maximum upwards shift of 2.0 seconds
 
-    func run(lvl:Level, newHeight:ShiftingTemplates, grouping:WaveChangeGroupings) -> ShiftingTemplates {
+    func run(lvl:Level, newHeight:ShiftingTemplates, grouping:WaveChangeGroupings = .both) -> ShiftingTemplates {
         //Here we use the raw values to calculate how long we should run the shifting
         // because we arbitrarily determined the interlevel distance as a 0.25 second shift.
-        let difference:Int = self.rawValue - newHeight.rawValue
+        let difference:Double = Double(abs(newHeight.rawValue - self.rawValue))
         let waitTime:Double = Double(difference * 0.25)
 
         switch grouping {
@@ -84,8 +124,7 @@ enum ShiftingTemplates:Int {
             }
             lvl.wait(time: waitTime)
             //Update the wave level indicator
-            self.changeLevel(to: newHeight)
-            return self
+            return newHeight
         case .top:
             if self.rawValue > newHeight.rawValue {
                 //We are going down.
@@ -96,8 +135,7 @@ enum ShiftingTemplates:Int {
             }
             lvl.wait(time: waitTime)
             //Update the wave level indicator
-            self.changeLevel(to: newHeight)
-            return self
+            return newHeight
         case .bottom:
             if self.rawValue > newHeight.rawValue {
                 //We are going down.
@@ -108,17 +146,8 @@ enum ShiftingTemplates:Int {
             }
             lvl.wait(time: waitTime)
             //Update the wave level indicator
-            self.changeLevel(to: newHeight)
-            return self
+            return newHeight
         }
-    }
-
-    mutating private func changeLevel(to: ShiftingTemplates){
-        self = to
-    }
-
-    init() {
-        self.changeLevel(to: ShiftingTemplates.CE)
     }
 }
 
@@ -136,11 +165,11 @@ enum WaveTemplates:Int {
     case triangle3
     case triangle4
 
-    func run(lvl: Level, grouping: WaveChangeGroupings) -> WaveTemplates {
+    func run(lvl: Level, grouping: WaveChangeGroupings = .both){
         switch self {
         case .sin1:
-            let dxMultiplier = 1
-            let dyMultiplier = 1
+            let dxMultiplier:CGFloat = 1
+            let dyMultiplier:CGFloat = 1
             let wave = WaveType.simpleSin()
             switch grouping {
             case .both:
@@ -154,10 +183,9 @@ enum WaveTemplates:Int {
                 lvl.changeBottomWave(to: Level.scale(wave: wave, dx: dxMultiplier, dy: dyMultiplier))
                 break
             }
-            return .sin1
         case .sin2:
-            let dxMultiplier = 2
-            let dyMultiplier = 2
+            let dxMultiplier:CGFloat = 2
+            let dyMultiplier:CGFloat = 2
             let wave = WaveType.simpleSin()
             switch grouping {
             case .both:
@@ -171,10 +199,9 @@ enum WaveTemplates:Int {
                 lvl.changeBottomWave(to: Level.scale(wave: wave, dx: dxMultiplier, dy: dyMultiplier))
                 break
             }
-            return .sin2
         case .sin3:
-            let dxMultiplier = 4
-            let dyMultiplier = 2
+            let dxMultiplier:CGFloat = 4
+            let dyMultiplier:CGFloat = 2
             let wave = WaveType.simpleSin()
             switch grouping {
             case .both:
@@ -188,10 +215,9 @@ enum WaveTemplates:Int {
                 lvl.changeBottomWave(to: Level.scale(wave: wave, dx: dxMultiplier, dy: dyMultiplier))
                 break
             }
-            return .sin3
         case .sin4:
-            let dxMultiplier = 3
-            let dyMultiplier = 2.5
+            let dxMultiplier:CGFloat = 3
+            let dyMultiplier:CGFloat = 2.5
             let wave = WaveType.simpleSin()
             switch grouping {
             case .both:
@@ -205,10 +231,9 @@ enum WaveTemplates:Int {
                 lvl.changeBottomWave(to: Level.scale(wave: wave, dx: dxMultiplier, dy: dyMultiplier))
                 break
             }
-            return .sin4
         case .square1:
-            let dxMultiplier = 1
-            let dyMultiplier = 1
+            let dxMultiplier:CGFloat = 1
+            let dyMultiplier:CGFloat = 1
             let wave = WaveType.simpleSquare()
             switch grouping {
             case .both:
@@ -222,10 +247,9 @@ enum WaveTemplates:Int {
                 lvl.changeBottomWave(to: Level.scale(wave: wave, dx: dxMultiplier, dy: dyMultiplier))
                 break
             }
-            return .square1
         case .square2:
-            let dxMultiplier = 2
-            let dyMultiplier = 2
+            let dxMultiplier:CGFloat = 2
+            let dyMultiplier:CGFloat = 2
             let wave = WaveType.simpleSquare()
             switch grouping {
             case .both:
@@ -239,10 +263,9 @@ enum WaveTemplates:Int {
                 lvl.changeBottomWave(to: Level.scale(wave: wave, dx: dxMultiplier, dy: dyMultiplier))
                 break
             }
-            return .square2
         case .square3:
-            let dxMultiplier = 3
-            let dyMultiplier = 2.5
+            let dxMultiplier:CGFloat = 3
+            let dyMultiplier:CGFloat = 2.5
             let wave = WaveType.simpleSquare()
             switch grouping {
             case .both:
@@ -256,10 +279,9 @@ enum WaveTemplates:Int {
                 lvl.changeBottomWave(to: Level.scale(wave: wave, dx: dxMultiplier, dy: dyMultiplier))
                 break
             }
-            return .square3
         case .square4:
-            let dxMultiplier = 4
-            let dyMultiplier = 2.5
+            let dxMultiplier:CGFloat = 4
+            let dyMultiplier:CGFloat = 2.5
             let wave = WaveType.simpleSquare()
             switch grouping {
             case .both:
@@ -273,10 +295,9 @@ enum WaveTemplates:Int {
                 lvl.changeBottomWave(to: Level.scale(wave: wave, dx: dxMultiplier, dy: dyMultiplier))
                 break
             }
-            return .square4
         case .triangle1:
-            let dxMultiplier = 1
-            let dyMultiplier = 1
+            let dxMultiplier:CGFloat = 1
+            let dyMultiplier:CGFloat = 1
             let wave = WaveType.simpleTriangle()
             switch grouping {
             case .both:
@@ -290,10 +311,9 @@ enum WaveTemplates:Int {
                 lvl.changeBottomWave(to: Level.scale(wave: wave, dx: dxMultiplier, dy: dyMultiplier))
                 break
             }
-            return .triangle1
         case .triangle2:
-            let dxMultiplier = 2
-            let dyMultiplier = 2
+            let dxMultiplier:CGFloat = 2
+            let dyMultiplier:CGFloat = 2
             let wave = WaveType.simpleTriangle()
             switch grouping {
             case .both:
@@ -307,10 +327,9 @@ enum WaveTemplates:Int {
                 lvl.changeBottomWave(to: Level.scale(wave: wave, dx: dxMultiplier, dy: dyMultiplier))
                 break
             }
-            return .triangle2
         case .triangle3:
-            let dxMultiplier = 3
-            let dyMultiplier = 2.5
+            let dxMultiplier:CGFloat = 3
+            let dyMultiplier:CGFloat = 2.5
             let wave = WaveType.simpleTriangle()
             switch grouping {
             case .both:
@@ -324,10 +343,9 @@ enum WaveTemplates:Int {
                 lvl.changeBottomWave(to: Level.scale(wave: wave, dx: dxMultiplier, dy: dyMultiplier))
                 break
             }
-            return .triangle3
         case .triangle4:
-            let dxMultiplier = 4
-            let dyMultiplier = 2
+            let dxMultiplier:CGFloat = 4
+            let dyMultiplier:CGFloat = 2
             let wave = WaveType.simpleTriangle()
             switch grouping {
             case .both:
@@ -341,8 +359,11 @@ enum WaveTemplates:Int {
                 lvl.changeBottomWave(to: Level.scale(wave: wave, dx: dxMultiplier, dy: dyMultiplier))
                 break
             }
-            return .triangle4
         }
+    }
+
+    private mutating func change(to: WaveTemplates){
+        self = to
     }
 }
 
@@ -353,7 +374,7 @@ enum ObstacleTemplates:Int {
     case obstacle4
     case obstacle5
 
-    func run(lvl: Level) -> ObstacleTemplates{
+    func run(lvl: Level){
         //Before an obstacle is added there is a 1 second lead time.
         lvl.wait(time: 1)
         switch self {
@@ -373,7 +394,6 @@ enum ObstacleTemplates:Int {
                     obstacleTravelTime: 5,
                     obstacleSize: CGSize(width: 50, height: 10),
                     randomPositions: false))
-            return .obstacle1
         case .obstacle2:
             lvl.addObstacleGenerator(position: CGPoint(x: 400, y: 0), obsParams: ObstacleParameters(
                     timeBetweenObstacles: 0.5,
@@ -390,7 +410,6 @@ enum ObstacleTemplates:Int {
                     obstacleTravelTime: 5,
                     obstacleSize: CGSize(width: 50, height: 10),
                     randomPositions: false))
-            return .obstacle2
         case .obstacle3:
             lvl.addObstacleGenerator(position: CGPoint(x: 400, y: 0), obsParams: ObstacleParameters(
                     timeBetweenObstacles: 0.5,
@@ -407,24 +426,22 @@ enum ObstacleTemplates:Int {
                     obstacleTravelTime: 3,
                     obstacleSize: CGSize(width: 50, height: 10),
                     randomPositions: false))
-            return .obstacle3
         case .obstacle4:
             lvl.addObstacleGenerator(position: CGPoint(x: 400, y: 0), obsParams: ObstacleParameters(
-                    timeBetweenObstacles: 0.5,
+                    timeBetweenObstacles: 1.5,
                     obstacleTravelTime: 5,
                     obstacleSize: CGSize(width: 50, height: 10),
                     randomPositions: false))
             lvl.addObstacleGenerator(position: CGPoint(x: 400, y: 120), obsParams: ObstacleParameters(
-                    timeBetweenObstacles: 0.5,
+                    timeBetweenObstacles: 1,
                     obstacleTravelTime: 5,
                     obstacleSize: CGSize(width: 50, height: 10),
                     randomPositions: false))
             lvl.addObstacleGenerator(position: CGPoint(x: 400, y: -120), obsParams: ObstacleParameters(
-                    timeBetweenObstacles: 0.5,
+                    timeBetweenObstacles: 1.5,
                     obstacleTravelTime: 5,
                     obstacleSize: CGSize(width: 50, height: 10),
                     randomPositions: false))
-            return .obstacle4
         case .obstacle5:
             lvl.addObstacleGenerator(position: CGPoint(x: 400, y: 0), obsParams: ObstacleParameters(
                     timeBetweenObstacles: 0.5,
@@ -441,16 +458,28 @@ enum ObstacleTemplates:Int {
                     obstacleTravelTime: 5,
                     obstacleSize: CGSize(width: 50, height: 10),
                     randomPositions: false))
-            return .obstacle5
         }
     }
 }
 
 class RandomizerTree {
-    init(lvl:Level){
-        let a = DisplacementTemplate.displace30.run(lvl: lvl, direction: .down)
-        let b = WaveTemplates.sin2.run(lvl: lvl, grouping: .both)
-        let c = ObstacleTemplates.obstacle3.run(lvl: lvl)
-        let d = ShiftingTemplates.CE.run(lvl: lvl, newHeight: ShiftingTemplates.N3, grouping: .both)
+    public class func generateLevel(for lvl:Level){
+        //Set initial displacement
+        if DisplacementTemplate.displace30.run(lvl: lvl, direction: .up, grouping: .top) != .displace30 { return }
+        if DisplacementTemplate.displace30.run(lvl: lvl, direction: .down, grouping: .bottom) != .displace30 { return }
+
+        //Set wavetype
+        WaveTemplates.sin2.run(lvl: lvl)
+
+        //Add obstacles
+        ObstacleTemplates.obstacle4.run(lvl: lvl)
+//        ObstacleTemplates.obstacle5.run(lvl: lvl)
+
+        lvl.wait(time: 10)
+        if ShiftingTemplates.CE.run(lvl: lvl, newHeight: .P3, grouping: .both) != .P3 { return }
+        WaveTemplates.square3.run(lvl: lvl)
+        lvl.wait(time: 10)
+        if ShiftingTemplates.P3.run(lvl: lvl, newHeight: .CE, grouping: .both) != .CE { return }
+        WaveTemplates.triangle3.run(lvl: lvl)
     }
 }

@@ -45,7 +45,7 @@ class WaveGenerator:SKNode, WaveGenerationNotifier, UIGestureRecognizerDelegate{
     private var userTapRecognizer:UIGestureRecognizer?
 
     //This will allow us to calculate score
-    var scoreUpdateDelegate:ScoreChangeNotifier?
+    weak var scoreUpdateDelegate:ScoreChangeNotifier?
 
     //Score notifier
     private var waveScoreKeeper:SKLabelNode?
@@ -90,7 +90,7 @@ class WaveGenerator:SKNode, WaveGenerationNotifier, UIGestureRecognizerDelegate{
         self.waveDrawer2!.zPosition = 1
         self.addChild(self.waveDrawer2!)
 
-        //Adds a small score label to the player head.
+        //Adds a small score label to the player head as well as the starting and ending receivers.
         if self.params!.waveHead.isPlayer == true{
             self.waveScoreKeeper = SKLabelNode(text: "0")
             self.waveScoreKeeper!.fontName = "AvenirNext-Bold"
@@ -99,25 +99,25 @@ class WaveGenerator:SKNode, WaveGenerationNotifier, UIGestureRecognizerDelegate{
             self.waveScoreKeeper!.fontSize = 20
             self.waveScoreKeeper!.fontColor = .green
             self.waveHead!.addChild(self.waveScoreKeeper!)
+
+            //Add the starting reciever and hide it.
+            self.startingReciever = SKSpriteNode(color: .red, size: CGSize(width: 22, height: 400))
+            self.startingReciever!.anchorPoint = CGPoint(x: 0.5, y: 1)
+            self.startingReciever!.position.x = 0
+            self.startingReciever!.alpha = 0.25
+            self.startingReciever!.zPosition = 2
+            self.startingReciever!.isHidden = true
+            self.addChild(self.startingReciever!)
+
+            //Add the ending reciever and hide it.
+            self.endingReciever = SKSpriteNode(color: .red, size: CGSize(width: 22, height: 400))
+            self.endingReciever!.anchorPoint = CGPoint(x: 0.5, y: 1)
+            self.endingReciever!.position.x = 187.5
+            self.endingReciever!.alpha = 0.25
+            self.endingReciever!.zPosition = 2
+            self.endingReciever!.isHidden = true
+            self.addChild(self.endingReciever!)
         }
-
-        //Add the starting reciever and hide it.
-        self.startingReciever = SKSpriteNode(color: .red, size: CGSize(width: 22, height: 400))
-        self.startingReciever!.anchorPoint = CGPoint(x: 0.5, y: 1)
-        self.startingReciever!.position.x = 0
-        self.startingReciever!.alpha = 0.25
-        self.startingReciever!.zPosition = 2
-        self.startingReciever!.isHidden = true
-        self.addChild(self.startingReciever!)
-
-        //Add the ending reciever and hide it.
-        self.endingReciever = SKSpriteNode(color: .red, size: CGSize(width: 22, height: 400))
-        self.endingReciever!.anchorPoint = CGPoint(x: 0.5, y: 1)
-        self.endingReciever!.position.x = 187.5
-        self.endingReciever!.alpha = 0.25
-        self.endingReciever!.zPosition = 2
-        self.endingReciever!.isHidden = true
-        self.addChild(self.endingReciever!)
     }
 
     //When the respective wavedrawer reaches its maximum length it notifies us to start the next wave drawer.
@@ -170,16 +170,14 @@ class WaveGenerator:SKNode, WaveGenerationNotifier, UIGestureRecognizerDelegate{
                 }
             }else{
                 //Initialize the tapGesture here because by now we are sure that the wavegenerator has been added to the scene.
-                if self.params!.waveHead.isPlayer == true{
-                    //Clear out recognizers between level loads.
-                    if self.scene!.view?.gestureRecognizers != nil {
-                        for ges in self.scene!.view!.gestureRecognizers! {
-                            self.scene!.view!.removeGestureRecognizer(ges)
-                        }
+                //Clear out recognizers between level loads.
+                if self.scene!.view?.gestureRecognizers != nil {
+                    for ges in self.scene!.view!.gestureRecognizers! {
+                        self.scene!.view!.removeGestureRecognizer(ges)
                     }
-                    self.userTapRecognizer = UITapGestureRecognizer(target: self, action: #selector(changeWaveHeadTravelDirection))
-                    self.scene!.view!.addGestureRecognizer(self.userTapRecognizer!)
                 }
+                self.userTapRecognizer = UITapGestureRecognizer(target: self, action: #selector(changeWaveHeadTravelDirection))
+                self.scene!.view!.addGestureRecognizer(self.userTapRecognizer!)
 
                 //This causes the player wave to draw as a straight line in the beginning
                 // before taking off upwards. Looks better than immediately jumping into the

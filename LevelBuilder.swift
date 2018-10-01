@@ -69,7 +69,7 @@ class WaveType{
 
 class Level {
     private var lvl:[SKAction] = []
-    private var lvlGen:LevelGenerator?
+    private weak var lvlGen:LevelGenerator?
 
     init(generator:LevelGenerator){
         self.lvlGen = generator
@@ -291,14 +291,7 @@ class LevelList {
 
     private class func level3(gen:LevelGenerator){
         let lvl = Level(generator: gen)
-        lvl.shiftTop(dy: 35)
-        lvl.shiftBottom(dy: -35)
-        lvl.wait(time: 1)
-        lvl.changeTopWave(to: WaveType.shiftDownwards())
-        lvl.changeBottomWave(to: WaveType.shiftDownwards())
-        lvl.wait(time: 2)
-        lvl.changeTopWave(to: WaveType.steady())
-        lvl.changeBottomWave(to: WaveType.steady())
+        RandomizerTree.generateLevel(for: lvl)
         lvl.runBuffer(level: gen)
     }
 }

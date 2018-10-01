@@ -41,17 +41,8 @@ class GameScene: SKScene, GameStatusNotifier{
         self.anchorPoint = CGPoint(x: 0.5, y: 0.5)
         self.backgroundColor = .black
 
-
         //Create a level and set it as the contact delegate
-        self.levelToPlay = LevelGenerator(in: self.view!)
-        self.addChild(self.levelToPlay!)
-        self.physicsWorld.contactDelegate = self.levelToPlay!
-
-        let playerOscillation:[[CGFloat]] = [[1,1,1,1]]
-        self.levelToPlay!.playerWave!.updateWaveOscillationWith(forces: playerOscillation)
-        LevelList.level(num: self.currentLevel, gen: self.levelToPlay!)
-        self.levelToPlay!.gameStatusDelegate = self
-        self.levelToPlay!.beginLevel()
+        self.resetLevel()
     }
 
     override func sceneDidLoad() {
@@ -62,16 +53,20 @@ class GameScene: SKScene, GameStatusNotifier{
     // This is easier and cleaner than writing some kind of crazy reset function to zero out all the values
     // inside the Wavegenerator class.
     private func resetLevel(){
-        self.removeAllActions()
-        self.levelToPlay!.removeFromParent()
-        self.levelToPlay = nil
+        //Remove references to reduce ARC and allow deinit of object
+        if self.levelToPlay != nil {
+            self.removeAllActions()
+            self.levelToPlay!.removeFromParent()
+            self.physicsWorld.contactDelegate = nil
+            self.levelToPlay = nil
+        }
 
         //Create a level and set it as the contact delegate
         self.levelToPlay = LevelGenerator(in: self.view!)
         self.addChild(self.levelToPlay!)
         self.physicsWorld.contactDelegate = self.levelToPlay!
 
-        let playerOscillation:[[CGFloat]] = [[1,1,1,1]]
+        let playerOscillation:[[CGFloat]] = [[1]]
         self.levelToPlay!.playerWave!.updateWaveOscillationWith(forces: playerOscillation)
         LevelList.level(num: self.currentLevel, gen: self.levelToPlay!)
         self.levelToPlay!.gameStatusDelegate = self
@@ -81,7 +76,7 @@ class GameScene: SKScene, GameStatusNotifier{
     //Function which handles win/lose condition and reseting the level.
     func gameStateChanged(status: GameStatus) {
         if status == .won{
-            self.run(SKAction.sequence([SKAction.wait(forDuration: 0.5), SKAction.run({
+            self.run(SKAction.sequence([SKAction.wait(forDuration: 0.5), SKAction.run({ [unowned self] in
                 self.gamestatus!.text = "SIGNAL RECEIVED!"
                 self.gamestatus!.fontSize = 36
                 self.gamestatus!.fontColor = .green
@@ -89,7 +84,7 @@ class GameScene: SKScene, GameStatusNotifier{
                     SKAction.fadeIn(withDuration: 0.5),
                     SKAction.wait(forDuration: 2),
                     SKAction.fadeOut(withDuration: 0.5),
-                    SKAction.run({
+                    SKAction.run({ [unowned self] in
                         self.currentLevel += 1
                         if self.currentLevel == 3 {
                             self.currentLevel = 0
@@ -98,7 +93,7 @@ class GameScene: SKScene, GameStatusNotifier{
                 })]))
             })]))
         }else if status == .lost{
-            self.run(SKAction.sequence([SKAction.wait(forDuration: 0.5), SKAction.run({
+            self.run(SKAction.sequence([SKAction.wait(forDuration: 0.5), SKAction.run({ [unowned self] in
                 self.gamestatus!.text = "SIGNAL LOST!"
                 self.gamestatus!.fontSize = 48
                 self.gamestatus!.fontColor = .red
@@ -106,7 +101,7 @@ class GameScene: SKScene, GameStatusNotifier{
                     SKAction.fadeIn(withDuration: 0.5),
                     SKAction.wait(forDuration: 2),
                     SKAction.fadeOut(withDuration: 0.5),
-                    SKAction.run({
+                    SKAction.run({ [unowned self] in
                         self.resetLevel()
                 })]))
             })]))

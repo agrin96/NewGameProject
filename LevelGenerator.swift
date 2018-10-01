@@ -19,6 +19,7 @@ protocol GameStatusNotifier:class{
     func gameStateChanged(status:GameStatus)
 }
 
+
 class LevelGenerator:SKNode, SKPhysicsContactDelegate, ScoreChangeNotifier{
     //Stores the wave generator
     var bottomWave:WaveGenerator?
@@ -41,11 +42,11 @@ class LevelGenerator:SKNode, SKPhysicsContactDelegate, ScoreChangeNotifier{
     // Each level will be a maximum of 180 seconds long.
     var currentTimeDisplay:SKLabelNode?
     var currentTime:CGFloat = 0
-    var levelTimer:Timer?
+    weak var levelTimer:Timer?
     let maximumLevelTime:CGFloat = 45//seconds
 
     //Notifier of win/lose
-    var gameStatusDelegate:GameStatusNotifier?
+    weak var gameStatusDelegate:GameStatusNotifier?
     var didPlayerLose:Bool = true
 
     required init?(coder aDecoder: NSCoder) {
@@ -55,7 +56,7 @@ class LevelGenerator:SKNode, SKPhysicsContactDelegate, ScoreChangeNotifier{
     //A level consists of 2 boundary waves and 1 player wave.
     init(in view:SKView) {
         super.init()
-
+        print("inititing")
         var playerSettings = WaveGeneratorParameters()
         playerSettings.waveHead.isPlayer = true
         playerSettings.waveHead.headColor = .red
@@ -63,6 +64,7 @@ class LevelGenerator:SKNode, SKPhysicsContactDelegate, ScoreChangeNotifier{
         self.playerWave = WaveGenerator(paramters: playerSettings)
         self.addChild(self.playerWave!)
         self.playerWave!.scoreUpdateDelegate = self
+
 
         var topWaveSettings = WaveGeneratorParameters()
         topWaveSettings.location = CGPoint(x: view.bounds.width / 2, y: 70)
@@ -86,6 +88,10 @@ class LevelGenerator:SKNode, SKPhysicsContactDelegate, ScoreChangeNotifier{
         self.addChild(self.currentTimeDisplay!)
     }
 
+    deinit{
+        print("Deiniting LevelGenerator")
+    }
+
     //Called to actually start the level
     func beginLevel(){
         if self.playerWave != nil{
@@ -97,16 +103,16 @@ class LevelGenerator:SKNode, SKPhysicsContactDelegate, ScoreChangeNotifier{
             queue.qualityOfService = .userInitiated
 
             //Start all the wave generators
-            queue.addOperation({
+            queue.addOperation({ [unowned self] in
                 self.bottomWave!.activateWaveGenerator()
             })
-            queue.addOperation({
+            queue.addOperation({ [unowned self] in
                 self.topWave!.activateWaveGenerator()
             })
 
             self.playerWave!.activateWaveGenerator()
 
-            queue.addOperation({
+            queue.addOperation({ [unowned self] in
                 for obs in self.obstacleGenerators {
                     obs.startObstacles()
                 }
@@ -115,7 +121,6 @@ class LevelGenerator:SKNode, SKPhysicsContactDelegate, ScoreChangeNotifier{
             //Start the level timer
             self.currentTimeDisplay!.text = "\(0)"
             self.levelTimer = Timer.scheduledTimer(timeInterval: 0.1, target: self, selector: #selector(updateTime), userInfo: nil, repeats: true)
-
         }
     }
 
@@ -143,6 +148,8 @@ class LevelGenerator:SKNode, SKPhysicsContactDelegate, ScoreChangeNotifier{
         //If the current level time reaches the max then we have won!
         if self.currentTime >= self.maximumLevelTime {
             self.levelTimer!.invalidate()
+            //TEST to fix signal recieve bug
+            self.levelTimer = nil
             self.currentTime = 0
             self.gameStatusDelegate!.gameStateChanged(status: .won)
             self.playerWave!.deactivateWaveGenerator()
@@ -159,13 +166,20 @@ class LevelGenerator:SKNode, SKPhysicsContactDelegate, ScoreChangeNotifier{
 
     internal func didBegin(_ contact: SKPhysicsContact) {
         if contact.bodyA.node?.name == "Player" || contact.bodyB.node?.name == "Player"{
-            self.didPlayerLose = true
-            self.isPaused = true
-            self.levelTimer!.invalidate()
+            //This prevents the double contact call from both the player node and the node it collided with
+            if self.didPlayerLose == false{
 
-            //If we hit into a wave then we have lost.
-            self.currentTime = 0
-            self.gameStatusDelegate!.gameStateChanged(status: .lost)
+                self.didPlayerLose = true
+                self.isPaused = true
+                if self.levelTimer != nil {
+                    self.levelTimer!.invalidate()
+                }
+
+                //If we hit into a wave then we have lost.
+                self.currentTime = 0
+                self.gameStatusDelegate!.gameStateChanged(status: .lost)
+            }
+
         }
     }
 
