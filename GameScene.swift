@@ -56,21 +56,24 @@ class GameScene: SKScene, GameStatusNotifier{
         //Remove references to reduce ARC and allow deinit of object
         if self.levelToPlay != nil {
             self.removeAllActions()
+            self.levelToPlay!.removeAllActions()
             self.levelToPlay!.removeFromParent()
             self.physicsWorld.contactDelegate = nil
             self.levelToPlay = nil
         }
 
-        //Create a level and set it as the contact delegate
-        self.levelToPlay = LevelGenerator(in: self.view!)
-        self.addChild(self.levelToPlay!)
-        self.physicsWorld.contactDelegate = self.levelToPlay!
+        if self.levelToPlay == nil {
+            //Create a level and set it as the contact delegate
+            self.levelToPlay = LevelGenerator(in: self.view!)
+            self.addChild(self.levelToPlay!)
+            self.physicsWorld.contactDelegate = self.levelToPlay!
 
-        let playerOscillation:[[CGFloat]] = [[1]]
-        self.levelToPlay!.playerWave!.updateWaveOscillationWith(forces: playerOscillation)
-        LevelList.level(num: self.currentLevel, gen: self.levelToPlay!)
-        self.levelToPlay!.gameStatusDelegate = self
-        self.levelToPlay!.beginLevel()
+            let playerOscillation:[[CGFloat]] = [[1]]
+            self.levelToPlay!.playerWave!.updateWaveOscillationWith(forces: playerOscillation)
+            LevelList.level(num: self.currentLevel, gen: self.levelToPlay!)
+            self.levelToPlay!.gameStatusDelegate = self
+            self.levelToPlay!.beginLevel()
+        }
     }
 
     //Function which handles win/lose condition and reseting the level.

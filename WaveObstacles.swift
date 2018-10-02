@@ -55,12 +55,17 @@ class ObstacleGenerator:SKNode{
         }
     }
 
+    func shiftObstacleGenerator(by delta:CGFloat){
+        let shiftAction = SKAction.moveTo(y: self.position.y + delta, duration: 1.5)
+        self.run(shiftAction)
+    }
+
     //Adds the SKActions that end up actually running the obstacles across the screen.
     // The actions are added to the obstacles not the generator.
     func startObstacles(){
         if self.randomPositions == true{
             for obs in obstacles{
-                obs.position.y = CGFloat(arc4random_uniform(600)) - 300
+                obs.position.y = CGFloat(arc4random_uniform(300)) - 150
             }
         }
 

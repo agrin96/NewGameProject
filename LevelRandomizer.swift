@@ -5,481 +5,325 @@
 
 import SpriteKit
 
-enum ShiftingDirection:Int {
-    case down = -1
-    case up = 1
-}
-
+//Decides whether to change top, bottom, or both boundary waves
 enum WaveChangeGroupings {
+    case both
     case top
     case bottom
-    case both
 }
 
-
-enum DisplacementTemplate:Int {
-    case displace30 = 0
-    case displace45
-    case displace55
-    case displace75
-
-    func run(lvl: Level, direction: ShiftingDirection, grouping:WaveChangeGroupings = .both) -> DisplacementTemplate {
-        switch self {
-        case .displace30:
-            switch grouping{
-            case .both:
-                lvl.shiftTop(dy: CGFloat(30 * direction.rawValue))
-                lvl.shiftBottom(dy: CGFloat(30 * direction.rawValue))
-                break
-            case .bottom:
-                lvl.shiftBottom(dy: CGFloat(30 * direction.rawValue))
-                break
-            case .top:
-                lvl.shiftTop(dy: CGFloat(30 * direction.rawValue))
-                break
-            }
-            return .displace30
-        case .displace45:
-            switch grouping{
-            case .both:
-                lvl.shiftTop(dy: CGFloat(45 * direction.rawValue))
-                lvl.shiftBottom(dy: CGFloat(45 * direction.rawValue))
-                break
-            case .bottom:
-                lvl.shiftBottom(dy: CGFloat(45 * direction.rawValue))
-                break
-            case .top:
-                lvl.shiftTop(dy: CGFloat(45 * direction.rawValue))
-                break
-            }
-            return .displace45
-        case .displace55:
-            switch grouping{
-            case .both:
-                lvl.shiftTop(dy: CGFloat(55 * direction.rawValue))
-                lvl.shiftBottom(dy: CGFloat(55 * direction.rawValue))
-                break
-            case .bottom:
-                lvl.shiftBottom(dy: CGFloat(55 * direction.rawValue))
-                break
-            case .top:
-                lvl.shiftTop(dy: CGFloat(55 * direction.rawValue))
-                break
-            }
-            return .displace55
-        case .displace75:
-            switch grouping{
-            case .both:
-                lvl.shiftTop(dy: CGFloat(75 * direction.rawValue))
-                lvl.shiftBottom(dy: CGFloat(75 * direction.rawValue))
-                break
-            case .bottom:
-                lvl.shiftBottom(dy: CGFloat(75 * direction.rawValue))
-                break
-            case .top:
-                lvl.shiftTop(dy: CGFloat(75 * direction.rawValue))
-                break
-            }
-            return .displace75
-        }
+class LevelPieceTemplates {
+    enum SegmentTemplateType:Int{
+        case steady = 0
+        case sin1
+        case sin2
+        case sin3
+        case sin4
+        case square1
+        case square2
+        case square3
+        case square4
+        case triangle1
+        case triangle2
+        case triangle3
+        case triangle4
+        case meld1
+        case meld2
+        case meld3
+        case meld4
+        case meld5
+        case meld6
     }
-}
+    class func addSegment(type:SegmentTemplateType, to lvl:Level){
+        switch type {
+        case .steady:
+            let dxMultiplier: CGFloat = 1
+            let dyMultiplier: CGFloat = 1
+            let wave = WaveType.steady()
 
-//Wave height is set via shifting by 0.25 increments.
-enum ShiftingTemplates:Int {
-    case N8 = -8    //Maximum negative shift of 2.0 seconds.
-    case N7
-    case N6
-    case N5
-    case N4
-    case N3
-    case N2
-    case N1
-    case CE = 0     //Centered or default position
-    case P1
-    case P2
-    case P3
-    case P4
-    case P5
-    case P6
-    case P7
-    case P8 = 8     //Maximum upwards shift of 2.0 seconds
+            lvl.changeTopWave(to: Level.scale(wave: wave, dx: dxMultiplier, dy: dyMultiplier))
+            lvl.changeBottomWave(to: Level.scale(wave: wave, dx: dxMultiplier, dy: dyMultiplier))
 
-    func run(lvl:Level, newHeight:ShiftingTemplates, grouping:WaveChangeGroupings = .both) -> ShiftingTemplates {
-        //Here we use the raw values to calculate how long we should run the shifting
-        // because we arbitrarily determined the interlevel distance as a 0.25 second shift.
-        let difference:Double = Double(abs(newHeight.rawValue - self.rawValue))
-        let waitTime:Double = Double(difference * 0.25)
-
-        switch grouping {
-        case .both:
-            if self.rawValue > newHeight.rawValue {
-                //We are going down.
-                lvl.changeTopWave(to: WaveType.shiftDownwards())
-                lvl.changeBottomWave(to: WaveType.shiftDownwards())
-            }else{
-                //We are moving up.
-                lvl.changeTopWave(to: WaveType.shiftUpwards())
-                lvl.changeBottomWave(to: WaveType.shiftUpwards())
-            }
-            lvl.wait(time: waitTime)
-            //Update the wave level indicator
-            return newHeight
-        case .top:
-            if self.rawValue > newHeight.rawValue {
-                //We are going down.
-                lvl.changeTopWave(to: WaveType.shiftDownwards())
-            }else{
-                //We are moving up.
-                lvl.changeTopWave(to: WaveType.shiftUpwards())
-            }
-            lvl.wait(time: waitTime)
-            //Update the wave level indicator
-            return newHeight
-        case .bottom:
-            if self.rawValue > newHeight.rawValue {
-                //We are going down.
-                lvl.changeBottomWave(to: WaveType.shiftDownwards())
-            }else{
-                //We are moving up.
-                lvl.changeBottomWave(to: WaveType.shiftUpwards())
-            }
-            lvl.wait(time: waitTime)
-            //Update the wave level indicator
-            return newHeight
-        }
-    }
-}
-
-enum WaveTemplates:Int {
-    case sin1
-    case sin2
-    case sin3
-    case sin4
-    case square1
-    case square2
-    case square3
-    case square4
-    case triangle1
-    case triangle2
-    case triangle3
-    case triangle4
-
-    func run(lvl: Level, grouping: WaveChangeGroupings = .both){
-        switch self {
+            lvl.wait(time: 1.0)
+            lvl.addObstacleGenerator(position: CGPoint(x: UIScreen.main.bounds.width + 25, y: 0), obsParams: ObstacleParameters(
+                    timeBetweenObstacles: 1.0,
+                    obstacleTravelTime: 5,
+                    obstacleSize: CGSize(width: 50, height: 10),
+                    randomPositions: true))
         case .sin1:
-            let dxMultiplier:CGFloat = 1
-            let dyMultiplier:CGFloat = 1
+            let dxMultiplier: CGFloat = 1
+            let dyMultiplier: CGFloat = 1
             let wave = WaveType.simpleSin()
-            switch grouping {
-            case .both:
-                lvl.changeTopWave(to: Level.scale(wave: wave, dx: dxMultiplier, dy: dyMultiplier))
-                lvl.changeBottomWave(to: Level.scale(wave: wave, dx: dxMultiplier, dy: dyMultiplier))
-                break
-            case .top:
-                lvl.changeTopWave(to: Level.scale(wave: wave, dx: dxMultiplier, dy: dyMultiplier))
-                break
-            case .bottom:
-                lvl.changeBottomWave(to: Level.scale(wave: wave, dx: dxMultiplier, dy: dyMultiplier))
-                break
-            }
-        case .sin2:
-            let dxMultiplier:CGFloat = 2
-            let dyMultiplier:CGFloat = 2
-            let wave = WaveType.simpleSin()
-            switch grouping {
-            case .both:
-                lvl.changeTopWave(to: Level.scale(wave: wave, dx: dxMultiplier, dy: dyMultiplier))
-                lvl.changeBottomWave(to: Level.scale(wave: wave, dx: dxMultiplier, dy: dyMultiplier))
-                break
-            case .top:
-                lvl.changeTopWave(to: Level.scale(wave: wave, dx: dxMultiplier, dy: dyMultiplier))
-                break
-            case .bottom:
-                lvl.changeBottomWave(to: Level.scale(wave: wave, dx: dxMultiplier, dy: dyMultiplier))
-                break
-            }
-        case .sin3:
-            let dxMultiplier:CGFloat = 4
-            let dyMultiplier:CGFloat = 2
-            let wave = WaveType.simpleSin()
-            switch grouping {
-            case .both:
-                lvl.changeTopWave(to: Level.scale(wave: wave, dx: dxMultiplier, dy: dyMultiplier))
-                lvl.changeBottomWave(to: Level.scale(wave: wave, dx: dxMultiplier, dy: dyMultiplier))
-                break
-            case .top:
-                lvl.changeTopWave(to: Level.scale(wave: wave, dx: dxMultiplier, dy: dyMultiplier))
-                break
-            case .bottom:
-                lvl.changeBottomWave(to: Level.scale(wave: wave, dx: dxMultiplier, dy: dyMultiplier))
-                break
-            }
-        case .sin4:
-            let dxMultiplier:CGFloat = 3
-            let dyMultiplier:CGFloat = 2.5
-            let wave = WaveType.simpleSin()
-            switch grouping {
-            case .both:
-                lvl.changeTopWave(to: Level.scale(wave: wave, dx: dxMultiplier, dy: dyMultiplier))
-                lvl.changeBottomWave(to: Level.scale(wave: wave, dx: dxMultiplier, dy: dyMultiplier))
-                break
-            case .top:
-                lvl.changeTopWave(to: Level.scale(wave: wave, dx: dxMultiplier, dy: dyMultiplier))
-                break
-            case .bottom:
-                lvl.changeBottomWave(to: Level.scale(wave: wave, dx: dxMultiplier, dy: dyMultiplier))
-                break
-            }
-        case .square1:
-            let dxMultiplier:CGFloat = 1
-            let dyMultiplier:CGFloat = 1
-            let wave = WaveType.simpleSquare()
-            switch grouping {
-            case .both:
-                lvl.changeTopWave(to: Level.scale(wave: wave, dx: dxMultiplier, dy: dyMultiplier))
-                lvl.changeBottomWave(to: Level.scale(wave: wave, dx: dxMultiplier, dy: dyMultiplier))
-                break
-            case .top:
-                lvl.changeTopWave(to: Level.scale(wave: wave, dx: dxMultiplier, dy: dyMultiplier))
-                break
-            case .bottom:
-                lvl.changeBottomWave(to: Level.scale(wave: wave, dx: dxMultiplier, dy: dyMultiplier))
-                break
-            }
-        case .square2:
-            let dxMultiplier:CGFloat = 2
-            let dyMultiplier:CGFloat = 2
-            let wave = WaveType.simpleSquare()
-            switch grouping {
-            case .both:
-                lvl.changeTopWave(to: Level.scale(wave: wave, dx: dxMultiplier, dy: dyMultiplier))
-                lvl.changeBottomWave(to: Level.scale(wave: wave, dx: dxMultiplier, dy: dyMultiplier))
-                break
-            case .top:
-                lvl.changeTopWave(to: Level.scale(wave: wave, dx: dxMultiplier, dy: dyMultiplier))
-                break
-            case .bottom:
-                lvl.changeBottomWave(to: Level.scale(wave: wave, dx: dxMultiplier, dy: dyMultiplier))
-                break
-            }
-        case .square3:
-            let dxMultiplier:CGFloat = 3
-            let dyMultiplier:CGFloat = 2.5
-            let wave = WaveType.simpleSquare()
-            switch grouping {
-            case .both:
-                lvl.changeTopWave(to: Level.scale(wave: wave, dx: dxMultiplier, dy: dyMultiplier))
-                lvl.changeBottomWave(to: Level.scale(wave: wave, dx: dxMultiplier, dy: dyMultiplier))
-                break
-            case .top:
-                lvl.changeTopWave(to: Level.scale(wave: wave, dx: dxMultiplier, dy: dyMultiplier))
-                break
-            case .bottom:
-                lvl.changeBottomWave(to: Level.scale(wave: wave, dx: dxMultiplier, dy: dyMultiplier))
-                break
-            }
-        case .square4:
-            let dxMultiplier:CGFloat = 4
-            let dyMultiplier:CGFloat = 2.5
-            let wave = WaveType.simpleSquare()
-            switch grouping {
-            case .both:
-                lvl.changeTopWave(to: Level.scale(wave: wave, dx: dxMultiplier, dy: dyMultiplier))
-                lvl.changeBottomWave(to: Level.scale(wave: wave, dx: dxMultiplier, dy: dyMultiplier))
-                break
-            case .top:
-                lvl.changeTopWave(to: Level.scale(wave: wave, dx: dxMultiplier, dy: dyMultiplier))
-                break
-            case .bottom:
-                lvl.changeBottomWave(to: Level.scale(wave: wave, dx: dxMultiplier, dy: dyMultiplier))
-                break
-            }
-        case .triangle1:
-            let dxMultiplier:CGFloat = 1
-            let dyMultiplier:CGFloat = 1
-            let wave = WaveType.simpleTriangle()
-            switch grouping {
-            case .both:
-                lvl.changeTopWave(to: Level.scale(wave: wave, dx: dxMultiplier, dy: dyMultiplier))
-                lvl.changeBottomWave(to: Level.scale(wave: wave, dx: dxMultiplier, dy: dyMultiplier))
-                break
-            case .top:
-                lvl.changeTopWave(to: Level.scale(wave: wave, dx: dxMultiplier, dy: dyMultiplier))
-                break
-            case .bottom:
-                lvl.changeBottomWave(to: Level.scale(wave: wave, dx: dxMultiplier, dy: dyMultiplier))
-                break
-            }
-        case .triangle2:
-            let dxMultiplier:CGFloat = 2
-            let dyMultiplier:CGFloat = 2
-            let wave = WaveType.simpleTriangle()
-            switch grouping {
-            case .both:
-                lvl.changeTopWave(to: Level.scale(wave: wave, dx: dxMultiplier, dy: dyMultiplier))
-                lvl.changeBottomWave(to: Level.scale(wave: wave, dx: dxMultiplier, dy: dyMultiplier))
-                break
-            case .top:
-                lvl.changeTopWave(to: Level.scale(wave: wave, dx: dxMultiplier, dy: dyMultiplier))
-                break
-            case .bottom:
-                lvl.changeBottomWave(to: Level.scale(wave: wave, dx: dxMultiplier, dy: dyMultiplier))
-                break
-            }
-        case .triangle3:
-            let dxMultiplier:CGFloat = 3
-            let dyMultiplier:CGFloat = 2.5
-            let wave = WaveType.simpleTriangle()
-            switch grouping {
-            case .both:
-                lvl.changeTopWave(to: Level.scale(wave: wave, dx: dxMultiplier, dy: dyMultiplier))
-                lvl.changeBottomWave(to: Level.scale(wave: wave, dx: dxMultiplier, dy: dyMultiplier))
-                break
-            case .top:
-                lvl.changeTopWave(to: Level.scale(wave: wave, dx: dxMultiplier, dy: dyMultiplier))
-                break
-            case .bottom:
-                lvl.changeBottomWave(to: Level.scale(wave: wave, dx: dxMultiplier, dy: dyMultiplier))
-                break
-            }
-        case .triangle4:
-            let dxMultiplier:CGFloat = 4
-            let dyMultiplier:CGFloat = 2
-            let wave = WaveType.simpleTriangle()
-            switch grouping {
-            case .both:
-                lvl.changeTopWave(to: Level.scale(wave: wave, dx: dxMultiplier, dy: dyMultiplier))
-                lvl.changeBottomWave(to: Level.scale(wave: wave, dx: dxMultiplier, dy: dyMultiplier))
-                break
-            case .top:
-                lvl.changeTopWave(to: Level.scale(wave: wave, dx: dxMultiplier, dy: dyMultiplier))
-                break
-            case .bottom:
-                lvl.changeBottomWave(to: Level.scale(wave: wave, dx: dxMultiplier, dy: dyMultiplier))
-                break
-            }
-        }
-    }
 
-    private mutating func change(to: WaveTemplates){
-        self = to
+            lvl.changeTopWave(to: Level.scale(wave: wave, dx: dxMultiplier, dy: dyMultiplier))
+            lvl.changeBottomWave(to: Level.scale(wave: wave, dx: dxMultiplier, dy: dyMultiplier))
+            break
+        case .sin2:
+            let dxMultiplier: CGFloat = 2
+            let dyMultiplier: CGFloat = 2
+            let wave = WaveType.simpleSin()
+
+            lvl.changeTopWave(to: Level.scale(wave: wave, dx: dxMultiplier, dy: dyMultiplier))
+            lvl.changeBottomWave(to: Level.scale(wave: wave, dx: dxMultiplier, dy: dyMultiplier))
+            break
+        case .sin3:
+            let dxMultiplier: CGFloat = 4
+            let dyMultiplier: CGFloat = 2
+            let wave = WaveType.simpleSin()
+
+            lvl.changeTopWave(to: Level.scale(wave: wave, dx: dxMultiplier, dy: dyMultiplier))
+            lvl.changeBottomWave(to: Level.scale(wave: wave, dx: dxMultiplier, dy: dyMultiplier))
+            break
+        case .sin4:
+            let dxMultiplier: CGFloat = 3
+            let dyMultiplier: CGFloat = 2.5
+            let wave = WaveType.simpleSin()
+
+            lvl.changeTopWave(to: Level.scale(wave: wave, dx: dxMultiplier, dy: dyMultiplier))
+            lvl.changeBottomWave(to: Level.scale(wave: wave, dx: dxMultiplier, dy: dyMultiplier))
+            break
+        case .square1:
+            let dxMultiplier: CGFloat = 1
+            let dyMultiplier: CGFloat = 1
+            let wave = WaveType.simpleSquare()
+
+            lvl.changeTopWave(to: Level.scale(wave: wave, dx: dxMultiplier, dy: dyMultiplier))
+            lvl.changeBottomWave(to: Level.scale(wave: wave, dx: dxMultiplier, dy: dyMultiplier))
+            break
+        case .square2:
+            let dxMultiplier: CGFloat = 2
+            let dyMultiplier: CGFloat = 2
+            let wave = WaveType.simpleSquare()
+
+            lvl.changeTopWave(to: Level.scale(wave: wave, dx: dxMultiplier, dy: dyMultiplier))
+            lvl.changeBottomWave(to: Level.scale(wave: wave, dx: dxMultiplier, dy: dyMultiplier))
+            break
+        case .square3:
+            let dxMultiplier: CGFloat = 3
+            let dyMultiplier: CGFloat = 2.5
+            let wave = WaveType.simpleSquare()
+
+            lvl.changeTopWave(to: Level.scale(wave: wave, dx: dxMultiplier, dy: dyMultiplier))
+            lvl.changeBottomWave(to: Level.scale(wave: wave, dx: dxMultiplier, dy: dyMultiplier))
+            break
+        case .square4:
+            let dxMultiplier: CGFloat = 4
+            let dyMultiplier: CGFloat = 2.5
+            let wave = WaveType.simpleSquare()
+
+            lvl.changeTopWave(to: Level.scale(wave: wave, dx: dxMultiplier, dy: dyMultiplier))
+            lvl.changeBottomWave(to: Level.scale(wave: wave, dx: dxMultiplier, dy: dyMultiplier))
+            break
+        case .triangle1:
+            let dxMultiplier: CGFloat = 1
+            let dyMultiplier: CGFloat = 1
+            let wave = WaveType.simpleTriangle()
+
+            lvl.changeTopWave(to: Level.scale(wave: wave, dx: dxMultiplier, dy: dyMultiplier))
+            lvl.changeBottomWave(to: Level.scale(wave: wave, dx: dxMultiplier, dy: dyMultiplier))
+            break
+        case .triangle2:
+            let dxMultiplier: CGFloat = 2
+            let dyMultiplier: CGFloat = 2
+            let wave = WaveType.simpleTriangle()
+
+            lvl.changeTopWave(to: Level.scale(wave: wave, dx: dxMultiplier, dy: dyMultiplier))
+            lvl.changeBottomWave(to: Level.scale(wave: wave, dx: dxMultiplier, dy: dyMultiplier))
+            break
+        case .triangle3:
+            let dxMultiplier: CGFloat = 3
+            let dyMultiplier: CGFloat = 2.5
+            let wave = WaveType.simpleTriangle()
+
+            lvl.changeTopWave(to: Level.scale(wave: wave, dx: dxMultiplier, dy: dyMultiplier))
+            lvl.changeBottomWave(to: Level.scale(wave: wave, dx: dxMultiplier, dy: dyMultiplier))
+            break
+        case .triangle4:
+            let dxMultiplier: CGFloat = 4
+            let dyMultiplier: CGFloat = 2
+            let wave = WaveType.simpleTriangle()
+
+            lvl.changeTopWave(to: Level.scale(wave: wave, dx: dxMultiplier, dy: dyMultiplier))
+            lvl.changeBottomWave(to: Level.scale(wave: wave, dx: dxMultiplier, dy: dyMultiplier))
+            break
+        case .meld1:
+            let dxMultiplierA: CGFloat = 2
+            let dyMultiplierA: CGFloat = 2
+            lvl.changeTopWave(to: Level.scale(wave: WaveType.simpleSin(), dx: dxMultiplierA, dy: dyMultiplierA))
+
+            let dxMultiplierB: CGFloat = 3
+            let dyMultiplierB: CGFloat = 1.5
+            lvl.changeBottomWave(to: Level.scale(wave: WaveType.simpleSquare(), dx: dxMultiplierB, dy: dyMultiplierB))
+            break
+        case .meld2:
+            let dxMultiplierA: CGFloat = 1.5
+            let dyMultiplierA: CGFloat = 2
+            lvl.changeTopWave(to: Level.scale(wave: WaveType.simpleTriangle(), dx: dxMultiplierA, dy: dyMultiplierA))
+
+            let dxMultiplierB: CGFloat = 3
+            let dyMultiplierB: CGFloat = 2
+            lvl.changeBottomWave(to: Level.scale(wave: WaveType.simpleSquare(), dx: dxMultiplierB, dy: dyMultiplierB))
+            break
+        case .meld3:
+            let dxMultiplierA: CGFloat = 1.5
+            let dyMultiplierA: CGFloat = 2
+            lvl.changeTopWave(to: Level.scale(wave: WaveType.simpleTrapezoid(), dx: dxMultiplierA, dy: dyMultiplierA))
+
+            let dxMultiplierB: CGFloat = 2
+            let dyMultiplierB: CGFloat = 3
+            lvl.changeBottomWave(to: Level.scale(wave: WaveType.simpleSin(), dx: dxMultiplierB, dy: dyMultiplierB))
+            break
+        case .meld4:
+            let dxMultiplierA:CGFloat = 4
+            let dyMultiplierA:CGFloat = 2
+            lvl.changeTopWave(to: Level.scale(wave: WaveType.simpleTriangle(), dx: dxMultiplierA, dy: dyMultiplierA))
+
+            let dxMultiplierB:CGFloat = 1.5
+            let dyMultiplierB:CGFloat = 3
+            lvl.changeBottomWave(to: Level.scale(wave: WaveType.simpleTrapezoid(), dx: dxMultiplierB, dy: dyMultiplierB))
+            break
+        case .meld5:
+            let dxMultiplierA:CGFloat = 2
+            let dyMultiplierA:CGFloat = 2
+            lvl.changeTopWave(to: Level.scale(wave: WaveType.simpleSin(), dx: dxMultiplierA, dy: dyMultiplierA))
+
+            let dxMultiplierB:CGFloat = 2
+            let dyMultiplierB:CGFloat = 2
+            lvl.changeBottomWave(to: Level.scale(wave: WaveType.simpleTriangle(), dx: dxMultiplierB, dy: dyMultiplierB))
+            break
+        case .meld6:
+            let dxMultiplierA:CGFloat = 2
+            let dyMultiplierA:CGFloat = 4
+            lvl.changeTopWave(to: Level.scale(wave: WaveType.simpleSquare(), dx: dxMultiplierA, dy: dyMultiplierA))
+
+            let dxMultiplierB:CGFloat = 3
+            let dyMultiplierB:CGFloat = 2
+            lvl.changeBottomWave(to: Level.scale(wave: WaveType.simpleSquare(), dx: dxMultiplierB, dy: dyMultiplierB))
+            break
+        }
     }
 }
 
-enum ObstacleTemplates:Int {
-    case obstacle1
-    case obstacle2
-    case obstacle3
-    case obstacle4
-    case obstacle5
+class DisplacementTemplate {
+    enum WaveDisplacements:Int {
+        case outDisplace30 = 0
+        case outDisplace45
+        case outDisplace55
+        case outDisplace75
+        case inDisplace30
+        case inDisplace45
+        case inDisplace55
+        case inDisplace75
+    }
 
-    func run(lvl: Level){
-        //Before an obstacle is added there is a 1 second lead time.
-        lvl.wait(time: 1)
-        switch self {
-        case .obstacle1:
-            lvl.addObstacleGenerator(position: CGPoint(x: 400, y: 0), obsParams: ObstacleParameters(
-                    timeBetweenObstacles: 0.5,
-                    obstacleTravelTime: 5,
-                    obstacleSize: CGSize(width: 50, height: 10),
-                    randomPositions: false))
-            lvl.addObstacleGenerator(position: CGPoint(x: 400, y: 30), obsParams: ObstacleParameters(
-                    timeBetweenObstacles: 0.5,
-                    obstacleTravelTime: 5,
-                    obstacleSize: CGSize(width: 50, height: 10),
-                    randomPositions: false))
-            lvl.addObstacleGenerator(position: CGPoint(x: 400, y: -30), obsParams: ObstacleParameters(
-                    timeBetweenObstacles: 0.5,
-                    obstacleTravelTime: 5,
-                    obstacleSize: CGSize(width: 50, height: 10),
-                    randomPositions: false))
-        case .obstacle2:
-            lvl.addObstacleGenerator(position: CGPoint(x: 400, y: 0), obsParams: ObstacleParameters(
-                    timeBetweenObstacles: 0.5,
-                    obstacleTravelTime: 5,
-                    obstacleSize: CGSize(width: 50, height: 10),
-                    randomPositions: false))
-            lvl.addObstacleGenerator(position: CGPoint(x: 400, y: 60), obsParams: ObstacleParameters(
-                    timeBetweenObstacles: 0.5,
-                    obstacleTravelTime: 5,
-                    obstacleSize: CGSize(width: 50, height: 10),
-                    randomPositions: false))
-            lvl.addObstacleGenerator(position: CGPoint(x: 400, y: -60), obsParams: ObstacleParameters(
-                    timeBetweenObstacles: 0.5,
-                    obstacleTravelTime: 5,
-                    obstacleSize: CGSize(width: 50, height: 10),
-                    randomPositions: false))
-        case .obstacle3:
-            lvl.addObstacleGenerator(position: CGPoint(x: 400, y: 0), obsParams: ObstacleParameters(
-                    timeBetweenObstacles: 0.5,
-                    obstacleTravelTime: 5,
-                    obstacleSize: CGSize(width: 50, height: 10),
-                    randomPositions: false))
-            lvl.addObstacleGenerator(position: CGPoint(x: 400, y: 90), obsParams: ObstacleParameters(
-                    timeBetweenObstacles: 0.5,
-                    obstacleTravelTime: 3,
-                    obstacleSize: CGSize(width: 50, height: 10),
-                    randomPositions: false))
-            lvl.addObstacleGenerator(position: CGPoint(x: 400, y: -90), obsParams: ObstacleParameters(
-                    timeBetweenObstacles: 0.5,
-                    obstacleTravelTime: 3,
-                    obstacleSize: CGSize(width: 50, height: 10),
-                    randomPositions: false))
-        case .obstacle4:
-            lvl.addObstacleGenerator(position: CGPoint(x: 400, y: 0), obsParams: ObstacleParameters(
-                    timeBetweenObstacles: 1.5,
-                    obstacleTravelTime: 5,
-                    obstacleSize: CGSize(width: 50, height: 10),
-                    randomPositions: false))
-            lvl.addObstacleGenerator(position: CGPoint(x: 400, y: 120), obsParams: ObstacleParameters(
-                    timeBetweenObstacles: 1,
-                    obstacleTravelTime: 5,
-                    obstacleSize: CGSize(width: 50, height: 10),
-                    randomPositions: false))
-            lvl.addObstacleGenerator(position: CGPoint(x: 400, y: -120), obsParams: ObstacleParameters(
-                    timeBetweenObstacles: 1.5,
-                    obstacleTravelTime: 5,
-                    obstacleSize: CGSize(width: 50, height: 10),
-                    randomPositions: false))
-        case .obstacle5:
-            lvl.addObstacleGenerator(position: CGPoint(x: 400, y: 0), obsParams: ObstacleParameters(
-                    timeBetweenObstacles: 0.5,
-                    obstacleTravelTime: 5,
-                    obstacleSize: CGSize(width: 50, height: 10),
-                    randomPositions: false))
-            lvl.addObstacleGenerator(position: CGPoint(x: 400, y: 30), obsParams: ObstacleParameters(
-                    timeBetweenObstacles: 0.5,
-                    obstacleTravelTime: 5,
-                    obstacleSize: CGSize(width: 50, height: 10),
-                    randomPositions: false))
-            lvl.addObstacleGenerator(position: CGPoint(x: 400, y: -30), obsParams: ObstacleParameters(
-                    timeBetweenObstacles: 0.5,
-                    obstacleTravelTime: 5,
-                    obstacleSize: CGSize(width: 50, height: 10),
-                    randomPositions: false))
+    class func addDisplacementSegment(to lvl: Level, with displaceType:WaveDisplacements){
+        switch displaceType {
+        //Pushes the two wave boundaries apart
+        case .outDisplace30:
+            lvl.shiftTop(dy: 30)
+            lvl.shiftBottom(dy: -30)
+            break
+        case .outDisplace45:
+            lvl.shiftTop(dy: 45)
+            lvl.shiftBottom(dy: -45)
+            break
+        case .outDisplace55:
+            lvl.shiftTop(dy: 60)
+            lvl.shiftBottom(dy: -60)
+            break
+        case .outDisplace75:
+            lvl.shiftTop(dy: 75)
+            lvl.shiftBottom(dy: -75)
+            break
+
+        //Squishes the two wave boundaries together
+        case .inDisplace30:
+            lvl.shiftTop(dy: -30)
+            lvl.shiftBottom(dy: 30)
+            break
+        case .inDisplace45:
+            lvl.shiftTop(dy: -45)
+            lvl.shiftBottom(dy: 45)
+            break
+        case .inDisplace55:
+            lvl.shiftTop(dy: -60)
+            lvl.shiftBottom(dy: 60)
+            break
+        case .inDisplace75:
+            lvl.shiftTop(dy: -75)
+            lvl.shiftBottom(dy: 75)
+            break
         }
+    }
+}
+
+
+class ShiftingTemplate {
+    //Wave height is set via shifting by 0.25 increments.
+    enum YLevelsList:Int {
+        case up025 = 0
+        case up050 = 1
+        case up100 = 2
+        case down025
+        case down050
+        case down100
+    }
+
+    public class func addYShiftingSection(to lvl:Level, newY:YLevelsList){
+        var waitTime:Double = 0
+
+        //Use the new level to determine how much the shift should be.
+        switch newY {
+        case .up025:
+            waitTime = 0.25
+            break
+        case .up050:
+            waitTime = 0.50
+            break
+        case .up100:
+            waitTime = 1.0
+            break
+        case .down025:
+            waitTime = 0.25
+            break
+        case .down050:
+            waitTime = 0.50
+            break
+        case .down100:
+            waitTime = 1.0
+            break
+        }
+
+        //Use the raw value to set the direction of travel
+        if newY.rawValue > 2 {
+            lvl.changeTopWave(to: WaveType.shiftUpwards())
+            lvl.changeBottomWave(to: WaveType.shiftUpwards())
+            //Shift the obstacle generators so they remain relavant
+            lvl.shiftObstacleGenerators(by: 30)
+        }else{
+            lvl.changeTopWave(to: WaveType.shiftDownwards())
+            lvl.changeBottomWave(to: WaveType.shiftDownwards())
+            lvl.shiftObstacleGenerators(by: -30)
+        }
+        lvl.wait(time: waitTime)
     }
 }
 
 class RandomizerTree {
     public class func generateLevel(for lvl:Level){
-        //Set initial displacement
-        if DisplacementTemplate.displace30.run(lvl: lvl, direction: .up, grouping: .top) != .displace30 { return }
-        if DisplacementTemplate.displace30.run(lvl: lvl, direction: .down, grouping: .bottom) != .displace30 { return }
-
-        //Set wavetype
-        WaveTemplates.sin2.run(lvl: lvl)
-
         //Add obstacles
-        ObstacleTemplates.obstacle4.run(lvl: lvl)
-//        ObstacleTemplates.obstacle5.run(lvl: lvl)
+        DisplacementTemplate.addDisplacementSegment(to: lvl, with: .outDisplace45)
+        LevelPieceTemplates.addSegment(type: .steady, to: lvl)
+        lvl.wait(time: 0.5)
+        LevelPieceTemplates.addSegment(type: .meld2, to: lvl)
+        lvl.wait(time: 15)
+        ShiftingTemplate.addYShiftingSection(to: lvl, newY: .down050)
+        LevelPieceTemplates.addSegment(type: .triangle3, to: lvl)
+        lvl.wait(time: 15)
+        ShiftingTemplate.addYShiftingSection(to: lvl, newY: .up050)
 
-        lvl.wait(time: 10)
-        if ShiftingTemplates.CE.run(lvl: lvl, newHeight: .P3, grouping: .both) != .P3 { return }
-        WaveTemplates.square3.run(lvl: lvl)
-        lvl.wait(time: 10)
-        if ShiftingTemplates.P3.run(lvl: lvl, newHeight: .CE, grouping: .both) != .CE { return }
-        WaveTemplates.triangle3.run(lvl: lvl)
+        //FIX OBSTACLE ADDITION
+        //CHANGE THE SHIFTING ACTION TO FLOAT BASIS
+        //MAKE SEGMENTS
     }
 }

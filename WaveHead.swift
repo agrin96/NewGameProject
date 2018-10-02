@@ -119,6 +119,10 @@ class WaveHead:SKSpriteNode {
         self.oscillationCount = 0
         self.p_osciallationForces = forces.flatMap({$0})
         self.n_osciallationForces = forces.flatMap({$0}).map({return -$0})
+
+        //Reset the movement
+        self.deactivateWaveHead()
+        self.activateWaveHead()
     }
 }
 

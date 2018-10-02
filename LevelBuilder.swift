@@ -107,6 +107,11 @@ class Level {
         self.lvlGen!.obstacleGenerators.append(temp)
         self.lvlGen!.addChild(temp)
     }
+    public func shiftObstacleGenerators(by delta:CGFloat){
+        for obs in self.lvlGen!.obstacleGenerators {
+            obs.shiftObstacleGenerator(by: delta)
+        }
+    }
     public func runBuffer(level:LevelGenerator){
         level.run(SKAction.sequence(self.lvl))
     }

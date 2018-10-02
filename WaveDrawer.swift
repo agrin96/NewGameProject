@@ -13,8 +13,7 @@ class WaveDrawer:SKShapeNode {
     private var physicsPath:CGMutablePath?
 
     //This is the maximum width of one possible wave in points.
-    // chosen based on the width of the iphone X screen.
-    private var maxWaveWidth:CGFloat = 400
+    private var maxWaveWidth:CGFloat = UIScreen.main.bounds.width
     private var called:Bool = false
 
     var waveNotificationDelegate: WaveGenerationNotifier?
@@ -36,8 +35,8 @@ class WaveDrawer:SKShapeNode {
             self.physicsPath = CGMutablePath()
         }else{
             //If this is the player wave then we don't need as long of a draw period.
-            // therefore we set a smaller limit than the default 400
-            self.maxWaveWidth = 200
+            // therefore we set a smaller limit than the default width of the screen
+            self.maxWaveWidth = UIScreen.main.bounds.width / 2
         }
     }
 
