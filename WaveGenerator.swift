@@ -193,13 +193,15 @@ class WaveGenerator:SKNode, WaveGenerationNotifier, UIGestureRecognizerDelegate{
                     self.startingReciever!.isHidden = false
                     self.startingReciever!.position.x -= self.params!.waveDrawer.waveSpeed
 
-                    if self.startingReciever!.position.x <= -170 && self.isUserInteractionEnabled == false{
-                        self.waveHead!.currentHeadDirection = .down
+                    if self.startingReciever!.position.x <= -(UIScreen.main.bounds.width / 2) && self.isUserInteractionEnabled == false{
+                        //Automatically start the player wavehead moving down.
+                        self.waveHead!.activatePlayerWavehead(direction: .down)
+
                         //For collision detection purposes we need to know that this is the player node.
                         self.waveHead!.name = "Player"
                         self.isUserInteractionEnabled = true
                     }
-                    if self.startingReciever!.position.x <= -200{
+                    if self.startingReciever!.position.x <= -(UIScreen.main.bounds.width){
                         self.removeAction(forKey: "StartingLine")
                         self.startingReciever!.removeFromParent()
                     }

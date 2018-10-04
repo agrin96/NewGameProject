@@ -68,7 +68,7 @@ class GameScene: SKScene, GameStatusNotifier{
             self.addChild(self.levelToPlay!)
             self.physicsWorld.contactDelegate = self.levelToPlay!
 
-            let playerOscillation:[[CGFloat]] = [[1]]
+            let playerOscillation:[[CGFloat]] = WaveType.playerSteady1()
             self.levelToPlay!.playerWave!.updateWaveOscillationWith(forces: playerOscillation)
             LevelList.level(num: self.currentLevel, gen: self.levelToPlay!)
             self.levelToPlay!.gameStatusDelegate = self

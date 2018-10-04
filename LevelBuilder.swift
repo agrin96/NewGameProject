@@ -12,6 +12,25 @@ import GameplayKit
 // This is to facilitate the scaling function in the wave builder. Otherwise
 // we this will crash out
 class WaveType{
+    public class func playerSteady1()->[[CGFloat]]{
+        return Array([
+            [CGFloat](repeatElement(1, count: 1)),
+            [CGFloat](repeatElement(1, count: 1))
+        ])
+    }
+
+    public class func playerSin1()->[[CGFloat]]{
+        return Array([
+            [CGFloat](repeatElement(0, count: 10)),
+            [CGFloat](repeatElement(0.1, count: 12)),
+            [CGFloat](repeatElement(0.25, count: 15)),
+            [CGFloat](repeatElement(0.50, count: 20)),
+            [CGFloat](repeatElement(0.25, count: 15)),
+            [CGFloat](repeatElement(0.1, count: 12)),
+            [CGFloat](repeatElement(0, count: 10))
+        ])
+    }
+
     public class func simpleSin()->[[CGFloat]]{
         return Array([
             [CGFloat](repeatElement(0, count: 10)),
@@ -96,10 +115,16 @@ class Level {
         self.lvl.append(SKAction.run({self.lvlGen!.playerWave!.updateWaveOscillationWith(forces: to)}))
     }
     public func shiftTop(dy:CGFloat){
-        self.lvl.append(SKAction.run({self.lvlGen!.topWave!.position.y += dy}))
+        self.lvl.append(SKAction.run({
+            self.lvlGen!.topWave!.run(SKAction.moveTo(
+                    y: self.lvlGen!.topWave!.position.y + dy,
+                    duration: 1.0))}))
     }
     public func shiftBottom(dy:CGFloat){
-        self.lvl.append(SKAction.run({self.lvlGen!.bottomWave!.position.y += dy}))
+        self.lvl.append(SKAction.run({
+            self.lvlGen!.bottomWave!.run(SKAction.moveTo(
+                    y: self.lvlGen!.bottomWave!.position.y + dy,
+                    duration: 1.0))}))
     }
     public func addObstacleGenerator(position:CGPoint, obsParams:ObstacleParameters){
         let temp = ObstacleGenerator(params: obsParams)
@@ -108,9 +133,11 @@ class Level {
         self.lvlGen!.addChild(temp)
     }
     public func shiftObstacleGenerators(by delta:CGFloat){
-        for obs in self.lvlGen!.obstacleGenerators {
-            obs.shiftObstacleGenerator(by: delta)
-        }
+        self.lvl.append(SKAction.run({
+            for obs in self.lvlGen!.obstacleGenerators {
+                obs.shiftObstacleGenerator(by: delta)
+            }
+        }))
     }
     public func runBuffer(level:LevelGenerator){
         level.run(SKAction.sequence(self.lvl))
@@ -230,21 +257,6 @@ class LevelList {
         lvl.shiftTop(dy: 35)
         lvl.shiftBottom(dy: -35)
         lvl.wait(time: 1)
-        lvl.addObstacleGenerator(position: CGPoint(x: 400, y: 0), obsParams: ObstacleParameters(
-                timeBetweenObstacles: 0.5,
-                obstacleTravelTime: 5,
-                obstacleSize: CGSize(width: 24, height: 6),
-                randomPositions: true))
-        lvl.addObstacleGenerator(position: CGPoint(x: 400, y: 100), obsParams: ObstacleParameters(
-                timeBetweenObstacles: 1.5,
-                obstacleTravelTime: 5,
-                obstacleSize: CGSize(width: 18, height: 6),
-                randomPositions: true))
-        lvl.addObstacleGenerator(position: CGPoint(x: 400, y: -100), obsParams: ObstacleParameters(
-                timeBetweenObstacles: 1.5,
-                obstacleTravelTime: 5,
-                obstacleSize: CGSize(width: 18, height: 6),
-                randomPositions: true))
         lvl.changeTopWave(to: Level.flip(wave: Level.scale(wave: WaveType.simpleTriangle(), dx: 4, dy: 2)))
         lvl.changeBottomWave(to: Level.scale(wave: WaveType.simpleTriangle(), dx: 4, dy: 2))
         lvl.wait(time: 5)
@@ -267,21 +279,6 @@ class LevelList {
                 dx: CGFloat(arc4random_uniform(6)),
                 dy: CGFloat(arc4random_uniform(5))))
         lvl.wait(time: 1.5)
-        lvl.addObstacleGenerator(position: CGPoint(x: 400, y: 0), obsParams: ObstacleParameters(
-                timeBetweenObstacles: 0.5,
-                obstacleTravelTime: 5,
-                obstacleSize: CGSize(width: 24, height: 6),
-                randomPositions: true))
-        lvl.addObstacleGenerator(position: CGPoint(x: 400, y: 0), obsParams: ObstacleParameters(
-                timeBetweenObstacles: 1.5,
-                obstacleTravelTime: 5,
-                obstacleSize: CGSize(width: 100, height: 6),
-                randomPositions: true))
-        lvl.addObstacleGenerator(position: CGPoint(x: 400, y: 0), obsParams: ObstacleParameters(
-                timeBetweenObstacles: 2,
-                obstacleTravelTime: 8,
-                obstacleSize: CGSize(width: 100, height: 6),
-                randomPositions: true))
         lvl.wait(time: 13)
         lvl.changeTopWave(to: Level.flip(wave: Level.scale(
                 wave: WaveType.simpleSin(),

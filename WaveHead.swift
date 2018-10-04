@@ -120,9 +120,11 @@ class WaveHead:SKSpriteNode {
         self.p_osciallationForces = forces.flatMap({$0})
         self.n_osciallationForces = forces.flatMap({$0}).map({return -$0})
 
-        //Reset the movement
+        //Reset the movement in a smooth way.
         self.deactivateWaveHead()
-        self.activateWaveHead()
+        self.run(SKAction.moveTo(y: 0, duration: 1.0)){
+            self.activateWaveHead()
+        }
     }
 }
 

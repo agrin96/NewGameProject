@@ -7,10 +7,9 @@ import SpriteKit
 
 //Holds all the parameters for the obstacle generator
 struct ObstacleParameters {
-    var timeBetweenObstacles:Double
     var obstacleTravelTime:Double
     var obstacleSize:CGSize
-    var randomPositions:Bool
+    var presetYPositions:[CGFloat]
 }
 
 //Generates an endless flow of obstacles across the screen.
@@ -19,10 +18,10 @@ class ObstacleGenerator:SKNode{
     private var obstacleSize:CGSize = CGSize.zero
     private var obstacleTime:Double = 0
     private var obstacleSpace:Double = 0
-    private var randomPositions:Bool = false
+    private var presetYPositions:[CGFloat] = []
 
     //Point at which the obstacles get shifted back.
-    private let obstacleResetPoint:CGFloat = -600
+    private let obstacleResetPoint:CGFloat = -(UIScreen.main.bounds.width * 2)
 
     required init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
@@ -34,12 +33,13 @@ class ObstacleGenerator:SKNode{
         //Helper information
         self.obstacleTime = params.obstacleTravelTime
         self.obstacleSize = params.obstacleSize
-        self.obstacleSpace = params.timeBetweenObstacles
-        self.randomPositions = params.randomPositions
-        let count:Int = 5
+        self.obstacleSpace = Double(UIScreen.main.bounds.width / (obstacleSize.width * CGFloat(params.presetYPositions.count)))
+        print(self.obstacleSpace)
+        self.presetYPositions = params.presetYPositions
+        let count:Int = params.presetYPositions.count
 
         //Create the objects.
-        for _ in 0..<count{
+        for i in 0..<count{
             let newObstacle = SKSpriteNode(color: .blue, size: self.obstacleSize)
             newObstacle.zPosition = 4
             newObstacle.physicsBody = SKPhysicsBody(rectangleOf: CGSize(
@@ -49,7 +49,9 @@ class ObstacleGenerator:SKNode{
             newObstacle.physicsBody!.collisionBitMask = 1
             newObstacle.physicsBody!.contactTestBitMask = 1
             newObstacle.physicsBody!.categoryBitMask = 0
-            newObstacle.position = CGPoint(x: 0, y: 0)
+            //Prevent the obstacle from moving on collision by having much higher rest mass
+            newObstacle.physicsBody!.mass = 1000
+            newObstacle.position = CGPoint(x: 0, y: self.presetYPositions[i])
             self.obstacles.append(newObstacle)
             self.addChild(newObstacle)
         }
@@ -63,13 +65,7 @@ class ObstacleGenerator:SKNode{
     //Adds the SKActions that end up actually running the obstacles across the screen.
     // The actions are added to the obstacles not the generator.
     func startObstacles(){
-        if self.randomPositions == true{
-            for obs in obstacles{
-                obs.position.y = CGFloat(arc4random_uniform(300)) - 150
-            }
-        }
-
-        let moveAction = SKAction.sequence([SKAction.moveTo(x: -600, duration: self.obstacleTime), SKAction.moveTo(x: 0, duration: 0)])
+        let moveAction = SKAction.sequence([SKAction.moveTo(x: self.obstacleResetPoint, duration: self.obstacleTime), SKAction.moveTo(x: 0, duration: 0)])
 
         var obsCounter:Int = 0
         let delayedActivation = SKAction.sequence([SKAction.wait(forDuration: self.obstacleSpace), SKAction.run({

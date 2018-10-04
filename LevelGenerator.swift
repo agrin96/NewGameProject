@@ -68,11 +68,13 @@ class LevelGenerator:SKNode, SKPhysicsContactDelegate, ScoreChangeNotifier{
 
         var topWaveSettings = WaveGeneratorParameters()
         topWaveSettings.location = CGPoint(x: view.bounds.width / 2, y: 70)
+        topWaveSettings.waveHead.isPlayer = false
         self.topWave = WaveGenerator(paramters: topWaveSettings)
         self.addChild(self.topWave!)
 
         var bottomWaveSettings = WaveGeneratorParameters()
         bottomWaveSettings.location = CGPoint(x: view.bounds.width / 2, y: -70)
+        bottomWaveSettings.waveHead.isPlayer = false
         self.bottomWave = WaveGenerator(paramters: bottomWaveSettings)
         self.addChild(self.bottomWave!)
 

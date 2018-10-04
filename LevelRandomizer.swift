@@ -5,13 +5,6 @@
 
 import SpriteKit
 
-//Decides whether to change top, bottom, or both boundary waves
-enum WaveChangeGroupings {
-    case both
-    case top
-    case bottom
-}
-
 class LevelPieceTemplates {
     enum SegmentTemplateType:Int{
         case steady = 0
@@ -43,13 +36,7 @@ class LevelPieceTemplates {
 
             lvl.changeTopWave(to: Level.scale(wave: wave, dx: dxMultiplier, dy: dyMultiplier))
             lvl.changeBottomWave(to: Level.scale(wave: wave, dx: dxMultiplier, dy: dyMultiplier))
-
-            lvl.wait(time: 1.0)
-            lvl.addObstacleGenerator(position: CGPoint(x: UIScreen.main.bounds.width + 25, y: 0), obsParams: ObstacleParameters(
-                    timeBetweenObstacles: 1.0,
-                    obstacleTravelTime: 5,
-                    obstacleSize: CGSize(width: 50, height: 10),
-                    randomPositions: true))
+            break
         case .sin1:
             let dxMultiplier: CGFloat = 1
             let dyMultiplier: CGFloat = 1
@@ -91,6 +78,7 @@ class LevelPieceTemplates {
             lvl.changeBottomWave(to: Level.scale(wave: wave, dx: dxMultiplier, dy: dyMultiplier))
             break
         case .square2:
+            //Needs to have larger spacing than standard. Probably the 40
             let dxMultiplier: CGFloat = 2
             let dyMultiplier: CGFloat = 2
             let wave = WaveType.simpleSquare()
@@ -99,6 +87,7 @@ class LevelPieceTemplates {
             lvl.changeBottomWave(to: Level.scale(wave: wave, dx: dxMultiplier, dy: dyMultiplier))
             break
         case .square3:
+            //Needs to have larger spacing than standard. Probably the 40
             let dxMultiplier: CGFloat = 3
             let dyMultiplier: CGFloat = 2.5
             let wave = WaveType.simpleSquare()
@@ -107,8 +96,8 @@ class LevelPieceTemplates {
             lvl.changeBottomWave(to: Level.scale(wave: wave, dx: dxMultiplier, dy: dyMultiplier))
             break
         case .square4:
-            let dxMultiplier: CGFloat = 4
-            let dyMultiplier: CGFloat = 2.5
+            let dxMultiplier: CGFloat = 3.5
+            let dyMultiplier: CGFloat = 1.5
             let wave = WaveType.simpleSquare()
 
             lvl.changeTopWave(to: Level.scale(wave: wave, dx: dxMultiplier, dy: dyMultiplier))
@@ -131,8 +120,8 @@ class LevelPieceTemplates {
             lvl.changeBottomWave(to: Level.scale(wave: wave, dx: dxMultiplier, dy: dyMultiplier))
             break
         case .triangle3:
-            let dxMultiplier: CGFloat = 3
-            let dyMultiplier: CGFloat = 2.5
+            let dxMultiplier: CGFloat = 4
+            let dyMultiplier: CGFloat = 1
             let wave = WaveType.simpleTriangle()
 
             lvl.changeTopWave(to: Level.scale(wave: wave, dx: dxMultiplier, dy: dyMultiplier))
@@ -156,6 +145,7 @@ class LevelPieceTemplates {
             lvl.changeBottomWave(to: Level.scale(wave: WaveType.simpleSquare(), dx: dxMultiplierB, dy: dyMultiplierB))
             break
         case .meld2:
+            //Needs large spacing
             let dxMultiplierA: CGFloat = 1.5
             let dyMultiplierA: CGFloat = 2
             lvl.changeTopWave(to: Level.scale(wave: WaveType.simpleTriangle(), dx: dxMultiplierA, dy: dyMultiplierA))
@@ -169,11 +159,12 @@ class LevelPieceTemplates {
             let dyMultiplierA: CGFloat = 2
             lvl.changeTopWave(to: Level.scale(wave: WaveType.simpleTrapezoid(), dx: dxMultiplierA, dy: dyMultiplierA))
 
-            let dxMultiplierB: CGFloat = 2
-            let dyMultiplierB: CGFloat = 3
+            let dxMultiplierB: CGFloat = 3
+            let dyMultiplierB: CGFloat = 1
             lvl.changeBottomWave(to: Level.scale(wave: WaveType.simpleSin(), dx: dxMultiplierB, dy: dyMultiplierB))
             break
         case .meld4:
+            //Needs larget spacing
             let dxMultiplierA:CGFloat = 4
             let dyMultiplierA:CGFloat = 2
             lvl.changeTopWave(to: Level.scale(wave: WaveType.simpleTriangle(), dx: dxMultiplierA, dy: dyMultiplierA))
@@ -183,7 +174,8 @@ class LevelPieceTemplates {
             lvl.changeBottomWave(to: Level.scale(wave: WaveType.simpleTrapezoid(), dx: dxMultiplierB, dy: dyMultiplierB))
             break
         case .meld5:
-            let dxMultiplierA:CGFloat = 2
+            //Needs larger spacing
+            let dxMultiplierA:CGFloat = 3.5
             let dyMultiplierA:CGFloat = 2
             lvl.changeTopWave(to: Level.scale(wave: WaveType.simpleSin(), dx: dxMultiplierA, dy: dyMultiplierA))
 
@@ -192,8 +184,9 @@ class LevelPieceTemplates {
             lvl.changeBottomWave(to: Level.scale(wave: WaveType.simpleTriangle(), dx: dxMultiplierB, dy: dyMultiplierB))
             break
         case .meld6:
+            //Needs larger spacing.
             let dxMultiplierA:CGFloat = 2
-            let dyMultiplierA:CGFloat = 4
+            let dyMultiplierA:CGFloat = 3
             lvl.changeTopWave(to: Level.scale(wave: WaveType.simpleSquare(), dx: dxMultiplierA, dy: dyMultiplierA))
 
             let dxMultiplierB:CGFloat = 3
@@ -206,52 +199,52 @@ class LevelPieceTemplates {
 
 class DisplacementTemplate {
     enum WaveDisplacements:Int {
-        case outDisplace30 = 0
-        case outDisplace45
-        case outDisplace55
-        case outDisplace75
-        case inDisplace30
-        case inDisplace45
-        case inDisplace55
-        case inDisplace75
+        case outDisplace5 = 0
+        case outDisplace10
+        case outDisplace20
+        case outDisplace40
+        case inDisplace5
+        case inDisplace10
+        case inDisplace20
+        case inDisplace40
     }
 
     class func addDisplacementSegment(to lvl: Level, with displaceType:WaveDisplacements){
         switch displaceType {
         //Pushes the two wave boundaries apart
-        case .outDisplace30:
-            lvl.shiftTop(dy: 30)
-            lvl.shiftBottom(dy: -30)
+        case .outDisplace5:
+            lvl.shiftTop(dy: 5)
+            lvl.shiftBottom(dy: -5)
             break
-        case .outDisplace45:
-            lvl.shiftTop(dy: 45)
-            lvl.shiftBottom(dy: -45)
+        case .outDisplace10:
+            lvl.shiftTop(dy: 10)
+            lvl.shiftBottom(dy: -10)
             break
-        case .outDisplace55:
-            lvl.shiftTop(dy: 60)
-            lvl.shiftBottom(dy: -60)
+        case .outDisplace20:
+            lvl.shiftTop(dy: 20)
+            lvl.shiftBottom(dy: -20)
             break
-        case .outDisplace75:
-            lvl.shiftTop(dy: 75)
-            lvl.shiftBottom(dy: -75)
+        case .outDisplace40:
+            lvl.shiftTop(dy: 40)
+            lvl.shiftBottom(dy: -40)
             break
 
         //Squishes the two wave boundaries together
-        case .inDisplace30:
-            lvl.shiftTop(dy: -30)
-            lvl.shiftBottom(dy: 30)
+        case .inDisplace5:
+            lvl.shiftTop(dy: -5)
+            lvl.shiftBottom(dy: 5)
             break
-        case .inDisplace45:
-            lvl.shiftTop(dy: -45)
-            lvl.shiftBottom(dy: 45)
+        case .inDisplace10:
+            lvl.shiftTop(dy: -10)
+            lvl.shiftBottom(dy: 10)
             break
-        case .inDisplace55:
-            lvl.shiftTop(dy: -60)
-            lvl.shiftBottom(dy: 60)
+        case .inDisplace20:
+            lvl.shiftTop(dy: -20)
+            lvl.shiftBottom(dy: 20)
             break
-        case .inDisplace75:
-            lvl.shiftTop(dy: -75)
-            lvl.shiftBottom(dy: 75)
+        case .inDisplace40:
+            lvl.shiftTop(dy: -40)
+            lvl.shiftBottom(dy: 40)
             break
         }
     }
@@ -261,69 +254,76 @@ class DisplacementTemplate {
 class ShiftingTemplate {
     //Wave height is set via shifting by 0.25 increments.
     enum YLevelsList:Int {
-        case up025 = 0
-        case up050 = 1
-        case up100 = 2
-        case down025
+        case up050 = 0
+        case up075 = 1
         case down050
-        case down100
+        case down075
     }
 
     public class func addYShiftingSection(to lvl:Level, newY:YLevelsList){
         var waitTime:Double = 0
+        var obsDisplacement:CGFloat = 0
 
         //Use the new level to determine how much the shift should be.
         switch newY {
-        case .up025:
-            waitTime = 0.25
-            break
         case .up050:
             waitTime = 0.50
+            obsDisplacement = 60
             break
-        case .up100:
-            waitTime = 1.0
-            break
-        case .down025:
-            waitTime = 0.25
+        case .up075:
+            waitTime = 0.75
+            obsDisplacement = 90
             break
         case .down050:
             waitTime = 0.50
+            obsDisplacement = -60
             break
-        case .down100:
-            waitTime = 1.0
+        case .down075:
+            waitTime = 0.75
+            obsDisplacement = -90
             break
         }
 
         //Use the raw value to set the direction of travel
-        if newY.rawValue > 2 {
+        if newY.rawValue < 2 {
             lvl.changeTopWave(to: WaveType.shiftUpwards())
             lvl.changeBottomWave(to: WaveType.shiftUpwards())
             //Shift the obstacle generators so they remain relavant
-            lvl.shiftObstacleGenerators(by: 30)
+            lvl.shiftObstacleGenerators(by: obsDisplacement)
         }else{
             lvl.changeTopWave(to: WaveType.shiftDownwards())
             lvl.changeBottomWave(to: WaveType.shiftDownwards())
-            lvl.shiftObstacleGenerators(by: -30)
+            lvl.shiftObstacleGenerators(by: obsDisplacement)
         }
         lvl.wait(time: waitTime)
     }
 }
 
+class ObstacleTemplate {
+    public class func addObstacle(lvl: Level){
+        lvl.wait(time: 1.0)
+        lvl.addObstacleGenerator(position: CGPoint(x: UIScreen.main.bounds.width + 25, y: 0), obsParams: ObstacleParameters(
+                obstacleTravelTime: 8.0,
+                obstacleSize: CGSize(width: 50, height: 10),
+                presetYPositions: [0,90,-90,45,-45,100]))
+    }
+}
+
 class RandomizerTree {
     public class func generateLevel(for lvl:Level){
-        //Add obstacles
-        DisplacementTemplate.addDisplacementSegment(to: lvl, with: .outDisplace45)
-        LevelPieceTemplates.addSegment(type: .steady, to: lvl)
-        lvl.wait(time: 0.5)
+        //Part 1 of a level steady intro
+        ObstacleTemplate.addObstacle(lvl: lvl)
+        DisplacementTemplate.addDisplacementSegment(to: lvl, with: .outDisplace20)
+        //Part 2 of a level choose a segment
+        LevelPieceTemplates.addSegment(type: .sin3, to: lvl)
+        lvl.wait(time: 9.0)
+        LevelPieceTemplates.addSegment(type: .square4, to: lvl)
+        lvl.wait(time: 9.0)
+        LevelPieceTemplates.addSegment(type: .square4, to: lvl)
+        lvl.wait(time: 9.0)
         LevelPieceTemplates.addSegment(type: .meld2, to: lvl)
-        lvl.wait(time: 15)
-        ShiftingTemplate.addYShiftingSection(to: lvl, newY: .down050)
-        LevelPieceTemplates.addSegment(type: .triangle3, to: lvl)
-        lvl.wait(time: 15)
-        ShiftingTemplate.addYShiftingSection(to: lvl, newY: .up050)
+        lvl.wait(time: 9.0)
+        LevelPieceTemplates.addSegment(type: .steady, to: lvl)
 
-        //FIX OBSTACLE ADDITION
-        //CHANGE THE SHIFTING ACTION TO FLOAT BASIS
-        //MAKE SEGMENTS
     }
 }
