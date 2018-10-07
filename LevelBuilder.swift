@@ -238,62 +238,8 @@ class LevelList {
     class func level(num:Int, gen:LevelGenerator){
         //Clear all actions just in case.
         gen.removeAllActions()
-
-        switch num{
-        case 1:
-            LevelList.level1(gen: gen)
-            break
-        case 2:
-            LevelList.level2(gen: gen)
-            break
-        default:
-            LevelList.level3(gen: gen)
-            break
-        }
-    }
-
-    private class func level1(gen:LevelGenerator){
         let lvl = Level(generator: gen)
-        lvl.shiftTop(dy: 35)
-        lvl.shiftBottom(dy: -35)
-        lvl.wait(time: 1)
-        lvl.changeTopWave(to: Level.flip(wave: Level.scale(wave: WaveType.simpleTriangle(), dx: 4, dy: 2)))
-        lvl.changeBottomWave(to: Level.scale(wave: WaveType.simpleTriangle(), dx: 4, dy: 2))
-        lvl.wait(time: 5)
-        lvl.changeTopWave(to: WaveType.shiftDownwards())
-        lvl.wait(time: 1)
-        lvl.changeTopWave(to: Level.flip(wave: Level.scale(wave: WaveType.simpleTriangle(), dx: 4, dy: 2)))
-        lvl.runBuffer(level: gen)
-    }
-
-    private class func level2(gen:LevelGenerator){
-        let lvl = Level(generator: gen)
-        lvl.shiftTop(dy: 75)
-        lvl.shiftBottom(dy: -75)
-        lvl.changeTopWave(to: Level.scale(
-                wave: WaveType.simpleSin(),
-                dx: CGFloat(arc4random_uniform(6)),
-                dy: CGFloat(arc4random_uniform(5))))
-        lvl.changeBottomWave(to: Level.scale(
-                wave: WaveType.simpleSin(),
-                dx: CGFloat(arc4random_uniform(6)),
-                dy: CGFloat(arc4random_uniform(5))))
-        lvl.wait(time: 1.5)
-        lvl.wait(time: 13)
-        lvl.changeTopWave(to: Level.flip(wave: Level.scale(
-                wave: WaveType.simpleSin(),
-                dx: CGFloat(arc4random_uniform(6)),
-                dy: CGFloat(arc4random_uniform(5)))))
-        lvl.changeBottomWave(to: Level.scale(
-                wave: WaveType.simpleSin(),
-                dx: CGFloat(arc4random_uniform(6)),
-                dy: CGFloat(arc4random_uniform(5))))
-        lvl.runBuffer(level: gen)
-    }
-
-    private class func level3(gen:LevelGenerator){
-        let lvl = Level(generator: gen)
-        RandomizerTree.generateLevel(for: lvl)
+        LevelRandomizer.generateLevel(for: lvl, lvlTemplate: num)
         lvl.runBuffer(level: gen)
     }
 }

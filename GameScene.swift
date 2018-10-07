@@ -21,10 +21,12 @@ import GameplayKit
 
 class GameScene: SKScene, GameStatusNotifier{
     var levelToPlay:LevelGenerator?
-    var currentLevel:Int = 3
+    var currentLevel:Int = 0
     //Win/lose
     var gamestatus:SKLabelNode?
     var score:Int = 0
+
+    let maxLevels:Int = 100
 
     override func didMove(to view: SKView) {
         super.didMove(to: view)
@@ -89,7 +91,7 @@ class GameScene: SKScene, GameStatusNotifier{
                     SKAction.fadeOut(withDuration: 0.5),
                     SKAction.run({ [unowned self] in
                         self.currentLevel += 1
-                        if self.currentLevel == 3 {
+                        if self.currentLevel == self.maxLevels {
                             self.currentLevel = 0
                         }
                         self.resetLevel()
