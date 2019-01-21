@@ -12,13 +12,6 @@
 import SpriteKit
 import GameplayKit
 
-///NOTE: make custom enums + struct of level editing scripting style so like:
-// enum Action: case wait,change
-// struct Level: Action,Data
-// so it would look like [Wait(3), change([]), wait(10), change([])]
-// can mask it under regular SKAction subclass
-
-
 class GameScene: SKScene, GameStatusNotifier{
     var levelToPlay:LevelGenerator?
     var currentLevel:Int = 0
