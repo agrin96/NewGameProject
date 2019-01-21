@@ -176,7 +176,13 @@ class WaveGenerator:SKNode, WaveGenerationNotifier, UIGestureRecognizerDelegate{
                         self.scene!.view!.removeGestureRecognizer(ges)
                     }
                 }
-                self.userTapRecognizer = UITapGestureRecognizer(target: self, action: #selector(changeWaveHeadTravelDirection))
+
+                let temp = UILongPressGestureRecognizer(target: self, action: #selector(changeWaveHeadTravelDirection))
+                temp.minimumPressDuration = 0.0
+                temp.allowableMovement = 10.0
+                temp.numberOfTouchesRequired = 1
+                temp.numberOfTapsRequired = 0
+                self.userTapRecognizer = temp
                 self.scene!.view!.addGestureRecognizer(self.userTapRecognizer!)
 
                 //This causes the player wave to draw as a straight line in the beginning
@@ -256,9 +262,10 @@ class WaveGenerator:SKNode, WaveGenerationNotifier, UIGestureRecognizerDelegate{
     }
 
     //Trigger for changing the wave head travel direction on the y axis
-    @objc private func changeWaveHeadTravelDirection(_ sender:UITapGestureRecognizer){
+    @objc private func changeWaveHeadTravelDirection(_ sender:UILongPressGestureRecognizer){
+
         switch sender.state{
-        case .began,.changed,.ended:
+        case .began:
             if self.isUserInteractionEnabled == true{
                 if self.params != nil{
                     //Update the player score and reset the score keeper

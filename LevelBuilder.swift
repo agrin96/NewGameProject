@@ -14,8 +14,8 @@ import GameplayKit
 class WaveType{
     public class func playerSteady1()->[[CGFloat]]{
         return Array([
-            [CGFloat](repeatElement(1, count: 1)),
-            [CGFloat](repeatElement(1, count: 1))
+            [CGFloat](repeatElement(0.80, count: 1)),
+            [CGFloat](repeatElement(0.80, count: 1))
         ])
     }
 
