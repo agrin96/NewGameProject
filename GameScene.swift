@@ -91,6 +91,7 @@ class GameScene: SKScene, GameStatusNotifier{
                 })]))
             })]))
         }else if status == .lost{
+            self.gameLostAnimation()
             self.run(SKAction.sequence([SKAction.wait(forDuration: 0.5), SKAction.run({ [unowned self] in
                 self.gamestatus!.text = "SIGNAL LOST!"
                 self.gamestatus!.fontSize = 48
@@ -106,7 +107,22 @@ class GameScene: SKScene, GameStatusNotifier{
         }
     }
 
+    //Fade and stretch the screen to show the signal being lost.
+    func gameLostAnimation(){
+        let interferenceAnimation = SKAction.sequence([
+            SKAction.wait(forDuration: 0.25),
+            SKAction.group([
+                SKAction.move(by: CGVector(dx: Int(arc4random_uniform(100))-50, dy: Int(arc4random_uniform(60))-30), duration: 1.0),
+                SKAction.scaleX(to: 1.45, duration: 2.0),
+                SKAction.scaleY(to: 2.0, duration: 2.0),
+                SKAction.fadeOut(withDuration: 2.0)
+            ])
+        ])
+        self.levelToPlay!.run(interferenceAnimation)
+    }
+
     override func update(_ currentTime: TimeInterval) {
         // Called before each frame is rendered
     }
 }
+

@@ -172,7 +172,12 @@ class LevelGenerator:SKNode, SKPhysicsContactDelegate, ScoreChangeNotifier{
             if self.didPlayerLose == false{
 
                 self.didPlayerLose = true
-                self.isPaused = true
+                self.topWave!.isPaused = true
+                self.bottomWave!.isPaused = true
+                self.playerWave!.isPaused = true
+                for obs in self.obstacleGenerators{
+                    obs.isPaused = true
+                }
                 if self.levelTimer != nil {
                     self.levelTimer!.invalidate()
                 }
