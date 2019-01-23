@@ -19,7 +19,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         // and control our app directly.
         window = UIWindow(frame: UIScreen.main.bounds)
         window?.makeKeyAndVisible()
-        window?.rootViewController = UINavigationController(rootViewController: GameViewController())
+        window?.rootViewController = UINavigationController(rootViewController: MainMenuViewController())
 
         //Here we will handle state restoration by opening a shared instance object or closing it.
 

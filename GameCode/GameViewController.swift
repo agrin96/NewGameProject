@@ -12,6 +12,8 @@ import GameplayKit
 
 class GameViewController: UIViewController {
 
+    var levelToPlay:Int?
+
     override func viewWillAppear(_ animated: Bool) {
         //Set the navigation bar to hidden before the view appears so the user never notices.
         self.navigationController?.isNavigationBarHidden = true
@@ -32,6 +34,8 @@ class GameViewController: UIViewController {
 
             // Init the scene from our Gamescene class to match the size of the view
             let scene = GameScene(size: self.view!.bounds.size)
+            scene.currentLevel = levelToPlay!
+
             // Set the scale mode to scale to fit the window
             scene.scaleMode = .aspectFill
 

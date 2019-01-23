@@ -34,7 +34,6 @@ class ObstacleGenerator:SKNode{
         self.obstacleTime = params.obstacleTravelTime
         self.obstacleSize = params.obstacleSize
         self.obstacleSpace = Double(UIScreen.main.bounds.width / (obstacleSize.width * CGFloat(params.presetYPositions.count)))
-        print(self.obstacleSpace)
         self.presetYPositions = params.presetYPositions
         let count:Int = params.presetYPositions.count
 

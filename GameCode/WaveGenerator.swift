@@ -101,22 +101,50 @@ class WaveGenerator:SKNode, WaveGenerationNotifier, UIGestureRecognizerDelegate{
             self.waveHead!.addChild(self.waveScoreKeeper!)
 
             //Add the starting reciever and hide it.
-            self.startingReciever = SKSpriteNode(color: .red, size: CGSize(width: 22, height: 400))
+            self.startingReciever = SKSpriteNode(color: .clear, size: CGSize(width: 0, height: 0))
             self.startingReciever!.anchorPoint = CGPoint(x: 0.5, y: 1)
             self.startingReciever!.position.x = 0
-            self.startingReciever!.alpha = 0.25
+            self.startingReciever!.alpha = 1.0
             self.startingReciever!.zPosition = 2
             self.startingReciever!.isHidden = true
             self.addChild(self.startingReciever!)
 
+            let startingLevelImage = SKSpriteNode(color: .red, size: CGSize(width: 22, height: 400))
+            startingLevelImage.anchorPoint = CGPoint(x: 0.5, y: 1)
+            startingLevelImage.position.x = 0
+            startingLevelImage.alpha = 0.25
+            startingLevelImage.zPosition = 2
+            self.startingReciever!.addChild(startingLevelImage)
+
+            let startLevelIndicator = SKLabelNode(text: "Level \(self.params!.level + 1)")
+            startLevelIndicator.position.y = 100
+            startLevelIndicator.fontColor = .white
+            startLevelIndicator.alpha = 1.0
+            startLevelIndicator.zPosition = 2
+            self.startingReciever!.addChild(startLevelIndicator)
+
             //Add the ending reciever and hide it.
-            self.endingReciever = SKSpriteNode(color: .red, size: CGSize(width: 22, height: 400))
+            self.endingReciever = SKSpriteNode(color: .clear, size: CGSize(width: 0, height: 0))
             self.endingReciever!.anchorPoint = CGPoint(x: 0.5, y: 1)
             self.endingReciever!.position.x = 187.5
-            self.endingReciever!.alpha = 0.25
+            self.endingReciever!.alpha = 1.0
             self.endingReciever!.zPosition = 2
             self.endingReciever!.isHidden = true
             self.addChild(self.endingReciever!)
+
+            let endingLevelImage = SKSpriteNode(color: .red, size: CGSize(width: 22, height: 400))
+            endingLevelImage.anchorPoint = CGPoint(x: 0.5, y: 1)
+            endingLevelImage.position.x = 0
+            endingLevelImage.alpha = 0.25
+            endingLevelImage.zPosition = 2
+            self.endingReciever!.addChild(endingLevelImage)
+
+            let endLevelIndicator = SKLabelNode(text: "Level \(self.params!.level + 2)")
+            endLevelIndicator.position.y = 100
+            endLevelIndicator.fontColor = .white
+            endLevelIndicator.alpha = 1.0
+            endLevelIndicator.zPosition = 2
+            self.endingReciever!.addChild(endLevelIndicator)
         }
     }
 
@@ -201,6 +229,7 @@ class WaveGenerator:SKNode, WaveGenerationNotifier, UIGestureRecognizerDelegate{
 
                     if self.startingReciever!.position.x <= -(UIScreen.main.bounds.width / 2) && self.isUserInteractionEnabled == false{
                         //Automatically start the player wavehead moving down.
+                        self.resetAndRunScore()
                         self.waveHead!.activatePlayerWavehead(direction: .down)
 
                         //For collision detection purposes we need to know that this is the player node.
@@ -324,10 +353,12 @@ struct WaveGeneratorParameters{
     var location:CGPoint
     var waveHead:WaveHeadParameters
     var waveDrawer:WaveDrawerParameters
+    var level:Int
 
     init(){
         self.location = CGPoint(x: 0, y: 0)
         self.waveHead = WaveHeadParameters()
         self.waveDrawer = WaveDrawerParameters()
+        self.level = 0
     }
 }

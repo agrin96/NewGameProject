@@ -59,7 +59,7 @@ class GameScene: SKScene, GameStatusNotifier{
 
         if self.levelToPlay == nil {
             //Create a level and set it as the contact delegate
-            self.levelToPlay = LevelGenerator(in: self.view!)
+            self.levelToPlay = LevelGenerator(in: self.view!,level:self.currentLevel)
             self.addChild(self.levelToPlay!)
             self.physicsWorld.contactDelegate = self.levelToPlay!
 
@@ -113,9 +113,9 @@ class GameScene: SKScene, GameStatusNotifier{
             SKAction.wait(forDuration: 0.25),
             SKAction.group([
                 SKAction.move(by: CGVector(dx: Int(arc4random_uniform(100))-50, dy: Int(arc4random_uniform(60))-30), duration: 1.0),
-                SKAction.scaleX(to: 1.45, duration: 2.0),
-                SKAction.scaleY(to: 2.0, duration: 2.0),
-                SKAction.fadeOut(withDuration: 2.0)
+                SKAction.scaleX(to: 1.45, duration: 1.5),
+                SKAction.scaleY(to: 2.0, duration: 1.5),
+                SKAction.fadeOut(withDuration: 1.5)
             ])
         ])
         self.levelToPlay!.run(interferenceAnimation)

@@ -54,13 +54,13 @@ class LevelGenerator:SKNode, SKPhysicsContactDelegate, ScoreChangeNotifier{
     }
 
     //A level consists of 2 boundary waves and 1 player wave.
-    init(in view:SKView) {
+    init(in view:SKView, level:Int) {
         super.init()
-        print("inititing")
         var playerSettings = WaveGeneratorParameters()
         playerSettings.waveHead.isPlayer = true
         playerSettings.waveHead.headColor = .red
         playerSettings.waveDrawer.waveColor = .red
+        playerSettings.level = level
         self.playerWave = WaveGenerator(paramters: playerSettings)
         self.addChild(self.playerWave!)
         self.playerWave!.scoreUpdateDelegate = self
@@ -88,10 +88,6 @@ class LevelGenerator:SKNode, SKPhysicsContactDelegate, ScoreChangeNotifier{
         self.currentTimeDisplay!.position = CGPoint(x: 0, y: -250)
         self.currentTimeDisplay!.fontSize = 30
         self.addChild(self.currentTimeDisplay!)
-    }
-
-    deinit{
-        print("Deiniting LevelGenerator")
     }
 
     //Called to actually start the level
@@ -150,10 +146,11 @@ class LevelGenerator:SKNode, SKPhysicsContactDelegate, ScoreChangeNotifier{
         //If the current level time reaches the max then we have won!
         if self.currentTime >= self.maximumLevelTime {
             self.levelTimer!.invalidate()
-            //TEST to fix signal recieve bug
             self.levelTimer = nil
             self.currentTime = 0
             self.gameStatusDelegate!.gameStateChanged(status: .won)
+            //Take the score of the wavehead right at the end
+            self.playerWave!.resetAndRunScore()
             self.playerWave!.deactivateWaveGenerator()
         }
     }
