@@ -48,6 +48,7 @@ class LevelGenerator:SKNode, SKPhysicsContactDelegate, ScoreChangeNotifier{
     //Notifier of win/lose
     weak var gameStatusDelegate:GameStatusNotifier?
     var didPlayerLose:Bool = true
+    var currentLevel:Int = 0
 
     required init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
@@ -61,6 +62,7 @@ class LevelGenerator:SKNode, SKPhysicsContactDelegate, ScoreChangeNotifier{
         playerSettings.waveHead.headColor = .red
         playerSettings.waveDrawer.waveColor = .red
         playerSettings.level = level
+        self.currentLevel = level
         self.playerWave = WaveGenerator(paramters: playerSettings)
         self.addChild(self.playerWave!)
         self.playerWave!.scoreUpdateDelegate = self
@@ -151,6 +153,13 @@ class LevelGenerator:SKNode, SKPhysicsContactDelegate, ScoreChangeNotifier{
             self.gameStatusDelegate!.gameStateChanged(status: .won)
             //Take the score of the wavehead right at the end
             self.playerWave!.resetAndRunScore()
+
+            if GameData.sharedInstance().levelData[self.currentLevel].highScore < self.currentScore{
+                GameData.sharedInstance().levelData[self.currentLevel].highScore = self.currentScore
+            }
+            if self.currentLevel + 1 < GameData.sharedInstance().levelData.count{
+                GameData.sharedInstance().levelData[self.currentLevel + 1].unlocked = true
+            }
             self.playerWave!.deactivateWaveGenerator()
         }
     }
@@ -181,6 +190,9 @@ class LevelGenerator:SKNode, SKPhysicsContactDelegate, ScoreChangeNotifier{
 
                 //If we hit into a wave then we have lost.
                 self.currentTime = 0
+                if GameData.sharedInstance().levelData[self.currentLevel].highScore < self.currentScore{
+                    GameData.sharedInstance().levelData[self.currentLevel].highScore = self.currentScore
+                }
                 self.gameStatusDelegate!.gameStateChanged(status: .lost)
             }
 

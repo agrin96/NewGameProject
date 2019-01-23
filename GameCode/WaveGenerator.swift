@@ -282,6 +282,7 @@ class WaveGenerator:SKNode, WaveGenerationNotifier, UIGestureRecognizerDelegate{
     //Used to update the score.
     internal func resetAndRunScore(){
         self.removeAction(forKey: "scorer")
+        self.scoreUpdateDelegate!.updateScore(scoreKeeper: self.waveScoreKeeper!)
         var counter:Int = 1
         let scorer = SKAction.run({
             self.waveScoreKeeper!.text = String(counter*counter)
@@ -298,7 +299,6 @@ class WaveGenerator:SKNode, WaveGenerationNotifier, UIGestureRecognizerDelegate{
             if self.isUserInteractionEnabled == true{
                 if self.params != nil{
                     //Update the player score and reset the score keeper
-                    self.scoreUpdateDelegate!.updateScore(scoreKeeper: self.waveScoreKeeper!)
                     self.resetAndRunScore()
 
                     //Change the travel direction of the wave.
