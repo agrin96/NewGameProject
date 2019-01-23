@@ -81,7 +81,7 @@ class GameScene: SKScene, GameStatusNotifier{
                 self.gamestatus!.run(SKAction.sequence([
                     SKAction.fadeIn(withDuration: 0.5),
                     SKAction.wait(forDuration: 2),
-                    SKAction.fadeOut(withDuration: 0.5),
+                    SKAction.fadeOut(withDuration: 1.0),
                     SKAction.run({ [unowned self] in
                         self.currentLevel += 1
                         if self.currentLevel == self.maxLevels {

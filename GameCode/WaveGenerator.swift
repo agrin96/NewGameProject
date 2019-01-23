@@ -137,6 +137,7 @@ class WaveGenerator:SKNode, WaveGenerationNotifier, UIGestureRecognizerDelegate{
             endingLevelImage.position.x = 0
             endingLevelImage.alpha = 0.25
             endingLevelImage.zPosition = 2
+            endingLevelImage.name = "End"
             self.endingReciever!.addChild(endingLevelImage)
 
             let endLevelIndicator = SKLabelNode(text: "Level \(self.params!.level + 2)")
@@ -263,9 +264,9 @@ class WaveGenerator:SKNode, WaveGenerationNotifier, UIGestureRecognizerDelegate{
             let activation = SKAction.run({
                 self.endingReciever!.isHidden = false
                 self.endingReciever!.position.x -= self.params!.waveDrawer.waveSpeed
-                if self.endingReciever!.position.x <= 0{
+                if self.endingReciever!.position.x <= 5{
                     self.removeAction(forKey: "EndingLine")
-                    self.endingReciever!.color = .green
+                    (self.endingReciever!.childNode(withName: "End") as! SKSpriteNode).color = .green
                 }
             })
             self.run(SKAction.repeatForever(SKAction.sequence([activation, linearDelay])), withKey: "EndingLine")
