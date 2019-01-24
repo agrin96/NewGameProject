@@ -5,9 +5,12 @@
 
 import UIKit
 import SpriteKit
+import GoogleMobileAds
 
 class MainMenuViewController: UIViewController {
-
+    
+    var bannerViewAd:GADBannerView?
+    
     override func viewWillAppear(_ animated: Bool) {
         //Set the navigation bar to hidden before the view appears so the user never notices.
         self.navigationController?.isNavigationBarHidden = true
@@ -25,7 +28,6 @@ class MainMenuViewController: UIViewController {
         super.viewDidLoad()
 
         if let view = self.view as! SKView? {
-
             // Init the scene from our Gamescene class to match the size of the view
             let scene = MainMenuScene(size: self.view!.bounds.size)
             scene.parentVC = self
@@ -43,6 +45,11 @@ class MainMenuViewController: UIViewController {
             view.showsFPS = true
             view.showsNodeCount = true
             view.showsDrawCount = true
+        }
+        
+        //The ad setup can be run async just to make sure no performance is impacted.
+        DispatchQueue.main.async { [unowned self] in
+            self.initializeBannerAd()
         }
     }
 
@@ -80,6 +87,41 @@ class MainMenuViewController: UIViewController {
             (self.view as! SKView).scene!.isPaused = true
             self.navigationController?.pushViewController(gameVC, animated: true)
         })
+    }
+}
+
+extension MainMenuViewController: GADBannerViewDelegate {
+    private func initializeBannerAd(){
+        //Initialize a banner ad and set the delegate.
+        self.bannerViewAd = GADBannerView(adSize: kGADAdSizeBanner)
+        self.bannerViewAd!.translatesAutoresizingMaskIntoConstraints = false
+        self.bannerViewAd!.delegate = self
+        //Banner is initially hidden.
+        self.bannerViewAd!.alpha = 0.0
+        self.view.addSubview(self.bannerViewAd!)
+        
+        //These two constraints will center the ad banner and place it at the top safe area of the app.
+        NSLayoutConstraint(item: self.bannerViewAd!, attribute: .centerX, relatedBy: .equal, toItem: view, attribute: .centerX, multiplier: 1.0, constant: 0.0).isActive = true
+        NSLayoutConstraint(item: self.bannerViewAd!, attribute: .top, relatedBy: .equal, toItem: view.safeAreaLayoutGuide, attribute: .topMargin, multiplier: 1.0, constant: 0.0).isActive = true
+        
+        self.bannerViewAd!.adUnitID = "ca-app-pub-3940256099942544/2934735716"
+        self.bannerViewAd!.rootViewController = self
+        self.bannerViewAd!.load(GADRequest())
+    }
+    
+    //Check if the app has recieved an ad. If it has then fade the ad banner in and display the ad.
+    func adViewDidReceiveAd(_ bannerView: GADBannerView) {
+        if let banner = self.bannerViewAd {
+            banner.alpha = 0
+            UIView.animate(withDuration: 1, animations: {
+                banner.alpha = 1
+            })
+        }
+    }
+    
+    //If an ad has not appeared
+    func adView(_ bannerView: GADBannerView, didFailToReceiveAdWithError error: GADRequestError) {
+        print(error.localizedDescription)
     }
 }
 
