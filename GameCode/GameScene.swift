@@ -15,11 +15,16 @@ import GameplayKit
 class GameScene: SKScene, GameStatusNotifier{
     var levelToPlay:LevelGenerator?
     var currentLevel:Int = 0
+    var parentViewController:GameViewController?
+    
     //Win/lose
     var gamestatus:SKLabelNode?
     var score:Int = 0
 
     let maxLevels:Int = 100
+    
+    var numberOfTransitions:Int = 0
+    let transitionsBetweenAds:Int = 3
 
     override func didMove(to view: SKView) {
         super.didMove(to: view)
@@ -87,7 +92,17 @@ class GameScene: SKScene, GameStatusNotifier{
                         if self.currentLevel == self.maxLevels {
                             self.currentLevel = 0
                         }
+                        
+                        //After winning or losing the game we present a full screen ad.
+                        if self.numberOfTransitions >= self.transitionsBetweenAds{
+                            if let vc = self.parentViewController{
+                                vc.presentFullScreenAd()
+                            }
+                            self.numberOfTransitions = 0
+                        }
+                    
                         self.resetLevel()
+                        self.numberOfTransitions += 1
                 })]))
             })]))
         }else if status == .lost{
@@ -101,7 +116,16 @@ class GameScene: SKScene, GameStatusNotifier{
                     SKAction.wait(forDuration: 2),
                     SKAction.fadeOut(withDuration: 0.5),
                     SKAction.run({ [unowned self] in
+                        
+                        //After winning or losing the game we present a full screen ad.
+                        if self.numberOfTransitions >= self.transitionsBetweenAds{
+                            if let vc = self.parentViewController{
+                                vc.presentFullScreenAd()
+                            }
+                            self.numberOfTransitions = 0
+                        }
                         self.resetLevel()
+                        self.numberOfTransitions += 1
                 })]))
             })]))
         }

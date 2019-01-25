@@ -322,6 +322,7 @@ class ObstacleTemplate {
 // [0:obstacle(1), 1:displacement(8), 2: segment(18), 3: segment(18), 4: segment(18), 5: segment(18)]
 // We mix and match randomly to achieve a good level spread.
 fileprivate let randomizedLevels:[[Int]] = [
+    [1, 3, 5, 5, 6, 8],
     [1, 0, 5, 5, 6, 8],
     [1, 3, 8, 6, 10, 3],
     [0, 6, 14, 9, 9, 12],

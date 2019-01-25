@@ -9,9 +9,11 @@
 import UIKit
 import SpriteKit
 import GameplayKit
+import GoogleMobileAds
 
 class GameViewController: UIViewController {
 
+    var fullPageAd:GADInterstitial?
     var levelToPlay:Int?
 
     override func viewWillAppear(_ animated: Bool) {
@@ -34,6 +36,7 @@ class GameViewController: UIViewController {
 
             // Init the scene from our Gamescene class to match the size of the view
             let scene = GameScene(size: self.view!.bounds.size)
+            scene.parentViewController = self
             scene.currentLevel = levelToPlay!
 
             // Set the scale mode to scale to fit the window
@@ -50,7 +53,9 @@ class GameViewController: UIViewController {
             view.showsFPS = true
             view.showsNodeCount = true
             view.showsDrawCount = true
-//            view.showsPhysics = true
+            
+            //Initial loading of the ad.
+            self.reloadInterstitial()
         }
     }
 
@@ -77,5 +82,40 @@ class GameViewController: UIViewController {
 
     override var prefersStatusBarHidden: Bool {
         return true
+    }
+}
+
+extension GameViewController:GADInterstitialDelegate{
+    //Interstitial Ads need to be renewed after each showing so we have to reload it by making
+    // a new object.
+    func reloadInterstitial(){
+        self.fullPageAd = nil
+        let interstitial = GADInterstitial(adUnitID: "ca-app-pub-3940256099942544/4411468910")
+        interstitial.delegate = self
+        interstitial.load(GADRequest())
+        self.fullPageAd = interstitial
+    }
+    
+    func interstitialWillPresentScreen(_ ad: GADInterstitial) {
+        (self.view as! SKView).scene?.isPaused = true
+    }
+    
+    func interstitialDidDismissScreen(_ ad: GADInterstitial) {
+        (self.view as! SKView).scene?.isPaused = false
+        
+        //Load the interstitial ad on a different thread so as not to interfere with
+        // the game.
+        DispatchQueue.main.async { [unowned self] in
+            self.reloadInterstitial()
+        }
+    }
+    
+    //Handles presenting the full screen ad if it was successfully loaded.
+    func presentFullScreenAd(){
+        if let ad = self.fullPageAd {
+            if ad.isReady {
+                ad.present(fromRootViewController: self)
+            }
+        }
     }
 }
