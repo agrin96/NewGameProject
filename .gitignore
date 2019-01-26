@@ -1,4 +1,6 @@
 Assets.xcassets
+Images
 Base.lproj
 *.plist
+.DS_Store
 

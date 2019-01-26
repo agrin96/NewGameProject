@@ -24,7 +24,7 @@ class GameScene: SKScene, GameStatusNotifier{
     let maxLevels:Int = 100
     
     var numberOfTransitions:Int = 0
-    let transitionsBetweenAds:Int = 3
+    let transitionsBetweenAds:Int = 2
 
     override func didMove(to view: SKView) {
         super.didMove(to: view)
@@ -40,6 +40,13 @@ class GameScene: SKScene, GameStatusNotifier{
 
         self.anchorPoint = CGPoint(x: 0.5, y: 0.5)
         self.backgroundColor = .black
+        
+        let background = SKSpriteNode(imageNamed: "GameScreen.png")
+        background.size = self.size
+        background.anchorPoint = CGPoint(x: 0.5, y: 0.5)
+        background.position = CGPoint.zero
+        background.zPosition = -1
+        self.addChild(background)
 
         //Create a level and set it as the contact delegate
         self.resetLevel()
@@ -137,9 +144,9 @@ class GameScene: SKScene, GameStatusNotifier{
             SKAction.wait(forDuration: 0.25),
             SKAction.group([
                 SKAction.move(by: CGVector(dx: Int(arc4random_uniform(100))-50, dy: Int(arc4random_uniform(60))-30), duration: 1.0),
-                SKAction.scaleX(to: 1.45, duration: 1.5),
-                SKAction.scaleY(to: 2.0, duration: 1.5),
-                SKAction.fadeOut(withDuration: 1.5)
+                SKAction.scaleX(to: 0.01, duration: 1.0),
+                SKAction.scaleY(to: 0.01, duration: 1.0),
+                SKAction.fadeOut(withDuration: 1.0)
             ])
         ])
         self.levelToPlay!.run(interferenceAnimation)

@@ -33,7 +33,7 @@ class MainMenuViewController: UIViewController {
             let scene = MainMenuScene(size: self.view!.bounds.size)
             scene.parentVC = self
             // Set the scale mode to scale to fit the window
-            scene.scaleMode = .aspectFill
+            scene.scaleMode = .fill
 
             // Present the scene
             view.presentScene(scene)
@@ -141,6 +141,7 @@ extension MainMenuViewController: GADBannerViewDelegate {
     }
 }
 
+
 class MainMenuScene:SKScene, UIGestureRecognizerDelegate, UIPickerViewDelegate, UIPickerViewDataSource, UITextFieldDelegate{
 
     var startButton:SKSpriteNode?
@@ -153,26 +154,29 @@ class MainMenuScene:SKScene, UIGestureRecognizerDelegate, UIPickerViewDelegate, 
 
     override func didMove(to view: SKView) {
         super.didMove(to: view)
+        
+        let background = SKSpriteNode(imageNamed: "MainMenu.png")
+        background.zPosition = -1
+        background.size = self.size
+        background.anchorPoint = CGPoint(x: 0.0, y: 0.0)
+        background.position = CGPoint.zero
+        self.addChild(background)
 
-        let title = SKLabelNode(text: "Signal Process")
-        title.position = CGPoint(x: self.view!.bounds.size.width / 2, y: self.view!.bounds.size.height / 4 * 3)
-        self.addChild(title)
-
-        self.startButton = SKSpriteNode(color: .red, size: CGSize(width: 100, height: 40))
-        startButton!.position = CGPoint(x: self.view!.bounds.size.width / 2, y: self.view!.bounds.size.height / 2)
+        self.startButton = SKSpriteNode(color: .red, size: CGSize(width: 140, height: 32))
+        startButton!.position = CGPoint(x: self.view!.bounds.size.width / 2 - 10, y: self.view!.bounds.size.height / 2 - 36)
         self.addChild(self.startButton!)
 
         self.selectedLevel = SKLabelNode(text: "Selected Level 1")
         self.selectedLevel!.fontColor = .white
         self.selectedLevel!.fontName = UIFont.systemFont(ofSize: 8, weight: .medium).fontName
         self.selectedLevel!.fontSize = 16
-        self.selectedLevel!.position = CGPoint(x: self.size.width / 2, y: self.size.height / 6)
+        self.selectedLevel!.position = CGPoint(x: self.size.width / 2 + 18, y: self.size.height / 6 - 26)
         self.addChild(self.selectedLevel!)
 
         let tapGesture = UITapGestureRecognizer(target: self, action: #selector(handleTap))
         self.view!.addGestureRecognizer(tapGesture)
 
-        let picker = UIPickerView(frame: CGRect(x: self.view!.bounds.width/2 - 150, y: self.view!.bounds.height/4*2.5, width: 300, height: self.pickerRowHeight))
+        let picker = UIPickerView(frame: CGRect(x: self.view!.bounds.width/3, y: self.view!.bounds.height/4*3, width: self.pickerRowWidth, height: self.pickerRowHeight))
         picker.delegate = self
         picker.dataSource = self
         picker.backgroundColor = .clear
@@ -180,7 +184,7 @@ class MainMenuScene:SKScene, UIGestureRecognizerDelegate, UIPickerViewDelegate, 
         self.view!.addSubview(picker)
 
         picker.transform = CGAffineTransform(rotationAngle: -90 * (.pi/180))
-        picker.frame = CGRect(x: -50, y: self.view!.bounds.height/4*2.5, width: self.view!.bounds.size.width+100, height: self.pickerRowHeight)
+        picker.frame = CGRect(x: 20, y: self.view!.bounds.height/4*2.55, width: self.view!.bounds.size.width, height: self.pickerRowHeight)
     }
 
     func pickerView(_ pickerView: UIPickerView, didSelectRow row: Int, inComponent component: Int) {

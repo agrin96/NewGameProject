@@ -24,7 +24,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         // and control our app directly.
         window = UIWindow(frame: UIScreen.main.bounds)
         window?.makeKeyAndVisible()
-        window?.rootViewController = UINavigationController(rootViewController: MainMenuViewController())
+        window?.rootViewController = UINavigationController(rootViewController: OpeningScreenViewController())
 
         //Here we will handle state restoration by opening a shared instance object or closing it.
 
