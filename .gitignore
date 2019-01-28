@@ -3,4 +3,4 @@ Images
 Base.lproj
 *.plist
 .DS_Store
-
+*.png

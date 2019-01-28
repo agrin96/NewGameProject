@@ -99,7 +99,9 @@ class OpeningScreen:SKScene, UIGestureRecognizerDelegate {
         background.zPosition = -1
         background.anchorPoint = CGPoint(x: 0.0, y: 0.0)
         background.position = CGPoint.zero
+        background.alpha = 0
         self.addChild(background)
+        background.run(SKAction.fadeIn(withDuration: 3))
         
         let tapToSkip = SKLabelNode(text: "Tap to Skip")
         tapToSkip.position.x = self.size.width / 2

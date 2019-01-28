@@ -15,9 +15,115 @@ let dataPath: URL = {
     return pathOut
 }()
 
+fileprivate let cities:[String] = [
+    "New York",
+    "Washington",
+    "Chicago",
+    "Los Angeles",
+    "Seattle",
+    "Montreal",
+    "Sao Paulo",
+    "Lima",
+    "Buenos Aires",
+    "Callao",
+    "Mexico City",
+    "London",
+    "Paris",
+    "Brussels",
+    "Berlin",
+    "Copenhagen",
+    "Oslo",
+    "Stockholm",
+    "Vienna",
+    "Prague",
+    "Budapest",
+    "Rome",
+    "Bern",
+    "Madrid",
+    "Barcelona",
+    "Belgrad",
+    "Bucharest",
+    "Athens",
+    "Istanbul",
+    "Kiev",
+    "Helsinki",
+    "Riga",
+    "Saint Petersburg",
+    "Moscow",
+    "Minsk",
+    "Ankara",
+    "Damscus",
+    "Tel Aviv",
+    "Cairo",
+    "Alexandria",
+    "Tunis",
+    "Marakesh",
+    "Lisbon",
+    "Baghdad",
+    "Tehran",
+    "Riyadh",
+    "Dubai",
+    "Kabul",
+    "Islamabad",
+    "New Dehli",
+    "Bangalor",
+    "Kathamundu",
+    "Mandalay",
+    "Bangkok",
+    "Hanoi",
+    "Kuala Lampur",
+    "Guangzhou",
+    "Chengdu",
+    "Nanjing",
+    "Beijing",
+    "Ulaanbaatar",
+    "Irkutsk",
+    "Vladivostok",
+    "Pyongyang",
+    "Seoul",
+    "Tokyo",
+    "Kyoto",
+    "Taipei",
+    "Manila",
+    "Brunei",
+    "Jakarta",
+    "Singapore",
+    "Perth",
+    "Sydney",
+    "Melbourne",
+    "Auckland",
+    "Honolulu",
+    "Anchorage",
+    "Vancouver",
+    "Panama",
+    "Havana",
+    "Caracas",
+    "Cape Town",
+    "Antananarivo",
+    "Nairobi",
+    "Lusaka",
+    "Pretoria",
+    "Kinshasa",
+    "Bangui",
+    "Lagos",
+    "Dakar",
+    "Bamako",
+    "Noakchott",
+    "Niamey",
+    "Khartoum",
+    "Addis Ababa",
+    "Mogadishu",
+    "Tripoli",
+    "Malta",
+    "Algeirs",
+    "Casablanca",
+    "Reykjavik"
+]
+
 struct level:Codable {
     var unlocked:Bool
     var highScore:Int
+    var cityName:String
 }
 
 class GameData:Codable {
@@ -37,8 +143,8 @@ class GameData:Codable {
     private init() {
         self.levelData = {
             var data: [level] = []
-            for _ in 0..<100 {
-                data.append(level(unlocked: false, highScore: 0))
+            for i in 0..<100 {
+                data.append(level(unlocked: false, highScore: 0, cityName: cities[i]))
             }
             data[0].unlocked = true
             return data

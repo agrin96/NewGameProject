@@ -81,6 +81,7 @@ class MainMenuViewController: UIViewController {
 
     func transitionToGame(with level:Int){
         let gameVC = GameViewController()
+        gameVC.modalTransitionStyle = .flipHorizontal
         gameVC.levelToPlay = level
 
         let launchTime = DispatchTime.now() + 0.2
@@ -151,6 +152,9 @@ class MainMenuScene:SKScene, UIGestureRecognizerDelegate, UIPickerViewDelegate, 
 
     let pickerRowHeight:CGFloat = 100
     let pickerRowWidth:CGFloat = 100
+    
+    var signalTower:SKSpriteNode?
+    var playerSignal:SKSpriteNode?
 
     override func didMove(to view: SKView) {
         super.didMove(to: view)
@@ -161,30 +165,108 @@ class MainMenuScene:SKScene, UIGestureRecognizerDelegate, UIPickerViewDelegate, 
         background.anchorPoint = CGPoint(x: 0.0, y: 0.0)
         background.position = CGPoint.zero
         self.addChild(background)
+        
+        let mainScreen = SKSpriteNode(color: .black, size: CGSize(width: 300, height: 220))
+        mainScreen.alpha = 0.90
+        mainScreen.anchorPoint = CGPoint(x: 0.5, y: 0.5)
+        mainScreen.zPosition = 1
+        mainScreen.position = CGPoint(x: self.size.width / 2 + 43, y: self.size.height / 1.835)
+        self.addChild(mainScreen)
+        mainScreen.run(SKAction.sequence([
+            SKAction.fadeOut(withDuration: 1.5),
+            SKAction.run {
+                mainScreen.color = .white
+            },
+            SKAction.fadeAlpha(to: 0.50, duration: 1.5)
+            ]))
+        
+        let mainSelectionScreen = SKSpriteNode(color: .black, size: CGSize(width: 300, height: 130))
+        mainSelectionScreen.alpha = 0.90
+        mainSelectionScreen.anchorPoint = CGPoint(x: 0.5, y: 0.5)
+        mainSelectionScreen.zPosition = 1
+        mainSelectionScreen.position = CGPoint(x: self.size.width / 2 + 15, y: self.size.height / 3.42)
+        self.addChild(mainSelectionScreen)
+        mainSelectionScreen.run(SKAction.sequence([
+            SKAction.fadeOut(withDuration: 1.5),
+            SKAction.run {
+                mainSelectionScreen.color = .white
+            },
+            SKAction.fadeAlpha(to: 0.50, duration: 1.5)
+            ]))
 
-        self.startButton = SKSpriteNode(color: .red, size: CGSize(width: 140, height: 32))
-        startButton!.position = CGPoint(x: self.view!.bounds.size.width / 2 - 10, y: self.view!.bounds.size.height / 2 - 36)
+        self.startButton = SKSpriteNode(color: .green, size: CGSize(width: 140, height: 32))
+        startButton!.zPosition = 2
+        startButton!.alpha = 0
+        startButton!.position = CGPoint(x: self.view!.bounds.size.width / 2 - 8, y: self.view!.bounds.size.height / 2 - 36)
         self.addChild(self.startButton!)
+        startButton!.run(SKAction.sequence([SKAction.wait(forDuration: 3.0), SKAction.fadeIn(withDuration: 1.5)]))
+        
+        self.signalTower = SKSpriteNode(color: .red, size: CGSize(width: 40, height: 120))
+        self.signalTower!.zPosition = 2
+        self.signalTower!.anchorPoint = CGPoint(x: 0.5, y: 0.0)
+        self.signalTower!.alpha = 0.0
+        self.signalTower!.position = CGPoint(x: self.size.width / 2.6, y: self.size.height / 2 - 10)
+        self.addChild(self.signalTower!)
 
         self.selectedLevel = SKLabelNode(text: "Selected Level 1")
-        self.selectedLevel!.fontColor = .white
+        self.selectedLevel!.fontColor = .black
         self.selectedLevel!.fontName = UIFont.systemFont(ofSize: 8, weight: .medium).fontName
         self.selectedLevel!.fontSize = 16
-        self.selectedLevel!.position = CGPoint(x: self.size.width / 2 + 18, y: self.size.height / 6 - 26)
+        self.selectedLevel!.position = CGPoint(x: self.size.width / 2 + 18, y: self.size.height / 6 - 28)
+        self.selectedLevel!.alpha = 0
+        self.selectedLevel!.zPosition = 2
         self.addChild(self.selectedLevel!)
+        
+        let selectedScreen = SKSpriteNode(color: .black, size: CGSize(width: 160, height: 38))
+        selectedScreen.alpha = 0.90
+        selectedScreen.zPosition = 1
+        selectedScreen.anchorPoint = CGPoint(x: 0.5, y: 0.5)
+        selectedScreen.position = CGPoint(x: self.size.width / 1.79, y: self.size.height / 7.2)
+        self.addChild(selectedScreen)
+        self.run(SKAction.sequence([
+            SKAction.run {
+                selectedScreen.run(SKAction.sequence([
+                    SKAction.fadeOut(withDuration: 1.5),
+                    SKAction.run {
+                        selectedScreen.color = .white
+                    },
+                    SKAction.fadeAlpha(to: 0.50, duration: 1.5)
+                    ]))
+            },
+            SKAction.wait(forDuration: 3.0),
+            SKAction.run {
+                self.selectedLevel!.run(SKAction.fadeIn(withDuration: 1.0))
+            },
+            SKAction.run {
+                self.signalTower!.run(SKAction.fadeAlpha(to: 0.9, duration: 1.0))
+            }
+            ]))
 
         let tapGesture = UITapGestureRecognizer(target: self, action: #selector(handleTap))
         self.view!.addGestureRecognizer(tapGesture)
 
         let picker = UIPickerView(frame: CGRect(x: self.view!.bounds.width/3, y: self.view!.bounds.height/4*3, width: self.pickerRowWidth, height: self.pickerRowHeight))
         picker.delegate = self
+        picker.translatesAutoresizingMaskIntoConstraints = false
         picker.dataSource = self
         picker.backgroundColor = .clear
         picker.isOpaque = true
+        picker.alpha = 0
+        self.run(SKAction.sequence([
+            SKAction.wait(forDuration: 3.0),
+            SKAction.run {
+                UIView.animate(withDuration: 1.0, animations: {
+                    picker.alpha = 1.0
+                })
+        }]))
         self.view!.addSubview(picker)
-
+        
         picker.transform = CGAffineTransform(rotationAngle: -90 * (.pi/180))
-        picker.frame = CGRect(x: 20, y: self.view!.bounds.height/4*2.55, width: self.view!.bounds.size.width, height: self.pickerRowHeight)
+        NSLayoutConstraint(item: picker, attribute: .centerX, relatedBy: .equal, toItem: self.view!.safeAreaLayoutGuide, attribute: .centerX, multiplier: 1.0, constant: 10).isActive = true
+        NSLayoutConstraint(item: picker, attribute: .centerY, relatedBy: .equal, toItem: self.view!.safeAreaLayoutGuide, attribute: .centerY, multiplier: 1.0, constant: 160).isActive = true
+        NSLayoutConstraint(item: picker, attribute: .width, relatedBy: .equal, toItem: self.view!.safeAreaLayoutGuide, attribute: .width, multiplier: 0.3, constant: 0).isActive = true
+        NSLayoutConstraint(item: picker, attribute: .height, relatedBy: .equal, toItem: self.view!.safeAreaLayoutGuide, attribute: .height, multiplier: 0.50, constant: 0).isActive = true
+    
     }
 
     func pickerView(_ pickerView: UIPickerView, didSelectRow row: Int, inComponent component: Int) {
@@ -205,29 +287,35 @@ class MainMenuScene:SKScene, UIGestureRecognizerDelegate, UIPickerViewDelegate, 
     func pickerView(_ pickerView: UIPickerView, viewForRow row: Int, forComponent component: Int, reusing view: UIView?) -> UIView {
         let view = UIView(frame: CGRect(x: 0, y: 0, width: self.pickerRowWidth, height: self.pickerRowHeight))
 
-        let top = UILabel(frame: CGRect(x: 0, y: 25, width: self.pickerRowWidth, height: 15))
+        let top = UILabel(frame: CGRect(x: 0, y: 10, width: self.pickerRowWidth, height: 15))
         top.text = "Level"
         top.textAlignment = .center
-        top.textColor = .white
+        top.textColor = .black
         top.font = UIFont.systemFont(ofSize: 14, weight: .medium)
         view.addSubview(top)
 
-        let main = UILabel(frame: CGRect(x: 0, y: 5, width: self.pickerRowWidth, height: self.pickerRowHeight))
+        let main = UILabel(frame: CGRect(x: 0, y: -10, width: self.pickerRowWidth, height: self.pickerRowHeight))
         main.text = "\(row + 1)"
         main.textAlignment = .center
-        main.textColor = .white
+        main.textColor = .black
         main.font = UIFont.systemFont(ofSize: 20, weight: .heavy)
         view.addSubview(main)
+        
+        let cityName = UILabel(frame: CGRect(x: 0, y: 58, width: self.pickerRowWidth, height: 15))
+        cityName.text = GameData.sharedInstance().levelData[row].cityName
+        cityName.textAlignment = .center
+        cityName.textColor = .black
+        cityName.font = UIFont.systemFont(ofSize: 14, weight: .medium)
+        view.addSubview(cityName)
 
-        let bottom = UILabel(frame: CGRect(x: 0, y: 70, width: self.pickerRowWidth, height: 15))
+        let bottom = UILabel(frame: CGRect(x: 0, y: 80, width: self.pickerRowWidth, height: 15))
         if GameData.sharedInstance().levelData[row].unlocked {
             bottom.text = "\(GameData.sharedInstance().levelData[row].highScore)"
         }else{
             bottom.text = "Locked"
         }
-
         bottom.textAlignment = .center
-        bottom.textColor = .white
+        bottom.textColor = .black
         bottom.font = UIFont.systemFont(ofSize: 14, weight: .medium)
         view.addSubview(bottom)
 
@@ -246,9 +334,47 @@ class MainMenuScene:SKScene, UIGestureRecognizerDelegate, UIPickerViewDelegate, 
         if self.startButton != nil{
             if self.startButton?.contains(tapLocation) ?? false{
                 if parentVC != nil{
-                    parentVC!.transitionToGame(with: self.chosenLevel)
+                    self.run(SKAction.sequence([
+                        SKAction.run {
+                            self.activateGame()
+                        },
+                        SKAction.wait(forDuration: 1.1),
+                        SKAction.run {
+                            self.parentVC!.transitionToGame(with: self.chosenLevel)
+                        }]))
                 }
             }
         }
+    }
+    
+    func activateGame(){
+        self.playerSignal = SKSpriteNode(color: .red, size: CGSize(width: 10, height: 10))
+        self.playerSignal!.zPosition = 2
+        self.playerSignal!.anchorPoint = CGPoint(x: 0.5, y: 0.5)
+        self.playerSignal!.alpha = 0.90
+        self.playerSignal!.position = CGPoint(x: self.size.width / 2.6, y: self.size.height / 2 + 110)
+        self.addChild(self.playerSignal!)
+        
+        let shapeNode = SKShapeNode()
+        shapeNode.strokeColor = .red
+        shapeNode.lineWidth = 8
+        shapeNode.lineCap = .round
+        shapeNode.zPosition = 2
+        shapeNode.alpha = 0.90
+        self.addChild(shapeNode)
+        
+        let dynamicPath = CGMutablePath()
+        dynamicPath.move(to: self.playerSignal!.position)
+        
+        self.run(SKAction.repeatForever(SKAction.sequence([
+            SKAction.run({
+                dynamicPath.addLine(to: self.playerSignal!.position)
+                dynamicPath.closeSubpath()
+                self.playerSignal!.position.x += 3
+                shapeNode.path = dynamicPath
+                dynamicPath.move(to: self.playerSignal!.position)
+            }),
+            SKAction.wait(forDuration: 1/60)
+        ])))
     }
 }

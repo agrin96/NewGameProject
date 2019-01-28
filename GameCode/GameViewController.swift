@@ -33,7 +33,7 @@ class GameViewController: UIViewController {
         super.viewDidLoad()
 
         if let view = self.view as! SKView? {
-
+            
             // Init the scene from our Gamescene class to match the size of the view
             let scene = GameScene(size: self.view!.bounds.size)
             scene.parentViewController = self

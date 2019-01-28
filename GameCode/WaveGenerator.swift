@@ -108,6 +108,12 @@ class WaveGenerator:SKNode, WaveGenerationNotifier, UIGestureRecognizerDelegate{
             self.startingReciever!.zPosition = 2
             self.startingReciever!.isHidden = true
             self.addChild(self.startingReciever!)
+        
+            let startingCityLabel = SKLabelNode(text: GameData.sharedInstance().levelData[self.params!.level].cityName)
+            startingCityLabel.position.x = self.startingReciever!.position.x
+            startingCityLabel.position.y = self.startingReciever!.position.y + 50
+            startingCityLabel.zPosition = 2
+            self.startingReciever!.addChild(startingCityLabel)
 
             let startingLevelImage = SKSpriteNode(color: .red, size: CGSize(width: 22, height: 400))
             startingLevelImage.anchorPoint = CGPoint(x: 0.5, y: 1)
@@ -131,6 +137,12 @@ class WaveGenerator:SKNode, WaveGenerationNotifier, UIGestureRecognizerDelegate{
             self.endingReciever!.zPosition = 2
             self.endingReciever!.isHidden = true
             self.addChild(self.endingReciever!)
+            
+            let endingCityLabel = SKLabelNode(text: GameData.sharedInstance().levelData[self.params!.level + 1].cityName)
+            endingCityLabel.position.x = self.startingReciever!.position.x
+            endingCityLabel.position.y = self.startingReciever!.position.y + 50
+            endingCityLabel.zPosition = 2
+            self.endingReciever!.addChild(endingCityLabel)
 
             let endingLevelImage = SKSpriteNode(color: .red, size: CGSize(width: 22, height: 400))
             endingLevelImage.anchorPoint = CGPoint(x: 0.5, y: 1)
