@@ -61,8 +61,7 @@ class SpriteButton: SKSpriteNode {
             let textureToPress = SKAction.setTexture(buttonTouched!)
             let pressAnimation = SKAction.sequence([textureToPress, SKAction.wait(forDuration: 0.25), textureToDefault])
             
-            self.run(pressAnimation)
-            completion()
+            self.run(pressAnimation, completion: {completion()})
         }
     }
     

@@ -76,14 +76,19 @@ class OpeningScreenViewController: UIViewController {
         return true
     }
     
-    func transitionToMenu(){
+    func transitionToMenu(animated:Bool){
         let mainMenu = MainMenuViewController()
         
-        let launchTime = DispatchTime.now() + 0.2
-        DispatchQueue.main.asyncAfter(deadline: launchTime, execute: {
+        if animated == false {
             (self.view as! SKView).scene!.isPaused = true
-            self.navigationController?.pushViewController(mainMenu, animated: true)
-        })
+            self.navigationController?.pushViewController(mainMenu, animated: false)
+        }else{
+            let launchTime = DispatchTime.now() + 0.2
+            DispatchQueue.main.asyncAfter(deadline: launchTime, execute: {
+                (self.view as! SKView).scene!.isPaused = true
+                self.navigationController?.pushViewController(mainMenu, animated: true)
+            })
+        }
     }
 }
 
@@ -123,7 +128,7 @@ class OpeningScreen:SKScene, UIGestureRecognizerDelegate {
             if vc.isPresentedFromMenu {
                 vc.dismiss(animated: true, completion: {})
             }else{
-                vc.transitionToMenu()
+                vc.transitionToMenu(animated: true)
             }
         }
     }

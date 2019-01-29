@@ -36,7 +36,7 @@ class GameViewController: UIViewController {
         super.viewDidLoad()
 
         if let view = self.view as! SKView? {
-            
+            view.backgroundColor = .white
             // Init the scene from our Gamescene class to match the size of the view
             let scene = GameScene(size: self.view!.bounds.size)
             scene.parentViewController = self
@@ -71,6 +71,7 @@ class GameViewController: UIViewController {
     // the application will auto resume the scene unless manually told not to.
     @objc func EnterBackground(){
         self.wasPaused = true
+        (self.view as! SKView).scene!.alpha = 0.4
         (self.view as! SKView).scene!.isPaused = true
     }
     
@@ -80,9 +81,9 @@ class GameViewController: UIViewController {
         if self.wasPaused == true {
             (self.view as! SKView).scene!.isPaused = true
             if self.tapLabel == nil {
-                let view = UILabel(frame: CGRect(x: self.view.frame.width / 2 - 110, y: self.view.frame.height / 5, width: 240, height: 100))
+                let view = UILabel(frame: CGRect(x: self.view.frame.width / 2 - 135, y: self.view.frame.height / 5, width: 300, height: 100))
                 view.text = "Tap to Resume"
-                view.font = UIFont(name: "Helvetica", size: 32)
+                view.font = UIFont(name: "Helvetica-Bold", size: 36)
                 view.contentMode = .center
                 view.alpha = 0
                 self.tapLabel = view
@@ -105,6 +106,7 @@ class GameViewController: UIViewController {
         if self.tapLabel != nil {
             self.tapLabel!.alpha = 0
             self.wasPaused = false
+            (self.view as! SKView).scene!.alpha = 1.0
         }
     }
 

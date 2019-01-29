@@ -156,6 +156,7 @@ class MainMenuScene:SKScene, UIGestureRecognizerDelegate, UIPickerViewDelegate, 
     
     var signalTower:SKSpriteNode?
     var playerSignal:SKSpriteNode?
+    var playerLine:SKShapeNode?
 
     override func didMove(to view: SKView) {
         super.didMove(to: view)
@@ -372,6 +373,19 @@ class MainMenuScene:SKScene, UIGestureRecognizerDelegate, UIPickerViewDelegate, 
         }
     }
     
+    //When transitioning from the Game screen back to menu we need to reset all the fancy
+    // effects to prepare to launch again. Basically we are reloading.
+    func resetMainMenu(){
+        self.removeAllActions()
+        self.playerLine!.removeFromParent()
+        self.playerSignal!.removeFromParent()
+        self.playerSignal = nil
+        self.playerLine = nil
+        self.signalTower!.texture = SKTexture(imageNamed: "Tower_Off.png")
+    }
+    
+    //This is essentially an animation to show that the game is starting when the player
+    // types start.
     func activateGame(){
         self.signalTower!.texture! = SKTexture(imageNamed: "Tower_On.png")
         self.playerSignal = SKSpriteNode(color: .red, size: CGSize(width: 10, height: 10))
@@ -381,13 +395,13 @@ class MainMenuScene:SKScene, UIGestureRecognizerDelegate, UIPickerViewDelegate, 
         self.playerSignal!.position = CGPoint(x: self.size.width / 2.6, y: self.size.height / 2 + 85)
         self.addChild(self.playerSignal!)
         
-        let shapeNode = SKShapeNode()
-        shapeNode.strokeColor = .red
-        shapeNode.lineWidth = 8
-        shapeNode.lineCap = .round
-        shapeNode.zPosition = 2
-        shapeNode.alpha = 0.90
-        self.addChild(shapeNode)
+        self.playerLine = SKShapeNode()
+        self.playerLine!.strokeColor = .red
+        self.playerLine!.lineWidth = 8
+        self.playerLine!.lineCap = .round
+        self.playerLine!.zPosition = 2
+        self.playerLine!.alpha = 0.90
+        self.addChild(self.playerLine!)
         
         let dynamicPath = CGMutablePath()
         dynamicPath.move(to: self.playerSignal!.position)
@@ -397,7 +411,7 @@ class MainMenuScene:SKScene, UIGestureRecognizerDelegate, UIPickerViewDelegate, 
                 dynamicPath.addLine(to: self.playerSignal!.position)
                 dynamicPath.closeSubpath()
                 self.playerSignal!.position.x += 3
-                shapeNode.path = dynamicPath
+                self.playerLine!.path = dynamicPath
                 dynamicPath.move(to: self.playerSignal!.position)
             }),
             SKAction.wait(forDuration: 1/120)

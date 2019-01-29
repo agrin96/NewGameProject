@@ -310,6 +310,14 @@ class WaveGenerator:SKNode, WaveGenerationNotifier, UIGestureRecognizerDelegate{
 
     //Trigger for changing the wave head travel direction on the y axis
     @objc private func changeWaveHeadTravelDirection(_ sender:UILongPressGestureRecognizer){
+        //Send a call to handle user choice. This is essentially a cheap delegation to a scene
+        // method for gesture recognition
+        
+        //If the scene has not finished initializing this level then we need to return or we crash
+        if scoreUpdateDelegate == nil{
+            return
+        }
+        
         if self.scene!.isPaused == true {
             if let vc = (self.scene as! GameScene).parentViewController {
                 vc.handleGameResume()
@@ -336,6 +344,11 @@ class WaveGenerator:SKNode, WaveGenerationNotifier, UIGestureRecognizerDelegate{
         default:
             break
         }
+        
+        if self.scene != nil {
+            (self.scene as! GameScene).handleUserChoice(sender)
+        }
+
     }
 }
 

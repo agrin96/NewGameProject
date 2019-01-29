@@ -45,6 +45,7 @@ class LevelGenerator:SKNode, SKPhysicsContactDelegate, ScoreChangeNotifier{
     weak var levelTimer:Timer?
     let maximumLevelTime:CGFloat = 45//seconds
     var gamePaused:Bool = false
+    var willResignActiveCalls:Int = 0
 
     //Notifier of win/lose
     weak var gameStatusDelegate:GameStatusNotifier?
@@ -92,8 +93,8 @@ class LevelGenerator:SKNode, SKPhysicsContactDelegate, ScoreChangeNotifier{
         self.addChild(self.currentTimeDisplay!)
         
         //Subscribe to notifications to know when to pause and when to resume the timer.
-        NotificationCenter.default.addObserver(self, selector: #selector(pauseTimer), name: Notification.Name.init(rawValue: "ResumeGame"), object: nil)
-        NotificationCenter.default.addObserver(self, selector: #selector(pauseTimer), name: UIApplication.willResignActiveNotification, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(pauseTimer(sender:)), name: Notification.Name.init(rawValue: "ResumeGame"), object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(pauseTimer(sender:)), name: UIApplication.willResignActiveNotification, object: nil)
     }
 
     //Called to actually start the level
@@ -130,7 +131,19 @@ class LevelGenerator:SKNode, SKPhysicsContactDelegate, ScoreChangeNotifier{
     
     //Manually pause and unpause the game timer because it continues being active even
     // if the entire scene or view is paused.
-    @objc func pauseTimer(){
+    @objc func pauseTimer(sender:Notification){
+        //When the application resigns it is sometimes called twice which results
+        // in all kinds of timing issues hence we make sure that we ignore it after
+        // the first execution.
+        if sender.name == UIApplication.willResignActiveNotification {
+            self.willResignActiveCalls += 1
+        }
+        
+        if self.willResignActiveCalls == 2 {
+            self.willResignActiveCalls = 0
+            return
+        }
+        
         if self.gamePaused {
             self.levelTimer = Timer.scheduledTimer(timeInterval: 0.1, target: self, selector: #selector(updateTime), userInfo: nil, repeats: true)
             self.gamePaused = false

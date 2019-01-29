@@ -27,9 +27,12 @@ class GameScene: SKScene, GameStatusNotifier{
     let transitionsBetweenAds:Int = 2
     
     var resumeGame:SKLabelNode?
+    
+    var continueQuestion:SKNode?
 
     override func didMove(to view: SKView) {
         super.didMove(to: view)
+        
         //DO NOT TOUCH THE GRAVITY I SPENT 2 HOURS DEBUGGING THIS BEING COMMENTED OUT
         self.physicsWorld.gravity = CGVector(dx: 0, dy: 0)
 
@@ -56,7 +59,7 @@ class GameScene: SKScene, GameStatusNotifier{
             ]))
 
         self.anchorPoint = CGPoint(x: 0.5, y: 0.5)
-        self.backgroundColor = .black
+        self.backgroundColor = .white
         
         let background = SKSpriteNode(imageNamed: "GameScreen.png")
         background.size = self.size
@@ -136,20 +139,11 @@ class GameScene: SKScene, GameStatusNotifier{
                 self.gamestatus!.fontSize = 48
                 self.gamestatus!.fontColor = .red
                 self.gamestatus!.run(SKAction.sequence([
-                    SKAction.fadeIn(withDuration: 0.5),
-                    SKAction.wait(forDuration: 2),
-                    SKAction.fadeOut(withDuration: 0.5),
+                    SKAction.fadeIn(withDuration: 0.25),
+                    SKAction.wait(forDuration: 0.75),
+                    SKAction.fadeOut(withDuration: 0.25),
                     SKAction.run({ [unowned self] in
-                        
-                        //After winning or losing the game we present a full screen ad.
-                        if self.numberOfTransitions >= self.transitionsBetweenAds{
-                            if let vc = self.parentViewController{
-                                vc.presentFullScreenAd()
-                            }
-                            self.numberOfTransitions = 0
-                        }
-                        self.resetLevel()
-                        self.numberOfTransitions += 1
+                        self.presentUserContinueChoice()
                 })]))
             })]))
         }
@@ -167,6 +161,83 @@ class GameScene: SKScene, GameStatusNotifier{
             ])
         ])
         self.levelToPlay!.run(interferenceAnimation)
+    }
+    
+    //After losing, we ask the player if they want to continue or if they want to return
+    // to the menu
+    func presentUserContinueChoice(){
+        if self.continueQuestion == nil {
+            self.continueQuestion = SKNode()
+            self.continueQuestion!.position = CGPoint.zero
+            self.continueQuestion!.zPosition = 3
+            self.addChild(self.continueQuestion!)
+            
+            let continueGame = SpriteButton(button: SKTexture(imageNamed: "Button"), buttonTouched: SKTexture(imageNamed: "Button_Touched"))
+            continueGame.setButtonText(text: "Continue")
+            continueGame.setButtonScale(to: 0.5)
+            continueGame.zPosition = 3
+            continueGame.anchorPoint = CGPoint(x: 0.5, y: 0.5)
+            continueGame.position = CGPoint.zero
+            continueGame.alpha = 0.9
+            continueGame.name = "ContinueGame"
+            continueGame.position.y += 100
+            self.continueQuestion!.addChild(continueGame)
+            
+            let stopGame = SpriteButton(button: SKTexture(imageNamed: "Button"), buttonTouched: SKTexture(imageNamed: "Button_Touched"))
+            stopGame.setButtonText(text: "Main Menu")
+            stopGame.setButtonScale(to: 0.5)
+            stopGame.zPosition = 3
+            stopGame.anchorPoint = CGPoint(x: 0.5, y: 0.5)
+            stopGame.position = CGPoint.zero
+            stopGame.alpha = 0.9
+            stopGame.name = "StopGame"
+            stopGame.position.y -= 100
+            self.continueQuestion!.addChild(stopGame)
+        }else{
+            self.continueQuestion?.isHidden = false
+        }
+    }
+    
+    func continueGame(){
+        //After winning or losing the game we present a full screen ad.
+        if self.numberOfTransitions >= self.transitionsBetweenAds{
+            if let vc = self.parentViewController{
+                vc.presentFullScreenAd()
+            }
+            self.numberOfTransitions = 0
+        }
+        self.resetLevel()
+        self.numberOfTransitions += 1
+    }
+    
+    func handleUserChoice(_ sender:UILongPressGestureRecognizer){
+        if self.continueQuestion == nil {
+            return
+        }
+        
+        let coordinates = sender.location(in: self.view!)
+        let tapLocation = self.convertPoint(fromView: coordinates)
+        
+        if let node = self.continueQuestion!.childNode(withName: "ContinueGame"){
+            if node.contains(tapLocation){
+                (node as! SpriteButton).buttonTouchedUpInside {
+                    self.continueGame()
+                    self.continueQuestion!.isHidden = true
+                }
+            }
+        }
+        if let node = self.continueQuestion!.childNode(withName: "StopGame"){
+            if node.contains(tapLocation){
+                (node as! SpriteButton).buttonTouchedUpInside {
+                    if let nav = self.parentViewController?.navigationController{
+                        nav.popViewController(animated: true)
+                        let scene = ((nav.topViewController as! MainMenuViewController).view as! SKView).scene as! MainMenuScene
+                        scene.isPaused = false
+                        scene.resetMainMenu()
+                    }
+                }
+            }
+        }
     }
 
     override func update(_ currentTime: TimeInterval) {
