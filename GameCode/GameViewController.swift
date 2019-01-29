@@ -15,6 +15,9 @@ class GameViewController: UIViewController {
 
     var fullPageAd:GADInterstitial?
     var levelToPlay:Int?
+    var wasPaused:Bool = false
+    var tapLabel:UILabel?
+    var resumeNotification:Notification?
 
     override func viewWillAppear(_ animated: Bool) {
         //Set the navigation bar to hidden before the view appears so the user never notices.
@@ -54,8 +57,54 @@ class GameViewController: UIViewController {
             view.showsNodeCount = true
             view.showsDrawCount = true
             
+            //Subscribe to the notifications telling us that the application becomes inactive or active for pause handling.
+            NotificationCenter.default.addObserver(self, selector: #selector(EnterBackground), name: UIApplication.willResignActiveNotification, object: nil)
+            NotificationCenter.default.addObserver(self, selector: #selector(EnterForeGround), name: UIApplication.didBecomeActiveNotification, object: nil)
+            
             //Initial loading of the ad.
             self.reloadInterstitial()
+        }
+    }
+    
+    //When the application goes into the background we pause the scene and set our own
+    // variable to make sure that we handle the pausing on resume. This is because
+    // the application will auto resume the scene unless manually told not to.
+    @objc func EnterBackground(){
+        self.wasPaused = true
+        (self.view as! SKView).scene!.isPaused = true
+    }
+    
+    //Called when the application becomes active to display a view telling the players
+    // how to resume the game.
+    @objc func EnterForeGround(){
+        if self.wasPaused == true {
+            (self.view as! SKView).scene!.isPaused = true
+            if self.tapLabel == nil {
+                let view = UILabel(frame: CGRect(x: self.view.frame.width / 2 - 110, y: self.view.frame.height / 5, width: 240, height: 100))
+                view.text = "Tap to Resume"
+                view.font = UIFont(name: "Helvetica", size: 32)
+                view.contentMode = .center
+                view.alpha = 0
+                self.tapLabel = view
+                self.view.addSubview(view)
+            }
+            UIView.animate(withDuration: 0.5, animations: { self.tapLabel!.alpha = 1.0 })
+        }
+    }
+    
+    //Will handle resuming the game scene and sending the resume notification for the game timer.
+    // This is necessary because the timer is not paused with the scene so we have to handle it
+    // manually.
+    func handleGameResume(){
+        if self.resumeNotification == nil {
+            self.resumeNotification = Notification(name: Notification.Name.init(rawValue: "ResumeGame"), object: nil, userInfo: nil)
+        }
+        NotificationCenter.default.post(self.resumeNotification!)
+
+        (self.view as! SKView).scene!.isPaused = false
+        if self.tapLabel != nil {
+            self.tapLabel!.alpha = 0
+            self.wasPaused = false
         }
     }
 
@@ -83,6 +132,8 @@ class GameViewController: UIViewController {
     override var prefersStatusBarHidden: Bool {
         return true
     }
+    
+    
 }
 
 extension GameViewController:GADInterstitialDelegate{

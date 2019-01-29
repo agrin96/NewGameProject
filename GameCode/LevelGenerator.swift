@@ -44,6 +44,7 @@ class LevelGenerator:SKNode, SKPhysicsContactDelegate, ScoreChangeNotifier{
     var currentTime:CGFloat = 0
     weak var levelTimer:Timer?
     let maximumLevelTime:CGFloat = 45//seconds
+    var gamePaused:Bool = false
 
     //Notifier of win/lose
     weak var gameStatusDelegate:GameStatusNotifier?
@@ -67,7 +68,6 @@ class LevelGenerator:SKNode, SKPhysicsContactDelegate, ScoreChangeNotifier{
         self.addChild(self.playerWave!)
         self.playerWave!.scoreUpdateDelegate = self
 
-
         var topWaveSettings = WaveGeneratorParameters()
         topWaveSettings.location = CGPoint(x: view.bounds.width / 2, y: 70)
         topWaveSettings.waveHead.isPlayer = false
@@ -90,6 +90,10 @@ class LevelGenerator:SKNode, SKPhysicsContactDelegate, ScoreChangeNotifier{
         self.currentTimeDisplay!.position = CGPoint(x: 0, y: -250)
         self.currentTimeDisplay!.fontSize = 30
         self.addChild(self.currentTimeDisplay!)
+        
+        //Subscribe to notifications to know when to pause and when to resume the timer.
+        NotificationCenter.default.addObserver(self, selector: #selector(pauseTimer), name: Notification.Name.init(rawValue: "ResumeGame"), object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(pauseTimer), name: UIApplication.willResignActiveNotification, object: nil)
     }
 
     //Called to actually start the level
@@ -121,6 +125,20 @@ class LevelGenerator:SKNode, SKPhysicsContactDelegate, ScoreChangeNotifier{
             //Start the level timer
             self.currentTimeDisplay!.text = "\(0)"
             self.levelTimer = Timer.scheduledTimer(timeInterval: 0.1, target: self, selector: #selector(updateTime), userInfo: nil, repeats: true)
+        }
+    }
+    
+    //Manually pause and unpause the game timer because it continues being active even
+    // if the entire scene or view is paused.
+    @objc func pauseTimer(){
+        if self.gamePaused {
+            self.levelTimer = Timer.scheduledTimer(timeInterval: 0.1, target: self, selector: #selector(updateTime), userInfo: nil, repeats: true)
+            self.gamePaused = false
+        }else{
+            if self.levelTimer != nil{
+                self.levelTimer!.invalidate()
+            }
+            self.gamePaused = true
         }
     }
 

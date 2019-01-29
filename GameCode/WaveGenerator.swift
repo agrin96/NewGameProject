@@ -111,19 +111,21 @@ class WaveGenerator:SKNode, WaveGenerationNotifier, UIGestureRecognizerDelegate{
         
             let startingCityLabel = SKLabelNode(text: GameData.sharedInstance().levelData[self.params!.level].cityName)
             startingCityLabel.position.x = self.startingReciever!.position.x
-            startingCityLabel.position.y = self.startingReciever!.position.y + 50
+            startingCityLabel.position.y = self.startingReciever!.position.y + 80
             startingCityLabel.zPosition = 2
             self.startingReciever!.addChild(startingCityLabel)
 
-            let startingLevelImage = SKSpriteNode(color: .red, size: CGSize(width: 22, height: 400))
+            let startingLevelImage = SKSpriteNode(imageNamed: "Tower_On.png")
+            startingLevelImage.setScale(0.70)
             startingLevelImage.anchorPoint = CGPoint(x: 0.5, y: 1)
             startingLevelImage.position.x = 0
-            startingLevelImage.alpha = 0.25
+            startingLevelImage.alpha = 0.80
             startingLevelImage.zPosition = 2
+            startingLevelImage.position.y += 75
             self.startingReciever!.addChild(startingLevelImage)
 
             let startLevelIndicator = SKLabelNode(text: "Level \(self.params!.level + 1)")
-            startLevelIndicator.position.y = 100
+            startLevelIndicator.position.y = 120
             startLevelIndicator.fontColor = .white
             startLevelIndicator.alpha = 1.0
             startLevelIndicator.zPosition = 2
@@ -140,20 +142,22 @@ class WaveGenerator:SKNode, WaveGenerationNotifier, UIGestureRecognizerDelegate{
             
             let endingCityLabel = SKLabelNode(text: GameData.sharedInstance().levelData[self.params!.level + 1].cityName)
             endingCityLabel.position.x = self.startingReciever!.position.x
-            endingCityLabel.position.y = self.startingReciever!.position.y + 50
+            endingCityLabel.position.y = self.startingReciever!.position.y + 80
             endingCityLabel.zPosition = 2
             self.endingReciever!.addChild(endingCityLabel)
 
-            let endingLevelImage = SKSpriteNode(color: .red, size: CGSize(width: 22, height: 400))
+            let endingLevelImage = SKSpriteNode(imageNamed: "Tower_Off.png")
+            endingLevelImage.setScale(0.70)
             endingLevelImage.anchorPoint = CGPoint(x: 0.5, y: 1)
             endingLevelImage.position.x = 0
-            endingLevelImage.alpha = 0.25
+            endingLevelImage.alpha = 0.80
             endingLevelImage.zPosition = 2
             endingLevelImage.name = "End"
+            endingLevelImage.position.y += 75
             self.endingReciever!.addChild(endingLevelImage)
 
             let endLevelIndicator = SKLabelNode(text: "Level \(self.params!.level + 2)")
-            endLevelIndicator.position.y = 100
+            endLevelIndicator.position.y = 120
             endLevelIndicator.fontColor = .white
             endLevelIndicator.alpha = 1.0
             endLevelIndicator.zPosition = 2
@@ -278,7 +282,7 @@ class WaveGenerator:SKNode, WaveGenerationNotifier, UIGestureRecognizerDelegate{
                 self.endingReciever!.position.x -= self.params!.waveDrawer.waveSpeed
                 if self.endingReciever!.position.x <= 5{
                     self.removeAction(forKey: "EndingLine")
-                    (self.endingReciever!.childNode(withName: "End") as! SKSpriteNode).color = .green
+                    (self.endingReciever!.childNode(withName: "End") as! SKSpriteNode).texture = SKTexture(imageNamed: "Tower_On.png")
                 }
             })
             self.run(SKAction.repeatForever(SKAction.sequence([activation, linearDelay])), withKey: "EndingLine")
@@ -306,7 +310,13 @@ class WaveGenerator:SKNode, WaveGenerationNotifier, UIGestureRecognizerDelegate{
 
     //Trigger for changing the wave head travel direction on the y axis
     @objc private func changeWaveHeadTravelDirection(_ sender:UILongPressGestureRecognizer){
-
+        if self.scene!.isPaused == true {
+            if let vc = (self.scene as! GameScene).parentViewController {
+                vc.handleGameResume()
+                return
+            }
+        }
+        
         switch sender.state{
         case .began:
             if self.isUserInteractionEnabled == true{

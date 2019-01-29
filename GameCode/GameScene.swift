@@ -25,6 +25,8 @@ class GameScene: SKScene, GameStatusNotifier{
     
     var numberOfTransitions:Int = 0
     let transitionsBetweenAds:Int = 2
+    
+    var resumeGame:SKLabelNode?
 
     override func didMove(to view: SKView) {
         super.didMove(to: view)
@@ -37,6 +39,21 @@ class GameScene: SKScene, GameStatusNotifier{
         self.gamestatus!.isHidden = false
         self.gamestatus!.zPosition = 10
         self.addChild(self.gamestatus!)
+        
+        let mainScreen = SKSpriteNode(color: .black, size: CGSize(width: 380, height: 605))
+        mainScreen.alpha = 0.90
+        mainScreen.anchorPoint = CGPoint(x: 0.5, y: 0.5)
+        mainScreen.zPosition = 1
+        mainScreen.position = CGPoint.zero
+        mainScreen.position.y += 5
+        self.addChild(mainScreen)
+        mainScreen.run(SKAction.sequence([
+            SKAction.fadeOut(withDuration: 0.5),
+            SKAction.run {
+                mainScreen.color = .white
+            },
+            SKAction.fadeAlpha(to: 0.30, duration: 0.5)
+            ]))
 
         self.anchorPoint = CGPoint(x: 0.5, y: 0.5)
         self.backgroundColor = .black

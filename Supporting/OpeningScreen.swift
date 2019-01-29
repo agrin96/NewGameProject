@@ -11,6 +11,8 @@ import UIKit
 
 class OpeningScreenViewController: UIViewController {
     
+    var isPresentedFromMenu:Bool = false
+    
     override func viewWillAppear(_ animated: Bool) {
         //Set the navigation bar to hidden before the view appears so the user never notices.
         self.navigationController?.isNavigationBarHidden = true
@@ -101,7 +103,7 @@ class OpeningScreen:SKScene, UIGestureRecognizerDelegate {
         background.position = CGPoint.zero
         background.alpha = 0
         self.addChild(background)
-        background.run(SKAction.fadeIn(withDuration: 3))
+        background.run(SKAction.fadeIn(withDuration: 2))
         
         let tapToSkip = SKLabelNode(text: "Tap to Skip")
         tapToSkip.position.x = self.size.width / 2
@@ -110,7 +112,7 @@ class OpeningScreen:SKScene, UIGestureRecognizerDelegate {
         tapToSkip.alpha = 0
         self.addChild(tapToSkip)
         
-        tapToSkip.run(SKAction.fadeIn(withDuration: 3))
+        tapToSkip.run(SKAction.fadeIn(withDuration: 2))
         
         let tapHandle = UITapGestureRecognizer(target: self, action: #selector(handleTap))
         self.view!.addGestureRecognizer(tapHandle)
@@ -118,7 +120,11 @@ class OpeningScreen:SKScene, UIGestureRecognizerDelegate {
     
     @objc func handleTap(_ sender: UITapGestureRecognizer){
         if let vc = self.parentVC {
-            vc.transitionToMenu()
+            if vc.isPresentedFromMenu {
+                vc.dismiss(animated: true, completion: {})
+            }else{
+                vc.transitionToMenu()
+            }
         }
     }
 }

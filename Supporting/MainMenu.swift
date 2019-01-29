@@ -145,7 +145,8 @@ extension MainMenuViewController: GADBannerViewDelegate {
 
 class MainMenuScene:SKScene, UIGestureRecognizerDelegate, UIPickerViewDelegate, UIPickerViewDataSource, UITextFieldDelegate{
 
-    var startButton:SKSpriteNode?
+    var startButton:SpriteButton?
+    var showLetterButton:SpriteButton?
     var selectedLevel:SKLabelNode?
     var chosenLevel:Int = 0
     weak var parentVC:MainMenuViewController?
@@ -173,11 +174,11 @@ class MainMenuScene:SKScene, UIGestureRecognizerDelegate, UIPickerViewDelegate, 
         mainScreen.position = CGPoint(x: self.size.width / 2 + 43, y: self.size.height / 1.835)
         self.addChild(mainScreen)
         mainScreen.run(SKAction.sequence([
-            SKAction.fadeOut(withDuration: 1.5),
+            SKAction.fadeOut(withDuration: 1.0),
             SKAction.run {
                 mainScreen.color = .white
             },
-            SKAction.fadeAlpha(to: 0.50, duration: 1.5)
+            SKAction.fadeAlpha(to: 0.50, duration: 1.0)
             ]))
         
         let mainSelectionScreen = SKSpriteNode(color: .black, size: CGSize(width: 300, height: 130))
@@ -187,32 +188,44 @@ class MainMenuScene:SKScene, UIGestureRecognizerDelegate, UIPickerViewDelegate, 
         mainSelectionScreen.position = CGPoint(x: self.size.width / 2 + 15, y: self.size.height / 3.42)
         self.addChild(mainSelectionScreen)
         mainSelectionScreen.run(SKAction.sequence([
-            SKAction.fadeOut(withDuration: 1.5),
+            SKAction.fadeOut(withDuration: 1.0),
             SKAction.run {
                 mainSelectionScreen.color = .white
             },
-            SKAction.fadeAlpha(to: 0.50, duration: 1.5)
+            SKAction.fadeAlpha(to: 0.50, duration: 1.0)
             ]))
 
-        self.startButton = SKSpriteNode(color: .green, size: CGSize(width: 140, height: 32))
+        self.startButton = SpriteButton(button: SKTexture(imageNamed: "Button"), buttonTouched: SKTexture(imageNamed: "Button_Touched"))
+        startButton!.setButtonText(text: "Start Signal")
+        startButton!.setButtonScale(to: 0.35)
         startButton!.zPosition = 2
         startButton!.alpha = 0
-        startButton!.position = CGPoint(x: self.view!.bounds.size.width / 2 - 8, y: self.view!.bounds.size.height / 2 - 36)
+        startButton!.position = CGPoint(x: self.view!.bounds.size.width / 2 + 80, y: self.view!.bounds.size.height / 2 + 25 )
         self.addChild(self.startButton!)
-        startButton!.run(SKAction.sequence([SKAction.wait(forDuration: 3.0), SKAction.fadeIn(withDuration: 1.5)]))
+        startButton!.run(SKAction.sequence([SKAction.wait(forDuration: 1.0), SKAction.fadeIn(withDuration: 1.0)]))
         
-        self.signalTower = SKSpriteNode(color: .red, size: CGSize(width: 40, height: 120))
+        self.showLetterButton = SpriteButton(button: SKTexture(imageNamed: "Button"), buttonTouched: SKTexture(imageNamed: "Button_Touched"))
+        showLetterButton!.setButtonText(text: "Tecla's Letter")
+        showLetterButton!.setButtonScale(to: 0.35)
+        showLetterButton!.zPosition = 2
+        showLetterButton!.alpha = 0
+        showLetterButton!.position = CGPoint(x: self.view!.bounds.size.width / 2 + 80, y: self.view!.bounds.size.height / 2 - 28)
+        self.addChild(self.showLetterButton!)
+        showLetterButton!.run(SKAction.sequence([SKAction.wait(forDuration: 1.0), SKAction.fadeIn(withDuration: 1.0)]))
+        
+        self.signalTower = SKSpriteNode(imageNamed: "Tower_Off.png")
+        self.signalTower!.setScale(0.45)
         self.signalTower!.zPosition = 2
         self.signalTower!.anchorPoint = CGPoint(x: 0.5, y: 0.0)
         self.signalTower!.alpha = 0.0
-        self.signalTower!.position = CGPoint(x: self.size.width / 2.6, y: self.size.height / 2 - 10)
+        self.signalTower!.position = CGPoint(x: self.size.width / 2.7, y: self.size.height / 2.4)
         self.addChild(self.signalTower!)
 
         self.selectedLevel = SKLabelNode(text: "Selected Level 1")
         self.selectedLevel!.fontColor = .black
         self.selectedLevel!.fontName = UIFont.systemFont(ofSize: 8, weight: .medium).fontName
         self.selectedLevel!.fontSize = 16
-        self.selectedLevel!.position = CGPoint(x: self.size.width / 2 + 18, y: self.size.height / 6 - 28)
+        self.selectedLevel!.position = CGPoint(x: self.size.width / 2 + 18, y: self.size.height / 6 - 29)
         self.selectedLevel!.alpha = 0
         self.selectedLevel!.zPosition = 2
         self.addChild(self.selectedLevel!)
@@ -226,19 +239,19 @@ class MainMenuScene:SKScene, UIGestureRecognizerDelegate, UIPickerViewDelegate, 
         self.run(SKAction.sequence([
             SKAction.run {
                 selectedScreen.run(SKAction.sequence([
-                    SKAction.fadeOut(withDuration: 1.5),
+                    SKAction.fadeOut(withDuration: 0.75),
                     SKAction.run {
                         selectedScreen.color = .white
                     },
-                    SKAction.fadeAlpha(to: 0.50, duration: 1.5)
+                    SKAction.fadeAlpha(to: 0.50, duration: 0.75)
                     ]))
             },
-            SKAction.wait(forDuration: 3.0),
+            SKAction.wait(forDuration: 1.0),
             SKAction.run {
-                self.selectedLevel!.run(SKAction.fadeIn(withDuration: 1.0))
+                self.selectedLevel!.run(SKAction.fadeIn(withDuration: 0.75))
             },
             SKAction.run {
-                self.signalTower!.run(SKAction.fadeAlpha(to: 0.9, duration: 1.0))
+                self.signalTower!.run(SKAction.fadeAlpha(to: 0.8, duration: 0.75))
             }
             ]))
 
@@ -253,7 +266,7 @@ class MainMenuScene:SKScene, UIGestureRecognizerDelegate, UIPickerViewDelegate, 
         picker.isOpaque = true
         picker.alpha = 0
         self.run(SKAction.sequence([
-            SKAction.wait(forDuration: 3.0),
+            SKAction.wait(forDuration: 1.0),
             SKAction.run {
                 UIView.animate(withDuration: 1.0, animations: {
                     picker.alpha = 1.0
@@ -332,27 +345,40 @@ class MainMenuScene:SKScene, UIGestureRecognizerDelegate, UIPickerViewDelegate, 
         let tapLocation = self.convertPoint(fromView: coordinates)
 
         if self.startButton != nil{
-            if self.startButton?.contains(tapLocation) ?? false{
+            if self.startButton!.contains(tapLocation){
                 if parentVC != nil{
+                    self.startButton!.buttonTouchedUpInside(completion: {})
                     self.run(SKAction.sequence([
                         SKAction.run {
                             self.activateGame()
                         },
-                        SKAction.wait(forDuration: 1.1),
+                        SKAction.wait(forDuration: 0.5),
                         SKAction.run {
                             self.parentVC!.transitionToGame(with: self.chosenLevel)
                         }]))
                 }
             }
         }
+        if self.showLetterButton != nil{
+            if self.showLetterButton!.contains(tapLocation) {
+                if parentVC != nil{
+                    self.showLetterButton!.buttonTouchedUpInside {
+                        let letter = OpeningScreenViewController()
+                        letter.isPresentedFromMenu = true
+                        self.parentVC!.navigationController!.present(letter, animated: true, completion: {})
+                    }
+                }
+            }
+        }
     }
     
     func activateGame(){
+        self.signalTower!.texture! = SKTexture(imageNamed: "Tower_On.png")
         self.playerSignal = SKSpriteNode(color: .red, size: CGSize(width: 10, height: 10))
         self.playerSignal!.zPosition = 2
         self.playerSignal!.anchorPoint = CGPoint(x: 0.5, y: 0.5)
-        self.playerSignal!.alpha = 0.90
-        self.playerSignal!.position = CGPoint(x: self.size.width / 2.6, y: self.size.height / 2 + 110)
+        self.playerSignal!.alpha = 0.80
+        self.playerSignal!.position = CGPoint(x: self.size.width / 2.6, y: self.size.height / 2 + 85)
         self.addChild(self.playerSignal!)
         
         let shapeNode = SKShapeNode()
@@ -374,7 +400,7 @@ class MainMenuScene:SKScene, UIGestureRecognizerDelegate, UIPickerViewDelegate, 
                 shapeNode.path = dynamicPath
                 dynamicPath.move(to: self.playerSignal!.position)
             }),
-            SKAction.wait(forDuration: 1/60)
+            SKAction.wait(forDuration: 1/120)
         ])))
     }
 }
