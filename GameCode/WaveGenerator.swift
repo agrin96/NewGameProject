@@ -73,7 +73,7 @@ class WaveGenerator:SKNode, WaveGenerationNotifier, UIGestureRecognizerDelegate{
 
         //Setup the two wavedrawers for the infinite parallax effect
         self.waveDrawer1 = WaveDrawer(
-                color: self.params!.waveDrawer.waveColor,
+                texture: self.params!.waveDrawer.waveTexture,
                 strokeThickness: self.params!.waveDrawer.waveStroke,
                 drawerNumber: 1,
                 isPlayer: self.params!.waveHead.isPlayer)
@@ -82,7 +82,7 @@ class WaveGenerator:SKNode, WaveGenerationNotifier, UIGestureRecognizerDelegate{
         self.addChild(self.waveDrawer1!)
 
         self.waveDrawer2 = WaveDrawer(
-                color: self.params!.waveDrawer.waveColor,
+                texture: self.params!.waveDrawer.waveTexture,
                 strokeThickness: self.params!.waveDrawer.waveStroke,
                 drawerNumber: 2,
                 isPlayer: self.params!.waveHead.isPlayer)
@@ -113,6 +113,7 @@ class WaveGenerator:SKNode, WaveGenerationNotifier, UIGestureRecognizerDelegate{
             startingCityLabel.position.x = self.startingReciever!.position.x
             startingCityLabel.position.y = self.startingReciever!.position.y + 80
             startingCityLabel.zPosition = 2
+            startingCityLabel.fontName = "Helvetica-Bold"
             self.startingReciever!.addChild(startingCityLabel)
 
             let startingLevelImage = SKSpriteNode(imageNamed: "Tower_On.png")
@@ -127,6 +128,7 @@ class WaveGenerator:SKNode, WaveGenerationNotifier, UIGestureRecognizerDelegate{
             let startLevelIndicator = SKLabelNode(text: "Level \(self.params!.level + 1)")
             startLevelIndicator.position.y = 120
             startLevelIndicator.fontColor = .white
+            startLevelIndicator.fontName = "Helvetica-Bold"
             startLevelIndicator.alpha = 1.0
             startLevelIndicator.zPosition = 2
             self.startingReciever!.addChild(startLevelIndicator)
@@ -144,6 +146,7 @@ class WaveGenerator:SKNode, WaveGenerationNotifier, UIGestureRecognizerDelegate{
             endingCityLabel.position.x = self.startingReciever!.position.x
             endingCityLabel.position.y = self.startingReciever!.position.y + 80
             endingCityLabel.zPosition = 2
+            endingCityLabel.fontName = "Helvetica-Bold"
             self.endingReciever!.addChild(endingCityLabel)
 
             let endingLevelImage = SKSpriteNode(imageNamed: "Tower_Off.png")
@@ -159,6 +162,7 @@ class WaveGenerator:SKNode, WaveGenerationNotifier, UIGestureRecognizerDelegate{
             let endLevelIndicator = SKLabelNode(text: "Level \(self.params!.level + 2)")
             endLevelIndicator.position.y = 120
             endLevelIndicator.fontColor = .white
+            endLevelIndicator.fontName = "Helvetica-Bold"
             endLevelIndicator.alpha = 1.0
             endLevelIndicator.zPosition = 2
             self.endingReciever!.addChild(endLevelIndicator)
@@ -247,6 +251,7 @@ class WaveGenerator:SKNode, WaveGenerationNotifier, UIGestureRecognizerDelegate{
                     if self.startingReciever!.position.x <= -(UIScreen.main.bounds.width / 2) && self.isUserInteractionEnabled == false{
                         //Automatically start the player wavehead moving down.
                         self.resetAndRunScore()
+                        self.updateWaveOscillationWith(forces: WaveType.playerSteady1())
                         self.waveHead!.activatePlayerWavehead(direction: .down)
 
                         //For collision detection purposes we need to know that this is the player node.
@@ -369,14 +374,14 @@ struct WaveHeadParameters{
 }
 
 struct WaveDrawerParameters{
-    var waveColor:UIColor
+    var waveTexture:SKTexture
     var waveStroke:CGFloat
     var sampleDelay:Double
     var waveSpeed:CGFloat
 
     //Default initialization with simple values
     init(){
-        self.waveColor = .blue
+        self.waveTexture = SKTexture(imageNamed: "ObstacleSignalColor.png")
         self.waveStroke = 9
         self.sampleDelay = 1/60
         self.waveSpeed = 1

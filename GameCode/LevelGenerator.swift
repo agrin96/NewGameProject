@@ -32,12 +32,6 @@ class LevelGenerator:SKNode, SKPhysicsContactDelegate, ScoreChangeNotifier{
     var scoreLabel:SKLabelNode?
     var currentScore:Int = 0
 
-    //We will have a star scoring system for levels based on score.
-    // The user will try to achieve these goals to get the relevant score.
-    var score3Star:Int = 1000
-    var score2Star:Int = 800
-    var score1Star:Int = 300
-
     //We will be determining how long levels last based on a timing counter.
     // Each level will be a maximum of 180 seconds long.
     var currentTimeDisplay:SKLabelNode?
@@ -62,7 +56,8 @@ class LevelGenerator:SKNode, SKPhysicsContactDelegate, ScoreChangeNotifier{
         var playerSettings = WaveGeneratorParameters()
         playerSettings.waveHead.isPlayer = true
         playerSettings.waveHead.headColor = .red
-        playerSettings.waveDrawer.waveColor = .red
+        playerSettings.waveDrawer.waveTexture = SKTexture(imageNamed: "PlayerSignalColor.png")
+        playerSettings.waveDrawer.waveStroke = 9
         playerSettings.level = level
         self.currentLevel = level
         self.playerWave = WaveGenerator(paramters: playerSettings)

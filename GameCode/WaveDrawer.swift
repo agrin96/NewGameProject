@@ -22,11 +22,13 @@ class WaveDrawer:SKShapeNode {
         super.init(coder: aDecoder)
     }
 
-    init(color:UIColor, strokeThickness:CGFloat, drawerNumber:Int, isPlayer:Bool){
+    init(texture:SKTexture, strokeThickness:CGFloat, drawerNumber:Int, isPlayer:Bool){
         super.init()
-        self.strokeColor = color
+        self.strokeColor = .white
         self.lineWidth = strokeThickness
         self.lineCap = .round
+        self.strokeTexture = texture
+        self.alpha = 0.90
 
         self.name = "drawer\(drawerNumber)"
         self.waveDrawerNumber = drawerNumber

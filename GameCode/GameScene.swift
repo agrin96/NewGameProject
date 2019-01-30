@@ -95,7 +95,7 @@ class GameScene: SKScene, GameStatusNotifier{
             self.addChild(self.levelToPlay!)
             self.physicsWorld.contactDelegate = self.levelToPlay!
 
-            let playerOscillation:[[CGFloat]] = WaveType.playerSteady1()
+            let playerOscillation:[[CGFloat]] = WaveType.steady()
             self.levelToPlay!.playerWave!.updateWaveOscillationWith(forces: playerOscillation)
             LevelList.level(num: self.currentLevel, gen: self.levelToPlay!)
             self.levelToPlay!.gameStatusDelegate = self
@@ -195,6 +195,7 @@ class GameScene: SKScene, GameStatusNotifier{
             self.continueQuestion!.addChild(stopGame)
         }else{
             self.continueQuestion?.isHidden = false
+            self.continueQuestion!.isUserInteractionEnabled = true
         }
     }
     
@@ -223,6 +224,7 @@ class GameScene: SKScene, GameStatusNotifier{
                 (node as! SpriteButton).buttonTouchedUpInside {
                     self.continueGame()
                     self.continueQuestion!.isHidden = true
+                    self.continueQuestion!.isUserInteractionEnabled = false
                 }
             }
         }

@@ -396,11 +396,12 @@ class MainMenuScene:SKScene, UIGestureRecognizerDelegate, UIPickerViewDelegate, 
         self.addChild(self.playerSignal!)
         
         self.playerLine = SKShapeNode()
-        self.playerLine!.strokeColor = .red
+        self.playerLine!.strokeColor = .white
         self.playerLine!.lineWidth = 8
         self.playerLine!.lineCap = .round
         self.playerLine!.zPosition = 2
         self.playerLine!.alpha = 0.90
+        self.playerLine!.strokeTexture = SKTexture(imageNamed: "PlayerSignalColor.png")
         self.addChild(self.playerLine!)
         
         let dynamicPath = CGMutablePath()

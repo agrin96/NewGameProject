@@ -39,7 +39,8 @@ class ObstacleGenerator:SKNode{
 
         //Create the objects.
         for i in 0..<count{
-            let newObstacle = SKSpriteNode(color: .blue, size: self.obstacleSize)
+            let newObstacle = SKSpriteNode(color: .white, size: self.obstacleSize)
+            newObstacle.texture = SKTexture(imageNamed: "ObstacleSignalColor.png")
             newObstacle.zPosition = 4
             newObstacle.physicsBody = SKPhysicsBody(rectangleOf: CGSize(
                     width: self.obstacleSize.width / 2,
