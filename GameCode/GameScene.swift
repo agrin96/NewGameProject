@@ -234,6 +234,7 @@ class GameScene: SKScene, GameStatusNotifier{
                     if let nav = self.parentViewController?.navigationController{
                         nav.popViewController(animated: true)
                         let scene = ((nav.topViewController as! MainMenuViewController).view as! SKView).scene as! MainMenuScene
+                        scene.view?.isPaused = false
                         scene.isPaused = false
                         scene.resetMainMenu()
                     }
