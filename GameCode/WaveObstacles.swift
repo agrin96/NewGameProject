@@ -43,7 +43,7 @@ class ObstacleGenerator:SKNode{
             newObstacle.texture = SKTexture(imageNamed: "ObstacleSignalColor.png")
             newObstacle.zPosition = 4
             newObstacle.physicsBody = SKPhysicsBody(rectangleOf: CGSize(
-                    width: self.obstacleSize.width / 2,
+                    width: self.obstacleSize.width / 1.5,
                     height: self.obstacleSize.height / 2))
 
             newObstacle.physicsBody!.collisionBitMask = 1

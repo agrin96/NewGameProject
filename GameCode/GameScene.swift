@@ -180,7 +180,7 @@ class GameScene: SKScene, GameStatusNotifier{
             continueGame.position = CGPoint.zero
             continueGame.alpha = 0.9
             continueGame.name = "ContinueGame"
-            continueGame.position.y += 100
+            continueGame.position.y -= 100
             self.continueQuestion!.addChild(continueGame)
             
             let stopGame = SpriteButton(button: SKTexture(imageNamed: "Button"), buttonTouched: SKTexture(imageNamed: "Button_Touched"))
@@ -191,7 +191,7 @@ class GameScene: SKScene, GameStatusNotifier{
             stopGame.position = CGPoint.zero
             stopGame.alpha = 0.9
             stopGame.name = "StopGame"
-            stopGame.position.y -= 100
+            stopGame.position.y += 100
             self.continueQuestion!.addChild(stopGame)
         }else{
             self.continueQuestion?.isHidden = false
@@ -232,11 +232,13 @@ class GameScene: SKScene, GameStatusNotifier{
             if node.contains(tapLocation){
                 (node as! SpriteButton).buttonTouchedUpInside {
                     if let nav = self.parentViewController?.navigationController{
-                        nav.popViewController(animated: true)
-                        let scene = ((nav.topViewController as! MainMenuViewController).view as! SKView).scene as! MainMenuScene
-                        scene.view?.isPaused = false
-                        scene.isPaused = false
-                        scene.resetMainMenu()
+                        if self.continueQuestion!.isHidden == false{
+                            nav.popViewController(animated: true)
+                            let scene = ((nav.topViewController as! MainMenuViewController).view as! SKView).scene as! MainMenuScene
+                            scene.view?.isPaused = false
+                            scene.isPaused = false
+                            scene.resetMainMenu()
+                        }
                     }
                 }
             }

@@ -36,7 +36,7 @@ class WaveHead:SKSpriteNode {
 
         //Setup wavehead to detect collision with boundary waves if it is the player
         if params.isPlayer == true{
-            self.physicsBody = SKPhysicsBody(circleOfRadius: (self.size.width / 1.1))
+            self.physicsBody = SKPhysicsBody(circleOfRadius: self.size.width / 1.3)
             self.physicsBody!.linearDamping = 0.0
             self.physicsBody!.friction = 0.0
             self.physicsBody!.density = 1
