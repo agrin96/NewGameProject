@@ -85,7 +85,6 @@ fileprivate let cities:[String] = [
     "Kyoto",
     "Taipei",
     "Manila",
-    "Brunei",
     "Jakarta",
     "Singapore",
     "Perth",

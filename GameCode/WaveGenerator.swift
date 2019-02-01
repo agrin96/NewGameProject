@@ -142,7 +142,15 @@ class WaveGenerator:SKNode, WaveGenerationNotifier, UIGestureRecognizerDelegate{
             self.endingReciever!.isHidden = true
             self.addChild(self.endingReciever!)
             
-            let endingCityLabel = SKLabelNode(text: GameData.sharedInstance().levelData[self.params!.level + 1].cityName)
+            var lvlNum:Int = {
+                if self.params!.level == 99 {
+                    return 0
+                }else{
+                    return self.params!.level + 1
+                }
+            }()
+            
+            let endingCityLabel = SKLabelNode(text: GameData.sharedInstance().levelData[lvlNum].cityName)
             endingCityLabel.position.x = self.startingReciever!.position.x
             endingCityLabel.position.y = self.startingReciever!.position.y + 80
             endingCityLabel.zPosition = 2
@@ -159,7 +167,15 @@ class WaveGenerator:SKNode, WaveGenerationNotifier, UIGestureRecognizerDelegate{
             endingLevelImage.position.y += 75
             self.endingReciever!.addChild(endingLevelImage)
 
-            let endLevelIndicator = SKLabelNode(text: "Level \(self.params!.level + 2)")
+            lvlNum = {
+                if self.params!.level == 99 {
+                    return 1
+                }else{
+                    return self.params!.level + 2
+                }
+            }()
+            
+            let endLevelIndicator = SKLabelNode(text: "Level \(lvlNum)")
             endLevelIndicator.position.y = 120
             endLevelIndicator.fontColor = .white
             endLevelIndicator.fontName = "Helvetica-Bold"
