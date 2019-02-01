@@ -15,7 +15,7 @@ import GameplayKit
 class GameScene: SKScene, GameStatusNotifier{
     var levelToPlay:LevelGenerator?
     var currentLevel:Int = 0
-    var parentViewController:GameViewController?
+    weak var parentViewController:GameViewController?
     
     //Win/lose
     var gamestatus:SKLabelNode?
@@ -85,6 +85,7 @@ class GameScene: SKScene, GameStatusNotifier{
             self.removeAllActions()
             self.levelToPlay!.removeAllActions()
             self.levelToPlay!.removeFromParent()
+            self.levelToPlay!.gameStatusDelegate = nil
             self.physicsWorld.contactDelegate = nil
             self.levelToPlay = nil
         }
@@ -220,19 +221,24 @@ class GameScene: SKScene, GameStatusNotifier{
         let tapLocation = self.convertPoint(fromView: coordinates)
         
         if let node = self.continueQuestion!.childNode(withName: "ContinueGame"){
-            if node.contains(tapLocation){
-                (node as! SpriteButton).buttonTouchedUpInside {
-                    self.continueGame()
-                    self.continueQuestion!.isHidden = true
-                    self.continueQuestion!.isUserInteractionEnabled = false
+            if self.continueQuestion!.isHidden == false{
+                if node.contains(tapLocation){
+                    (node as! SpriteButton).buttonTouchedUpInside {
+                        self.continueGame()
+                        self.continueQuestion!.isHidden = true
+                        self.continueQuestion!.isUserInteractionEnabled = false
+                    }
                 }
             }
         }
         if let node = self.continueQuestion!.childNode(withName: "StopGame"){
-            if node.contains(tapLocation){
-                (node as! SpriteButton).buttonTouchedUpInside {
-                    if let nav = self.parentViewController?.navigationController{
-                        if self.continueQuestion!.isHidden == false{
+            if self.continueQuestion!.isHidden == false{
+                if node.contains(tapLocation){
+                    (node as! SpriteButton).buttonTouchedUpInside {
+                        if let nav = self.parentViewController?.navigationController{
+                            self.continueQuestion!.isHidden = true
+                            self.continueQuestion!.isUserInteractionEnabled = false
+                            
                             nav.popViewController(animated: true)
                             let scene = ((nav.topViewController as! MainMenuViewController).view as! SKView).scene as! MainMenuScene
                             scene.view?.isPaused = false

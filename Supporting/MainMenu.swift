@@ -253,11 +253,11 @@ class MainMenuScene:SKScene, UIGestureRecognizerDelegate, UIPickerViewDelegate, 
             },
             SKAction.run {
                 self.signalTower!.run(SKAction.fadeAlpha(to: 0.8, duration: 0.75))
+                
+                let tapGesture = UITapGestureRecognizer(target: self, action: #selector(self.handleTap))
+                self.view!.addGestureRecognizer(tapGesture)
             }
             ]))
-
-        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(handleTap))
-        self.view!.addGestureRecognizer(tapGesture)
 
         let picker = UIPickerView(frame: CGRect(x: self.view!.bounds.width/3, y: self.view!.bounds.height/4*3, width: self.pickerRowWidth, height: self.pickerRowHeight))
         picker.delegate = self
