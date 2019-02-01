@@ -14,6 +14,8 @@ import GameplayKit
 
 class GameScene: SKScene, GameStatusNotifier{
     var levelToPlay:LevelGenerator?
+    var levelConstruct:LevelList?
+    
     var currentLevel:Int = 0
     weak var parentViewController:GameViewController?
     
@@ -88,6 +90,10 @@ class GameScene: SKScene, GameStatusNotifier{
             self.levelToPlay!.gameStatusDelegate = nil
             self.physicsWorld.contactDelegate = nil
             self.levelToPlay = nil
+            if self.levelConstruct != nil {
+                self.levelConstruct!.clearLevel()
+                self.levelConstruct = nil
+            }
         }
 
         if self.levelToPlay == nil {
@@ -98,7 +104,7 @@ class GameScene: SKScene, GameStatusNotifier{
 
             let playerOscillation:[[CGFloat]] = WaveType.steady()
             self.levelToPlay!.playerWave!.updateWaveOscillationWith(forces: playerOscillation)
-            LevelList.level(num: self.currentLevel, gen: self.levelToPlay!)
+            self.levelConstruct = LevelList(num: self.currentLevel, gen: self.levelToPlay!)
             self.levelToPlay!.gameStatusDelegate = self
             self.levelToPlay!.beginLevel()
         }

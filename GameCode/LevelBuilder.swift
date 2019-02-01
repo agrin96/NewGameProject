@@ -235,11 +235,20 @@ class Level {
 }
 
 class LevelList {
-    class func level(num:Int, gen:LevelGenerator){
+    var currentLevel:Level?
+    
+    init(num:Int, gen:LevelGenerator) {
         //Clear all actions just in case.
         gen.removeAllActions()
-        let lvl = Level(generator: gen)
-        LevelRandomizer.generateLevel(for: lvl, lvlTemplate: num)
-        lvl.runBuffer(level: gen)
+        self.currentLevel = Level(generator: gen)
+        LevelRandomizer.generateLevel(for: self.currentLevel!, lvlTemplate: num)
+        self.currentLevel!.runBuffer(level: gen)
+    }
+
+    func clearLevel(){
+        if self.currentLevel != nil {
+            self.currentLevel!.clearBuffer()
+            self.currentLevel = nil
+        }
     }
 }
