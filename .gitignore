@@ -4,3 +4,4 @@ Base.lproj
 *.plist
 .DS_Store
 *.png
+Audio

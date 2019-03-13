@@ -16,7 +16,7 @@ class WaveDrawer:SKShapeNode {
     private var maxWaveWidth:CGFloat = UIScreen.main.bounds.width
     private var called:Bool = false
 
-    var waveNotificationDelegate: WaveGenerationNotifier?
+    weak var waveNotificationDelegate: WaveGenerationNotifier?
 
     required init?(coder aDecoder:NSCoder){
         super.init(coder: aDecoder)

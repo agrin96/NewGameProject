@@ -157,9 +157,19 @@ class MainMenuScene:SKScene, UIGestureRecognizerDelegate, UIPickerViewDelegate, 
     var signalTower:SKSpriteNode?
     var playerSignal:SKSpriteNode?
     var playerLine:SKShapeNode?
+    
+    var audioPlayer:SKAudioNode?
 
     override func didMove(to view: SKView) {
         super.didMove(to: view)
+        
+        let path = Bundle.main.path(forResource: "SignalProcess_Menu", ofType: "mp3")
+        self.audioPlayer = SKAudioNode(url: URL(fileURLWithPath: path!))
+        self.addChild(self.audioPlayer!)
+        
+        self.audioPlayer!.run(SKAction.sequence([SKAction.changeVolume(to: 0, duration: 0),
+                                                 SKAction.play(),
+                                                 SKAction.changeVolume(to: 1.0, duration: 1.0)]))
         
         let background = SKSpriteNode(imageNamed: "MainMenu.png")
         background.zPosition = -1
@@ -387,6 +397,10 @@ class MainMenuScene:SKScene, UIGestureRecognizerDelegate, UIPickerViewDelegate, 
     //This is essentially an animation to show that the game is starting when the player
     // types start.
     func activateGame(){
+        if self.audioPlayer != nil {
+            self.audioPlayer!.run(SKAction.stop())
+        }
+        
         self.signalTower!.texture! = SKTexture(imageNamed: "Tower_On.png")
         self.playerSignal = SKSpriteNode(color: .red, size: CGSize(width: 10, height: 10))
         self.playerSignal!.zPosition = 2

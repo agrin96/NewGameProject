@@ -31,6 +31,8 @@ class GameScene: SKScene, GameStatusNotifier{
     var resumeGame:SKLabelNode?
     
     var continueQuestion:SKNode?
+    
+    var audioPlayer:SKAudioNode?
 
     override func didMove(to view: SKView) {
         super.didMove(to: view)
@@ -44,6 +46,10 @@ class GameScene: SKScene, GameStatusNotifier{
         self.gamestatus!.isHidden = false
         self.gamestatus!.zPosition = 10
         self.addChild(self.gamestatus!)
+        
+        let path = Bundle.main.path(forResource: "SignalProcess_level", ofType: "mp3")
+        self.audioPlayer = SKAudioNode(url: URL(fileURLWithPath: path!))
+        self.addChild(self.audioPlayer!)
         
         let mainScreen = SKSpriteNode(color: .black, size: CGSize(width: 380, height: 605))
         mainScreen.alpha = 0.90
@@ -94,6 +100,9 @@ class GameScene: SKScene, GameStatusNotifier{
                 self.levelConstruct!.clearLevel()
                 self.levelConstruct = nil
             }
+            if self.audioPlayer != nil {
+                self.audioPlayer!.run(SKAction.stop())
+            }
         }
 
         if self.levelToPlay == nil {
@@ -107,6 +116,10 @@ class GameScene: SKScene, GameStatusNotifier{
             self.levelConstruct = LevelList(num: self.currentLevel, gen: self.levelToPlay!)
             self.levelToPlay!.gameStatusDelegate = self
             self.levelToPlay!.beginLevel()
+            
+            if self.audioPlayer != nil {
+                 self.audioPlayer!.run(SKAction.play())
+            }
         }
     }
 
@@ -140,6 +153,11 @@ class GameScene: SKScene, GameStatusNotifier{
                 })]))
             })]))
         }else if status == .lost{
+            if self.audioPlayer != nil {
+                self.audioPlayer!.run(SKAction.sequence([SKAction.changeVolume(to: 0, duration: 0.5),
+                                                         SKAction.stop(),
+                                                         SKAction.changeVolume(to: 1.0, duration: 0)]))
+            }
             self.gameLostAnimation()
             self.run(SKAction.sequence([SKAction.wait(forDuration: 0.5), SKAction.run({ [unowned self] in
                 self.gamestatus!.text = "SIGNAL LOST!"

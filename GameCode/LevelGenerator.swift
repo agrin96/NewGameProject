@@ -91,7 +91,7 @@ class LevelGenerator:SKNode, SKPhysicsContactDelegate, ScoreChangeNotifier{
         NotificationCenter.default.addObserver(self, selector: #selector(pauseTimer(sender:)), name: Notification.Name.init(rawValue: "ResumeGame"), object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(pauseTimer(sender:)), name: UIApplication.willResignActiveNotification, object: nil)
     }
-
+    
     //Called to actually start the level
     func beginLevel(){
         if self.playerWave != nil{
