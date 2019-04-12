@@ -43,11 +43,6 @@ class OpeningScreenViewController: UIViewController {
             // when determining draw order
             view.ignoresSiblingOrder = true
             
-            //Debug information for development
-            view.showsFPS = true
-            view.showsNodeCount = true
-            view.showsDrawCount = true
-            
         }
     }
     

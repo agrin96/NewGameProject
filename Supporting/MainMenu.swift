@@ -8,6 +8,10 @@ import SpriteKit
 import GoogleMobileAds
 import DeviceKit
 
+//Control the ads.
+fileprivate let topBannerAdd:String = "ca-app-pub-3940256099942544/2934735716"
+fileprivate let bottomBannerAdd:String = "ca-app-pub-3940256099942544/2934735716"
+
 class MainMenuViewController: UIViewController {
     
     var topBannerViewAd:GADBannerView?
@@ -42,11 +46,6 @@ class MainMenuViewController: UIViewController {
             //Makes sure that zPosition value is taken into account rather than parent-child relation
             // when determining draw order
             view.ignoresSiblingOrder = true
-
-            //Debug information for development
-            view.showsFPS = true
-            view.showsNodeCount = true
-            view.showsDrawCount = true
         }
         
         //The ad setup can be run async just to make sure no performance is impacted.
@@ -108,7 +107,7 @@ extension MainMenuViewController: GADBannerViewDelegate {
         NSLayoutConstraint(item: self.topBannerViewAd!, attribute: .centerX, relatedBy: .equal, toItem: view, attribute: .centerX, multiplier: 1.0, constant: 0.0).isActive = true
         NSLayoutConstraint(item: self.topBannerViewAd!, attribute: .top, relatedBy: .equal, toItem: view.safeAreaLayoutGuide, attribute: .topMargin, multiplier: 1.0, constant: 0.0).isActive = true
         
-        self.topBannerViewAd!.adUnitID = "ca-app-pub-3940256099942544/2934735716"
+        self.topBannerViewAd!.adUnitID = topBannerAdd
         self.topBannerViewAd!.rootViewController = self
         self.topBannerViewAd!.load(GADRequest())
         
@@ -124,7 +123,7 @@ extension MainMenuViewController: GADBannerViewDelegate {
         NSLayoutConstraint(item: self.bottomBannerViewAd!, attribute: .centerX, relatedBy: .equal, toItem: view, attribute: .centerX, multiplier: 1.0, constant: 0.0).isActive = true
         NSLayoutConstraint(item: self.bottomBannerViewAd!, attribute: .bottom, relatedBy: .equal, toItem: view.safeAreaLayoutGuide, attribute: .bottomMargin, multiplier: 1.0, constant: 0.0).isActive = true
         
-        self.bottomBannerViewAd!.adUnitID = "ca-app-pub-3940256099942544/2934735716"
+        self.bottomBannerViewAd!.adUnitID = bottomBannerAdd
         self.bottomBannerViewAd!.rootViewController = self
         self.bottomBannerViewAd!.load(GADRequest())
     }

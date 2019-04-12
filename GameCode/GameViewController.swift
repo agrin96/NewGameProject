@@ -8,8 +8,11 @@
 
 import UIKit
 import SpriteKit
+import SpriteKit
 import GameplayKit
 import GoogleMobileAds
+
+fileprivate let interstitialAdId:String = "ca-app-pub-3940256099942544/4411468910"
 
 class GameViewController: UIViewController {
 
@@ -51,11 +54,6 @@ class GameViewController: UIViewController {
             //Makes sure that zPosition value is taken into account rather than parent-child relation
             // when determining draw order
             view.ignoresSiblingOrder = true
-
-            //Debug information for development
-            view.showsFPS = true
-            view.showsNodeCount = true
-            view.showsDrawCount = true
             
             //Subscribe to the notifications telling us that the application becomes inactive or active for pause handling.
             NotificationCenter.default.addObserver(self, selector: #selector(EnterBackground), name: UIApplication.willResignActiveNotification, object: nil)
@@ -143,7 +141,7 @@ extension GameViewController:GADInterstitialDelegate{
     // a new object.
     func reloadInterstitial(){
         self.fullPageAd = nil
-        let interstitial = GADInterstitial(adUnitID: "ca-app-pub-3940256099942544/4411468910")
+        let interstitial = GADInterstitial(adUnitID: interstitialAdId)
         interstitial.delegate = self
         interstitial.load(GADRequest())
         self.fullPageAd = interstitial
