@@ -6,6 +6,7 @@
 import UIKit
 import SpriteKit
 import GoogleMobileAds
+import DeviceKit
 
 class MainMenuViewController: UIViewController {
     
@@ -284,13 +285,61 @@ class MainMenuScene:SKScene, UIGestureRecognizerDelegate, UIPickerViewDelegate, 
                 })
         }]))
         self.view!.addSubview(picker)
-        
+
+
         picker.transform = CGAffineTransform(rotationAngle: -90 * (.pi/180))
-        NSLayoutConstraint(item: picker, attribute: .centerX, relatedBy: .equal, toItem: self.view!.safeAreaLayoutGuide, attribute: .centerX, multiplier: 1.0, constant: 10).isActive = true
-        NSLayoutConstraint(item: picker, attribute: .centerY, relatedBy: .equal, toItem: self.view!.safeAreaLayoutGuide, attribute: .centerY, multiplier: 1.0, constant: 160).isActive = true
-        NSLayoutConstraint(item: picker, attribute: .width, relatedBy: .equal, toItem: self.view!.safeAreaLayoutGuide, attribute: .width, multiplier: 0.3, constant: 0).isActive = true
-        NSLayoutConstraint(item: picker, attribute: .height, relatedBy: .equal, toItem: self.view!.safeAreaLayoutGuide, attribute: .height, multiplier: 0.50, constant: 0).isActive = true
-    
+        if Device.current == Device.simulator(Device.iPhoneSE) {
+            picker.centerYAnchor.constraint(equalTo: self.view!.safeAreaLayoutGuide.centerYAnchor, constant: self.view!.frame.height * 0.14).isActive = true
+            picker.centerXAnchor.constraint(equalTo: self.view!.safeAreaLayoutGuide.centerXAnchor, constant: self.view!.frame.width * 0.05).isActive = true
+            picker.heightAnchor.constraint(equalTo: self.view!.safeAreaLayoutGuide.widthAnchor, multiplier: 1.0, constant: 0).isActive = true
+            picker.widthAnchor.constraint(equalTo: self.view!.safeAreaLayoutGuide.heightAnchor, multiplier: 0.15).isActive = true
+        }else if Device.current == Device.simulator(Device.iPhone7)
+            || Device.current == Device.simulator(Device.iPhone8){
+            picker.centerYAnchor.constraint(equalTo: self.view!.safeAreaLayoutGuide.centerYAnchor, constant: self.view!.frame.height * 0.16).isActive = true
+            picker.centerXAnchor.constraint(equalTo: self.view!.safeAreaLayoutGuide.centerXAnchor, constant: self.view!.frame.width * 0.05).isActive = true
+            picker.heightAnchor.constraint(equalTo: self.view!.safeAreaLayoutGuide.widthAnchor, multiplier: 1.0, constant: 0).isActive = true
+            picker.widthAnchor.constraint(equalTo: self.view!.safeAreaLayoutGuide.heightAnchor, multiplier: 0.15).isActive = true
+        }else if Device.current == Device.simulator(Device.iPhone8Plus){
+            picker.centerYAnchor.constraint(equalTo: self.view!.safeAreaLayoutGuide.centerYAnchor, constant: self.view!.frame.height*0.18).isActive = true
+            picker.centerXAnchor.constraint(equalTo: self.view!.safeAreaLayoutGuide.centerXAnchor, constant: self.view!.frame.width*0.025).isActive = true
+            picker.heightAnchor.constraint(equalTo: self.view!.safeAreaLayoutGuide.widthAnchor, multiplier: 1.0, constant: 0).isActive = true
+            picker.widthAnchor.constraint(equalTo: self.view!.safeAreaLayoutGuide.heightAnchor, multiplier: 0.15).isActive = true
+        }else if Device.current == Device.simulator(Device.iPhoneXSMax) {
+            picker.centerYAnchor.constraint(equalTo: self.view!.safeAreaLayoutGuide.centerYAnchor, constant: self.view!.frame.height * 0.22).isActive = true
+            picker.centerXAnchor.constraint(equalTo: self.view!.safeAreaLayoutGuide.centerXAnchor, constant: self.view!.frame.width * 0.025).isActive = true
+            picker.heightAnchor.constraint(equalTo: self.view!.safeAreaLayoutGuide.widthAnchor, multiplier: 1.0, constant: 0).isActive = true
+            picker.widthAnchor.constraint(equalTo: self.view!.safeAreaLayoutGuide.heightAnchor, multiplier: 0.15).isActive = true
+        }else if Device.current == Device.simulator(Device.iPadAir)
+            || Device.current == Device.simulator(Device.iPadAir2)
+            || Device.current == Device.simulator(Device.iPad5)
+            || Device.current == Device.simulator(Device.iPad6)
+            || Device.current == Device.simulator(Device.iPadPro9Inch){
+            picker.centerYAnchor.constraint(equalTo: self.view!.safeAreaLayoutGuide.centerYAnchor, constant: self.view!.frame.height*0.25).isActive = true
+            picker.centerXAnchor.constraint(equalTo: self.view!.safeAreaLayoutGuide.centerXAnchor, constant: self.view!.frame.width*0.1).isActive = true
+            picker.heightAnchor.constraint(equalTo: self.view!.safeAreaLayoutGuide.widthAnchor, multiplier: 1.2, constant: 0).isActive = true
+            picker.widthAnchor.constraint(equalTo: self.view!.safeAreaLayoutGuide.heightAnchor, multiplier: 0.10).isActive = true
+        }else if Device.current == Device.simulator(Device.iPadAir3)
+            || Device.current == Device.simulator(Device.iPadPro10Inch){
+            picker.centerYAnchor.constraint(equalTo: self.view!.safeAreaLayoutGuide.centerYAnchor, constant: self.view!.frame.height*0.28).isActive = true
+            picker.centerXAnchor.constraint(equalTo: self.view!.safeAreaLayoutGuide.centerXAnchor, constant: self.view!.frame.width*0.1).isActive = true
+            picker.heightAnchor.constraint(equalTo: self.view!.safeAreaLayoutGuide.widthAnchor, multiplier: 1.2, constant: 0).isActive = true
+            picker.widthAnchor.constraint(equalTo: self.view!.safeAreaLayoutGuide.heightAnchor, multiplier: 0.10).isActive = true
+        }else if Device.current == Device.simulator(Device.iPadPro9Inch){
+            picker.centerYAnchor.constraint(equalTo: self.view!.safeAreaLayoutGuide.centerYAnchor, constant: self.view!.frame.height*0.25).isActive = true
+            picker.centerXAnchor.constraint(equalTo: self.view!.safeAreaLayoutGuide.centerXAnchor, constant: self.view!.frame.width*0.1).isActive = true
+            picker.heightAnchor.constraint(equalTo: self.view!.safeAreaLayoutGuide.widthAnchor, multiplier: 1.2, constant: 0).isActive = true
+            picker.widthAnchor.constraint(equalTo: self.view!.safeAreaLayoutGuide.heightAnchor, multiplier: 0.10).isActive = true
+        }else if Device.allSimulatorPads.contains(Device.current){
+            picker.centerYAnchor.constraint(equalTo: self.view!.safeAreaLayoutGuide.centerYAnchor, constant: self.view!.frame.height*0.35).isActive = true
+            picker.centerXAnchor.constraint(equalTo: self.view!.safeAreaLayoutGuide.centerXAnchor, constant: self.view!.frame.width*0.1).isActive = true
+            picker.heightAnchor.constraint(equalTo: self.view!.safeAreaLayoutGuide.widthAnchor, multiplier: 1.2, constant: 0).isActive = true
+            picker.widthAnchor.constraint(equalTo: self.view!.safeAreaLayoutGuide.heightAnchor, multiplier: 0.15).isActive = true
+        }else{
+            picker.centerYAnchor.constraint(equalTo: self.view!.safeAreaLayoutGuide.centerYAnchor, constant: self.view!.frame.height*0.2).isActive = true
+            picker.centerXAnchor.constraint(equalTo: self.view!.safeAreaLayoutGuide.centerXAnchor, constant: self.view!.frame.width*0.025).isActive = true
+            picker.heightAnchor.constraint(equalTo: self.view!.safeAreaLayoutGuide.widthAnchor, multiplier: 1.0, constant: 0).isActive = true
+            picker.widthAnchor.constraint(equalTo: self.view!.safeAreaLayoutGuide.heightAnchor, multiplier: 0.15).isActive = true
+        }
     }
 
     func pickerView(_ pickerView: UIPickerView, didSelectRow row: Int, inComponent component: Int) {
