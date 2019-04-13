@@ -19,7 +19,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
 
         //Set up Google ad mob. Done on application launch. 
-        GADMobileAds.configure(withApplicationID: "ca-app-pub-3940256099942544~1458002511")
+        GADMobileAds.sharedInstance().start(completionHandler: nil)
         
         // Here we are initializing our own window and setting up a root view controller. This allows us to skip over using storyboards
         // and control our app directly.

@@ -12,7 +12,7 @@ import SpriteKit
 import GameplayKit
 import GoogleMobileAds
 
-fileprivate let interstitialAdId:String = "ca-app-pub-3940256099942544/4411468910"
+fileprivate let interstitialAdId:String = "ca-app-pub-5462309909970544/5836784182"
 
 class GameViewController: UIViewController {
 

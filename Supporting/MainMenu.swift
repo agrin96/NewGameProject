@@ -9,8 +9,8 @@ import GoogleMobileAds
 import DeviceKit
 
 //Control the ads.
-fileprivate let topBannerAdd:String = "ca-app-pub-3940256099942544/2934735716"
-fileprivate let bottomBannerAdd:String = "ca-app-pub-3940256099942544/2934735716"
+fileprivate let topBannerAdd:String = "ca-app-pub-5462309909970544/1790685821"
+fileprivate let bottomBannerAdd:String = "ca-app-pub-5462309909970544/1790685821"
 
 class MainMenuViewController: UIViewController {
     
@@ -287,43 +287,43 @@ class MainMenuScene:SKScene, UIGestureRecognizerDelegate, UIPickerViewDelegate, 
 
 
         picker.transform = CGAffineTransform(rotationAngle: -90 * (.pi/180))
-        if Device.current == Device.simulator(Device.iPhoneSE) {
+        if Device.current == Device.iPhoneSE {
             picker.centerYAnchor.constraint(equalTo: self.view!.safeAreaLayoutGuide.centerYAnchor, constant: self.view!.frame.height * 0.14).isActive = true
             picker.centerXAnchor.constraint(equalTo: self.view!.safeAreaLayoutGuide.centerXAnchor, constant: self.view!.frame.width * 0.05).isActive = true
             picker.heightAnchor.constraint(equalTo: self.view!.safeAreaLayoutGuide.widthAnchor, multiplier: 1.0, constant: 0).isActive = true
             picker.widthAnchor.constraint(equalTo: self.view!.safeAreaLayoutGuide.heightAnchor, multiplier: 0.15).isActive = true
-        }else if Device.current == Device.simulator(Device.iPhone7)
-            || Device.current == Device.simulator(Device.iPhone8){
+        }else if Device.current == Device.iPhone7
+            || Device.current == Device.iPhone8{
             picker.centerYAnchor.constraint(equalTo: self.view!.safeAreaLayoutGuide.centerYAnchor, constant: self.view!.frame.height * 0.16).isActive = true
             picker.centerXAnchor.constraint(equalTo: self.view!.safeAreaLayoutGuide.centerXAnchor, constant: self.view!.frame.width * 0.05).isActive = true
             picker.heightAnchor.constraint(equalTo: self.view!.safeAreaLayoutGuide.widthAnchor, multiplier: 1.0, constant: 0).isActive = true
             picker.widthAnchor.constraint(equalTo: self.view!.safeAreaLayoutGuide.heightAnchor, multiplier: 0.15).isActive = true
-        }else if Device.current == Device.simulator(Device.iPhone8Plus){
+        }else if Device.current == Device.iPhone8Plus{
             picker.centerYAnchor.constraint(equalTo: self.view!.safeAreaLayoutGuide.centerYAnchor, constant: self.view!.frame.height*0.18).isActive = true
             picker.centerXAnchor.constraint(equalTo: self.view!.safeAreaLayoutGuide.centerXAnchor, constant: self.view!.frame.width*0.025).isActive = true
             picker.heightAnchor.constraint(equalTo: self.view!.safeAreaLayoutGuide.widthAnchor, multiplier: 1.0, constant: 0).isActive = true
             picker.widthAnchor.constraint(equalTo: self.view!.safeAreaLayoutGuide.heightAnchor, multiplier: 0.15).isActive = true
-        }else if Device.current == Device.simulator(Device.iPhoneXSMax) {
+        }else if Device.current == Device.iPhoneXSMax{
             picker.centerYAnchor.constraint(equalTo: self.view!.safeAreaLayoutGuide.centerYAnchor, constant: self.view!.frame.height * 0.22).isActive = true
             picker.centerXAnchor.constraint(equalTo: self.view!.safeAreaLayoutGuide.centerXAnchor, constant: self.view!.frame.width * 0.025).isActive = true
             picker.heightAnchor.constraint(equalTo: self.view!.safeAreaLayoutGuide.widthAnchor, multiplier: 1.0, constant: 0).isActive = true
             picker.widthAnchor.constraint(equalTo: self.view!.safeAreaLayoutGuide.heightAnchor, multiplier: 0.15).isActive = true
-        }else if Device.current == Device.simulator(Device.iPadAir)
-            || Device.current == Device.simulator(Device.iPadAir2)
-            || Device.current == Device.simulator(Device.iPad5)
-            || Device.current == Device.simulator(Device.iPad6)
-            || Device.current == Device.simulator(Device.iPadPro9Inch){
+        }else if Device.current == Device.iPadAir
+            || Device.current == Device.iPadAir2
+            || Device.current == Device.iPad5
+            || Device.current == Device.iPad6
+            || Device.current == Device.iPadPro9Inch{
             picker.centerYAnchor.constraint(equalTo: self.view!.safeAreaLayoutGuide.centerYAnchor, constant: self.view!.frame.height*0.25).isActive = true
             picker.centerXAnchor.constraint(equalTo: self.view!.safeAreaLayoutGuide.centerXAnchor, constant: self.view!.frame.width*0.1).isActive = true
             picker.heightAnchor.constraint(equalTo: self.view!.safeAreaLayoutGuide.widthAnchor, multiplier: 1.2, constant: 0).isActive = true
             picker.widthAnchor.constraint(equalTo: self.view!.safeAreaLayoutGuide.heightAnchor, multiplier: 0.10).isActive = true
-        }else if Device.current == Device.simulator(Device.iPadAir3)
-            || Device.current == Device.simulator(Device.iPadPro10Inch){
+        }else if Device.current == Device.iPadAir3
+            || Device.current == Device.iPadPro10Inch{
             picker.centerYAnchor.constraint(equalTo: self.view!.safeAreaLayoutGuide.centerYAnchor, constant: self.view!.frame.height*0.28).isActive = true
             picker.centerXAnchor.constraint(equalTo: self.view!.safeAreaLayoutGuide.centerXAnchor, constant: self.view!.frame.width*0.1).isActive = true
             picker.heightAnchor.constraint(equalTo: self.view!.safeAreaLayoutGuide.widthAnchor, multiplier: 1.2, constant: 0).isActive = true
             picker.widthAnchor.constraint(equalTo: self.view!.safeAreaLayoutGuide.heightAnchor, multiplier: 0.10).isActive = true
-        }else if Device.current == Device.simulator(Device.iPadPro9Inch){
+        }else if Device.current == Device.iPadPro9Inch{
             picker.centerYAnchor.constraint(equalTo: self.view!.safeAreaLayoutGuide.centerYAnchor, constant: self.view!.frame.height*0.25).isActive = true
             picker.centerXAnchor.constraint(equalTo: self.view!.safeAreaLayoutGuide.centerXAnchor, constant: self.view!.frame.width*0.1).isActive = true
             picker.heightAnchor.constraint(equalTo: self.view!.safeAreaLayoutGuide.widthAnchor, multiplier: 1.2, constant: 0).isActive = true
